@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./ev3sim/Components"
+    ]
+}

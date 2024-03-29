@@ -1,4 +1,4 @@
-from BetterClasses.MathEx import *
+from ev3sim.Components.BetterClasses.mathEx import *
 import pygame
 
 
@@ -20,12 +20,14 @@ pixels_to_decimeters = 100
 positive_direction_arrow = 25
 half_unit_measure_line = 10
 
-robot_image_source = "Images/bot_from_above.png"
+robot_image_name = 'bot_from_above'
+robot_image_source = "ev3sim/Images/{0}.png".format(robot_image_name)
 robot_width = 15 #cm
 robot_length = 20 #cm
 
 turn_sensitivity = 0.04
-robot_wheel_distance = 9.97 / turn_sensitivity  #cm
+distance_between_wheels = 9.97
+robot_wheel_distance = distance_between_wheels / turn_sensitivity  #cm
 
 robot_scaling_factor = 1 #from field dimensions
 
@@ -41,6 +43,14 @@ fade_w = 300
 trail_len = 2000 #pixels
 trail_color = "yellow"
 trail_width = 2
+backing_distance = 1 #pixels
+
+menu_percent = 70 # % of window size
+menu_width = menu_percent / 100 * default_width
+menu_length = menu_percent / 100 * default_length
+
+acceleration_dc = 2
+acceleration_interval = 0.04
 
 
 velocity_multiplier = multiplier * robot_velocity * pixels_to_decimeters / 10
@@ -53,6 +63,8 @@ using_joystick = False
 manual_control = True
 field_centric = True
 tracking = False
+using_border = True
+draw_border = False
 
 
 #KEY BINDS
@@ -138,13 +150,17 @@ ps5_turn_270 = (-1, 0)
 ps5_turn_315 = (-1, 1)
 
 
-
-
 def toFieldCoords(pose):
     return Pose(half_l - pose.y, pose.x - half_w, normalizeDegrees(pose.head - 90))
     
 def toWindowCoords(pose):
     return Pose(half_w + pose.y, half_l - pose.x, normalizeDegrees(pose.head + 90))
+
+def toFieldPoint(point):
+    return (half_l - point.y, point.x - half_w)
+
+def toWindowPoint(point):
+    return (half_w + point.y, half_l - point.x)
 
 def pixels_to_cm(point):
     return Point(point.x / pixels_to_decimeters * 10, point.y / pixels_to_decimeters * 10)
@@ -170,3 +186,6 @@ def tuple2Point(tuple):
 
 def percent2Alpha(value):
     return value * 2.25
+
+    
+    
