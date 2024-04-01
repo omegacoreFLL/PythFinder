@@ -55,7 +55,7 @@ class Robot():
             return acceleration * signum(targetSpeed)
         return targetSpeed
     
-    def setWheelPowers(self, left, right, sensitivity = 1, accelerating = True):
+    def setWheelPowers(self, left, right, sensitivity = 1, accelerating = False):
         if abs(left) < 10 and abs(right) < 10:
             self.is_stopped = True
         else: self.is_stopped = False

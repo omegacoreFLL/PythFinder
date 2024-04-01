@@ -1,10 +1,10 @@
-from ev3sim.Pathing.motionProfile import *
+from ev3sim.Pathing.MotionProfile import *
 from ev3sim.Pathing.turnDeg import *
 from ev3sim.Pathing.inLineCM import *
 from ev3sim.core import *
 import pygame
 
-def startMultiplierTuner(simulator: Simulator, distance, multiplier = robot_multiplier):
+def startProfile(simulator: Simulator, distance):
     pygame.init()
     
     simulator.manual_control = False
@@ -18,9 +18,7 @@ def startMultiplierTuner(simulator: Simulator, distance, multiplier = robot_mult
         simulator.update()
         values = profile.calculate(pygame.time.get_ticks())
 
-        wheel_speeds = cmToPixels(values[1]) * multiplier
+        wheel_speeds = cmToPixels(values[1]) * 2 #robot vel --> wheel vel
         simulator.robot.setWheelPowers(wheel_speeds, wheel_speeds)
     
-    actual_distance = simulator.robot.pose.x / 10
-    print("recommended multiplier: {:.4f}".format(multiplier * abs(distance / actual_distance)))
         

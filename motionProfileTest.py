@@ -1,4 +1,4 @@
-from ev3sim.Pathing.motionProfile import *
+from ev3sim.Pathing.MotionProfile import *
 import pygame
 
 pygame.init()

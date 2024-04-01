@@ -86,10 +86,9 @@ robot_wheel_distance = distance_between_wheels / turn_sensitivity  #cm
 
 robot_scaling_factor = 1 #from field dimensions
 
-robot_velocity = 30 #cm / sec | has an error of +- 0.03 cm
-robot_acceleration = 10
-robot_deceleration = -5
-robot_multiplier = 2.4548
+robot_velocity = 3000 #cm / sec | has an error of +- 0.03 cm
+robot_acceleration = 100
+robot_deceleration = -20
 
 menu_color = (0, 100, 0)
 fade_percent = 0.9
@@ -117,7 +116,7 @@ def cmToPixels(val):
     return val * pixels_to_decimeters / 10
 
 
-velocity_multiplier = robot_multiplier * cmToPixels(robot_velocity)
+velocity_multiplier = 2 * cmToPixels(robot_velocity)
 
 robot_width_in_pixels = robot_scaling_factor * cmToPixels(robot_width)
 robot_length_in_pixels =  robot_scaling_factor * cmToPixels(robot_length)
