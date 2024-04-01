@@ -16,6 +16,9 @@ class Point:
         self.y = copy * math.sin(angle) - self.y * math.cos(angle)
 
         return self
+    
+    def distanceTo(self, other):
+        return hypot(other.x - self.x, other.y, - self.y)
 
 class Pose(Point):
     def __init__(self, x = 0, y = 0, head = 0):

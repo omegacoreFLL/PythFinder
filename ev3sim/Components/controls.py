@@ -32,6 +32,7 @@ class Controls():
             self.zero_button = 0
             self.menu_button = 0
             self.trail_button = 0
+            self.erase_trail_button = 0
 
             self.turn_0 = 0
             self.turn_45 = 0
@@ -65,6 +66,7 @@ class Controls():
             self.zero_button = xbox_zero_button
             self.menu_button = xbox_menu_button
             self.trail_button = xbox_trail_button
+            self.erase_trail_button = xbox_erase_trail_button
 
             self.turn_0 = xbox_turn_0
             self.turn_45 = xbox_turn_45
@@ -87,6 +89,7 @@ class Controls():
             self.zero_button = ps4_zero_button
             self.menu_button = ps4_menu_button
             self.trail_button = ps4_trail_button
+            self.erase_trail_button = ps4_erase_trail_button
 
             self.turn_0 = ps4_turn_0
             self.turn_45 = ps4_turn_45
@@ -109,6 +112,7 @@ class Controls():
             self.zero_button = ps5_zero_button
             self.menu_button = ps5_menu_button
             self.trail_button = ps5_trail_button
+            self.erase_trail_button = ps5_erase_trail_button
 
             self.turn_0 = ps5_turn_0
             self.turn_45 = ps5_turn_45

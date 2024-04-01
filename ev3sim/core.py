@@ -15,6 +15,7 @@ class Simulator():
         pygame.init()
         pygame.display.set_caption("FLL PythFinder simulator")
         self.running = True
+        self.manual_control = True
 
         self.dt = 0
 
@@ -26,14 +27,18 @@ class Simulator():
         self.robot = Robot()
         self.fade = Fade()
         self.menu = Menu()
-    
+
+
+
+
     def update(self):
         self.__updateEventManager()
 
         #reset frame
         self.screen.fill(default_background_color)
 
-        self.__updateControls()
+        if self.manual_control:
+            self.__updateControls()
         self.robot.update(self.dt)
 
         self.background.onScreen(self.screen)
@@ -174,19 +179,22 @@ class Simulator():
             self.controls.menu_entered = not self.controls.menu_entered
 
             if self.controls.menu_entered:
-                self.fade.reset("menu entered")
-            else: self.fade.reset("menu exited")
+                pass
+            else: pass
         
         if self.controls.menu_entered:
             return 0
+        
+        if self.controls.joystick_detector[self.controls.keybinds.erase_trail_button].rising:
+            self.robot.hide_trail = True
 
         if field_centric:
             if self.controls.joystick_detector[self.controls.keybinds.direction_button].rising:
                 self.controls.forwards = not self.controls.forwards
 
                 if self.controls.forwards:  
-                    self.fade.reset("forwards")
-                else: self.fade.reset("backwards")
+                    self.fade.reset(matchScreenSize(img_forwards))
+                else: self.fade.reset(matchScreenSize(img_backwards))
 
 
         if self.controls.joystick_detector[self.controls.keybinds.zero_button].rising:
@@ -199,17 +207,17 @@ class Simulator():
         else: self.controls.head_selection = False
 
         if self.controls.joystick_detector[self.controls.keybinds.menu_button].rising:
-                self.fade.reset("head selection: ON")
+                self.fade.reset(matchScreenSize(img_selecting_on))
         elif self.controls.joystick_detector[self.controls.keybinds.menu_button].falling:
-                self.fade.reset("head selection: OFF")
+                self.fade.reset(matchScreenSize(img_selecting_off))
 
         
         if self.controls.joystick_detector[self.controls.keybinds.trail_button].rising:
             self.robot.draw_trail = not self.robot.draw_trail
 
             if self.robot.draw_trail:
-                self.fade.reset("show trail")
-            else: self.fade.reset("hide trail")
+                self.fade.reset(matchScreenSize(img_show_trail))
+            else: self.fade.reset(matchScreenSize(img_hide_trail))
 
 
 
