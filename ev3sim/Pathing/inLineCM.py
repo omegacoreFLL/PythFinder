@@ -1,11 +1,11 @@
 from ev3sim.Components.Controllers.PIDController import *
 from ev3sim.Components.BetterClasses.mathEx import *
-from ev3sim.Components.constants import *
+from Constants.constants import *
 from ev3sim.Pathing.turnDeg import *
 from ev3sim.core import *
 
 
-def inLineCM(cm, simulator, chained = False,
+def inLineCM(cm, simulator: Simulator, chained = False,
             threshold = 0.1, 
             sensitivity = 1, 
             correctHeading = True, tangential_angle = None,
@@ -50,7 +50,7 @@ def inLineCM(cm, simulator, chained = False,
         fwd_error = cm - simulator.robot.distance
         fwd_error_abs = abs(fwd_error)
         forward = (fwd_controller.calculate(fwd_error) + signum(cm) * kS_fwd)
-        forward = direction_sign * forward / max_forward * velocity_multiplier
+        forward = direction_sign * forward / max_forward * cmToPixels(simulator.robot.max_vel)
 
 
         if correctHeading:
@@ -73,7 +73,6 @@ def inLineCM(cm, simulator, chained = False,
         else: simulator.robot.setWheelPowers(left = forward - correction, right = forward + correction, 
                             sensitivity = sensitivity, accelerating = accelerating)
         
-
 
     if not chained:
         if abs(head_error) > 0.4:

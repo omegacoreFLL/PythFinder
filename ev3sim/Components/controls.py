@@ -1,10 +1,11 @@
 from ev3sim.Components.BetterClasses.edgeDetectorEx import *
-from ev3sim.Components.constants import *
+from ev3sim.Components.BetterClasses.booleanEx import *
+from ev3sim.Components.Constants.constants import *
 import pygame
 
 class Controls():
     def __init__(self):
-        self.using_joystick = False
+        self.using_joystick = BooleanEx(False)
         self.keybinds = self.Keybinds()
 
         self.keyboard_len = 0
@@ -16,9 +17,9 @@ class Controls():
         self.keyboard_detector = self.__initKeyboardDetector()
         self.joystick_detector = self.__initJoystickDetector()
 
-        self.menu_entered = False
-        self.head_selection = False
-        self.forwards = True
+        self.menu_entered = BooleanEx(False)
+        self.head_selection = BooleanEx(False)
+        self.forwards = BooleanEx(True)
 
     class Keybinds():
         def __init__(self):
@@ -165,7 +166,7 @@ class Controls():
         return joystick_detector
     
     def update(self):
-        if self.using_joystick:
+        if self.using_joystick.compare():
             self.__updateJoystick()
         else: self.__updateKeyboard()
     
@@ -190,11 +191,11 @@ class Controls():
         self.joystick = joystick
         
         if not joystick == None:
-            self.using_joystick = True
+            self.using_joystick.set(True)
             self.joystick_detector = self.__initJoystickDetector()
             self.joystick_type = self.joystick.get_name()
             self.keybinds.setType(self.joystick_type)
 
         else: 
-            self.using_joystick = False
+            self.using_joystick.set(False)
             self.joystick_type = None

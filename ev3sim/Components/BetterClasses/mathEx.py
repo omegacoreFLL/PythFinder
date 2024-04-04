@@ -18,7 +18,13 @@ class Point:
         return self
     
     def distanceTo(self, other):
-        return hypot(other.x - self.x, other.y, - self.y)
+        return hypot(other.x - self.x, other.y - self.y)
+    
+    def subtract(self, other):
+        return Point(self.x - other.x, self.y - other.y)
+    
+    def hypot(self):
+        return hypot(self.x, self.y)
 
 class Pose(Point):
     def __init__(self, x = 0, y = 0, head = 0):

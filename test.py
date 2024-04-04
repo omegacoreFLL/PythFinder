@@ -1,19 +1,28 @@
 from ev3sim.Pathing.MotionProfile import *
-from ev3sim.Pathing.inLineCM import *
-from ev3sim.Pathing.turnDeg import *
-from ev3sim.profile import *
+from ev3sim.Components.Constants.constants import *
+#from ev3sim.Pathing.inLineCM import *
+#from ev3sim.Pathing.turnDeg import *
 from ev3sim.core import *
 
-
+    
 sim = Simulator()
-sim.manual_control = False
-startProfile(sim, -40)
+ang_vel = sim.robot.constrains.TRACK_WIDTH / 2 * sim.robot.constrains.ang_vel
+vel = sim.robot.constrains.vel
+sim.manual_control.set(False)
+start_head = 360
 
-pygame.time.wait(200)
+start_time = pygame.time.get_ticks()
 
-startProfile(sim, 70)
-
-sim.manual_control = True
-while sim.running:
+while pygame.time.get_ticks() - start_time <= 1000:
+    sim.robot.setWheelPowers(ang_vel, -ang_vel)
     sim.update()
+sim.robot.setWheelPowers(0, 0)
+
+print("delta: ", abs(sim.robot.pose.head - start_head))
+#sim.manual_control.set(True)
+
+while sim.RUNNING():
+    sim.update()
+
+
 

@@ -14,7 +14,6 @@ class PIDController():
         self.__derivative = 0
         self.__integral = 0
 
-        self.__current_error = 0
         self.__current_time = 0
 
         self.__past_error = 0
@@ -34,7 +33,6 @@ class PIDController():
     def calculate(self, error):
         isType([error], ["error"], [[int, float]])
 
-        self.__current_error = error
         self.__current_time = pygame.time.get_ticks()
 
         self.__proportional = error

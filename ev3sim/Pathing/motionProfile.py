@@ -29,6 +29,9 @@ class MotionProfile(ABC):
         self.t1 = self.t2 = self.t3 = 0
         self.x_total = self.t_total = 0
 
+        self.dt = 0
+        self.time = 0
+        self.last_time = 0
 
         self.isBusy = True
         self.isFirst = True
@@ -128,7 +131,7 @@ class TrapezoidalProfile(MotionProfile):
             stageTime = time - (self.t1 + self.t2)
             acceleration = self.dec
             velocity = self.max_vel + stageTime * acceleration
-            position = self.x1 + self.x2 - (self.max_vel + velocity) / 2 * stageTime
+            position = self.x1 + self.x2 + (self.max_vel + velocity) / 2 * stageTime
 
             stage = "T3"
         else: self.isBusy = False
