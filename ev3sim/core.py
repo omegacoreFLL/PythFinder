@@ -31,15 +31,101 @@ class Simulator():
         self.controls = Controls()
         #self.menu = Menu()
 
-    def setConstants(self, constants: Constants):
-        self.constants = constants
 
-        self.screen = pygame.display.set_mode(self.constants.screen_size.get())
+    def build(self, constants = None):
+        if exists(constants):
+            self.constants = constants
+        self.constants.up_to_date = True
 
-        self.background.setConstants(constants)
-        self.robot.setConstants(constants)
-        self.fade.setConstants(constants)
+        if not self.screen.get_size()  == self.constants.screen_size.get():
+            self.screen = pygame.display.set_mode(self.constants.screen_size.get())
 
+        self.background.setConstants(self.constants)
+        self.robot.setConstants(self.constants)
+        self.fade.setConstants(self.constants)
+ 
+    def set(self, pixels_2_dec = None, fps = None, 
+            robot_image_name = None, robot_image_extension = None, robot_image_path = None,
+            robot_scale = None, robot_width = None, robot_height = None,
+            text_color = None, text_font = None,
+            max_trail_length = None, max_trail_segment_length = None,
+            draw_trail_threshold = None, trail_color = None, trail_loops = None, trail_width = None,
+            backround_color = None, axis_color = None, grid_color = None,
+            width_percent = None, backing_distance = None,
+            arrow_offset = None, half_unit_measure_line = None,
+            time_until_fade = None, fade_percent = None,
+            field_centric_kP = None, screen_size = None):
+        
+        self.constants.up_to_date = False
+
+        if exists(pixels_2_dec):
+            self.constants.PIXELS_2_DEC = 0
+        if exists(fps):
+            self.constants.FPS = 0
+
+        if exists(robot_image_name):
+            self.constants.ROBOT_IMG_NAME = robot_image_name
+        if exists(robot_image_extension):
+            self.constants.ROBOT_IMG_EX = robot_image_extension
+        if exists(robot_image_path):
+            self.constants.ROBOT_IMG_PATH = robot_image_path
+
+        if exists(robot_scale):
+            self.constants.ROBOT_SCALE = robot_scale
+        if exists(robot_width):
+            self.constants.ROBOT_WIDTH = robot_width
+        if exists(robot_height):
+            self.constants.ROBOT_HEIGHT = robot_height
+
+        if exists(text_color):
+            self.constants.TEXT_COLOR = text_color
+        if exists(text_font):
+            self.constants.TEXT_FONT = text_font
+
+        if exists(max_trail_length):
+            self.constants.MAX_TRAIL_LEN = max_trail_length
+        if exists(max_trail_segment_length):
+            self.constants.MAX_TRAIL_SEGMENT_LEN = max_trail_segment_length
+
+        if exists(draw_trail_threshold):
+            self.constants.DRAW_TRAIL_THRESHOLD = draw_trail_threshold
+        if exists(trail_color):
+            self.constants.TRAIL_COLOR = trail_color
+        if exists(trail_loops):
+            self.constants.TRAIL_LOOPS = trail_loops
+        if exists(trail_width):
+            self.constants.TRAIL_WIDTH = trail_width
+
+        if exists(backround_color):
+            self.constants.BACKGROUND_COLOR = backround_color
+        if exists(axis_color):
+            self.constants.AXIS_COLOR = axis_color
+        if exists(grid_color):
+            self.constants.GRID_COLOR = grid_color
+
+        if exists(width_percent):
+            self.constants.WIDTH_PERCENT = width_percent
+
+        if exists(backing_distance):
+            self.constants.BACKING_DISTANCE = backing_distance
+        
+        if exists(arrow_offset):
+            self.constants.ARROW_OFFSET = arrow_offset
+        if exists(half_unit_measure_line):
+            self.constants.HALF_UNIT_MEASURE_LINE = half_unit_measure_line
+
+        if exists(time_until_fade):
+            self.constants.TIME_UNTIL_FADE = time_until_fade
+        if exists(fade_percent):
+            self.constants.FADE_PERCENT = fade_percent
+        
+        if exists(field_centric_kP):
+            self.constants.FIELD_CENTRIC_kP = field_centric_kP
+        if exists(screen_size):
+            self.constants.screen_size = screen_size
+
+        return self
+    
 
 
     def RUNNING(self):
@@ -49,12 +135,27 @@ class Simulator():
 
     def chooseFieldCentric(self, fun, bool = None):
         self.constants.FIELD_CENTRIC.choose(fun, bool)
+        self.constants.up_to_date = False
     
     def chooseDrawRobotBorder(self, fun, bool = None):
         self.constants.DRAW_BORDER.choose(fun, bool)
+        self.constants.up_to_date = False
     
     def chooseUsingScreenBorder(self, fun, bool = None):
         self.constants.USE_SCREEN_BORDER.choose(fun, bool)
+        self.constants.up_to_date = False
+    
+    def chooseMenuEntered(self, fun, bool = None):
+        self.constants.MENU_ENTERED.choose(fun, bool)
+        self.constants.up_to_date = False
+    
+    def chooseHeadSelection(self, fun, bool = None):
+        self.constants.HEAD_SELECTION.choose(fun, bool)
+        self.constants.up_to_date = False
+    
+    def chooseForward(self, fun, bool = None):
+        self.constants.FORWARDS.choose(fun, bool)
+        self.constants.up_to_date = False
 
 
 
@@ -70,6 +171,8 @@ class Simulator():
 
 
     def update(self):
+        if not self.constants.up_to_date:
+            self.build()
         self.__updateEventManager()
 
         #reset frame
@@ -82,9 +185,9 @@ class Simulator():
         self.background.onScreen(self.screen)
         self.robot.onScreen(self.screen)
         self.fade.onScreen(self.screen)
-        if self.constants.MENU_ENTERED.compare():
+        #if self.constants.MENU_ENTERED.compare():
             #self.menu.onScreen(self.screen, self.controls.joystick)
-            pass
+            
 
         pygame.display.update()
         self.dt = self.clock.tick(self.constants.FPS) / 1000
@@ -179,8 +282,8 @@ class Simulator():
         left_x, left_y = values
         joystick_threshold = self.controls.keybinds.threshold
 
-        if self.constants.MENU_ENTERED.compare():
-            return (0,0)
+        '''if self.constants.MENU_ENTERED.compare():
+            return (0,0)'''
 
         if (abs(left_x) > joystick_threshold or abs(left_y) > joystick_threshold):
             self.robot.target_head = normalizeDegrees(math.degrees(math.atan2(left_y, left_x) + math.pi / 2))
@@ -205,8 +308,8 @@ class Simulator():
         right_x, left_y = values
         joystick_threshold = self.controls.keybinds.threshold
 
-        if self.constants.MENU_ENTERED.compare():
-            return (0,0)
+        '''if self.constants.MENU_ENTERED.compare():
+            return (0,0)'''
 
         if abs(right_x) > joystick_threshold:
             joy_x = right_x
@@ -221,13 +324,16 @@ class Simulator():
     def __updateJoystickButtons(self):
         if self.controls.joystick_detector[self.controls.keybinds.disable_button].rising:
             self.constants.MENU_ENTERED.negate()
+            self.chooseFieldCentric('negate')
+            #self.set(screen_size = ScreenSize(self.constants.screen_size.width - 50, self.constants.screen_size.height - 50))
+            #self.build()
 
             if self.constants.MENU_ENTERED.compare():
                 pass
             else: pass
         
-        if self.constants.MENU_ENTERED.compare():
-            return 0
+        '''if self.constants.MENU_ENTERED.compare():
+            return 0'''
         
         if self.controls.joystick_detector[self.controls.keybinds.erase_trail_button].rising:
             self.robot.trail.hide_trail.set(True)
@@ -246,13 +352,13 @@ class Simulator():
         
 
 
-        if self.controls.joystick_detector[self.controls.keybinds.menu_button].high:
+        if self.controls.joystick_detector[self.controls.keybinds.head_selection_button].high:
             self.constants.HEAD_SELECTION.set(True)
         else: self.constants.HEAD_SELECTION.set(False)
 
-        if self.controls.joystick_detector[self.controls.keybinds.menu_button].rising:
+        if self.controls.joystick_detector[self.controls.keybinds.head_selection_button].rising:
                 self.fade.reset(self.matchScreenSize(img_selecting_on, self.constants.screen_size.width))
-        elif self.controls.joystick_detector[self.controls.keybinds.menu_button].falling:
+        elif self.controls.joystick_detector[self.controls.keybinds.head_selection_button].falling:
                 self.fade.reset(self.matchScreenSize(img_selecting_off, self.constants.screen_size.width))
 
         

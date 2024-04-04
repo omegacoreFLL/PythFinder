@@ -5,10 +5,10 @@ import pygame
 
 pygame.init()
 
-dist = toRadians(15)
-vel = math.radians(90)
-accel = math.radians(40)
-decel = math.radians(40)
+dist = toRadians(160)
+vel = math.radians(130)
+accel = math.radians(100)
+decel = math.radians(100)
 
 profile = TrapezoidalProfile(distance = dist, max_vel = vel, acc = accel, dec = decel)
 

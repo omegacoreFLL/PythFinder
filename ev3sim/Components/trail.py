@@ -6,9 +6,9 @@ import pygame
 
 class Segment():
     def __init__(self, constants: Constants, points = None):
-        if points == None:
-            self.points = []
-        else: self.points = points
+        if exists(points):
+            self.points = points
+        else: self.points = []
 
         self.hide = BooleanEx(False)
 

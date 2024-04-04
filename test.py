@@ -4,7 +4,6 @@ from ev3sim.Components.Constants.constants import *
 from ev3sim.Pathing.turnDeg import *
 from ev3sim.core import *
 
-    
 sim = Simulator()
 
 while sim.RUNNING():

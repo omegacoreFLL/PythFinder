@@ -1,4 +1,5 @@
 from ev3sim.Components.BetterClasses.errorEx import *
+from ev3sim.Components.Constants.constants import *
 import pygame
 
 #generic PID controller
@@ -20,13 +21,13 @@ class PIDController():
         self.__past_time = 0
     
     def setCoefficients(self, kP = None, kI = None, kD = None):
-        if not kP == None:
+        if exists(kP):
             isType([kP], ["kP"], [[int, float]])
             self.__kP = kP
-        if not kI == None:
+        if exists(kI):
             isType([kI], ["kI"], [[int, float]])
             self.__kI = kI
-        if not kD == None:
+        if exists(kD):
             isType([kD], ["kD"], [[int, float]])
             self.__kD = kD
 

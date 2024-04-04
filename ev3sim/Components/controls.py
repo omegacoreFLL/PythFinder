@@ -27,7 +27,7 @@ class Controls():
             self.disable_button = 0
             self.direction_button = 0
             self.zero_button = 0
-            self.menu_button = 0
+            self.head_selection_button = 0
             self.trail_button = 0
             self.erase_trail_button = 0
 
@@ -61,7 +61,7 @@ class Controls():
             self.disable_button = xbox_disable_button
             self.direction_button = xbox_direction_button
             self.zero_button = xbox_zero_button
-            self.menu_button = xbox_menu_button
+            self.head_selection_button = xbox_head_selection_button
             self.trail_button = xbox_trail_button
             self.erase_trail_button = xbox_erase_trail_button
 
@@ -84,7 +84,7 @@ class Controls():
             self.disable_button = ps4_disable_button
             self.direction_button = ps4_direction_button
             self.zero_button = ps4_zero_button
-            self.menu_button = ps4_menu_button
+            self.head_selection_button = ps4_head_selection_button
             self.trail_button = ps4_trail_button
             self.erase_trail_button = ps4_erase_trail_button
 
@@ -107,7 +107,7 @@ class Controls():
             self.disable_button = ps5_disable_button
             self.direction_button = ps5_direction_button
             self.zero_button = ps5_zero_button
-            self.menu_button = ps5_menu_button
+            self.head_selection_button = ps5_head_selection_button
             self.trail_button = ps5_trail_button
             self.erase_trail_button = ps5_erase_trail_button
 
@@ -153,7 +153,7 @@ class Controls():
     
     def __initJoystickDetector(self):
         joystick_detector = []
-        if not self.joystick == None:
+        if exists(self.joystick):
             self.joystick_len = self.joystick.get_numbuttons()                                                                    
 
             for button in range(self.joystick_len):
@@ -186,12 +186,11 @@ class Controls():
     def addJoystick(self, joystick):
         self.joystick = joystick
         
-        if not joystick == None:
+        if exists(joystick):
             self.using_joystick.set(True)
             self.joystick_detector = self.__initJoystickDetector()
             self.joystick_type = self.joystick.get_name()
             self.keybinds.setType(self.joystick_type)
-
         else: 
             self.using_joystick.set(False)
             self.joystick_type = None

@@ -61,6 +61,8 @@ default_backing_distance = 1
 
 class Constants():
     def __init__(self, screen_size = None):
+        self.up_to_date = True
+        
         self.PIXELS_2_DEC = 0
         self.FPS = 0
 
@@ -108,7 +110,7 @@ class Constants():
 
         self.default()
 
-        if not screen_size == None:
+        if exists(screen_size):
             self.screen_size = screen_size
 
 
@@ -184,6 +186,8 @@ def percent2Alpha(value):
 def distance(p1: tuple, p2: tuple):
     return hypot(p2[0] - p1[0], p2[1] - p1[1])
 
+def exists(value):
+    return not value == None
 
 
 #KEY BINDS
@@ -214,7 +218,7 @@ xbox_right_x = 2
 xbox_disable_button = 2
 xbox_direction_button = 3
 xbox_zero_button = 1
-xbox_menu_button = 5
+xbox_head_selection_button = 5
 xbox_trail_button = 0
 xbox_erase_trail_button = 4
 
@@ -236,7 +240,7 @@ ps4_right_x = 2
 ps4_disable_button = 2
 ps4_direction_button = 3
 ps4_zero_button = 1
-ps4_menu_button = 10
+ps4_head_selection_button = 10
 ps4_trail_button = 0
 ps4_erase_trail_button = 9
 
@@ -258,7 +262,7 @@ ps5_right_x = 2
 ps5_disable_button = 2
 ps5_direction_button = 3
 ps5_zero_button = 1
-ps5_menu_button = 10
+ps5_head_selection_button = 10
 ps5_trail_button = 0
 ps5_erase_trail_button = 9
 
