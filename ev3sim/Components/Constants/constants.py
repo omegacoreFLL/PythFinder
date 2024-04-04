@@ -32,6 +32,11 @@ default_fade_percent = 1
 default_use_screen_border = True
 default_field_centric = True
 default_draw_robot_border = False
+default_menu_entered = False
+default_head_selection = False
+default_forwards = True
+
+default_field_centric_kP = 6
 
 
 
@@ -95,6 +100,11 @@ class Constants():
         self.DRAW_ROBOT_BORDER = 0
         self.FIELD_CENTRIC = 0
         self.USE_SCREEN_BORDER = 0
+        self.MENU_ENTERED = 0
+        self.HEAD_SELECTION = 0
+        self.FORWARDS = 0
+
+        self.FIELD_CENTRIC_kP = 0
 
         self.default()
 
@@ -139,9 +149,14 @@ class Constants():
         self.TIME_UNTIL_FADE = default_time_until_fade
         self.FADE_PERCENT = default_fade_percent
 
+        self.FIELD_CENTRIC_kP = default_field_centric_kP
+
         self.DRAW_ROBOT_BORDER = BooleanEx(default_draw_robot_border)
         self.FIELD_CENTRIC = BooleanEx(default_field_centric)
         self.USE_SCREEN_BORDER = BooleanEx(default_use_screen_border)
+        self.MENU_ENTERED = BooleanEx(default_menu_entered)
+        self.HEAD_SELECTION = BooleanEx(default_head_selection)
+        self.FORWARDS = BooleanEx(default_forwards)
 
         self.screen_size = ScreenSize()
     

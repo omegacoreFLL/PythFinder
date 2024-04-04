@@ -82,7 +82,7 @@ class Simulator():
         self.background.onScreen(self.screen)
         self.robot.onScreen(self.screen)
         self.fade.onScreen(self.screen)
-        if self.controls.menu_entered.compare():
+        if self.constants.MENU_ENTERED.compare():
             #self.menu.onScreen(self.screen, self.controls.joystick)
             pass
 
@@ -171,30 +171,33 @@ class Simulator():
         joy_ang_vel = joy_x * self.robot.constrains.ang_vel
         inverse = self.robot.kinematics.inverseKinematics(joy_vel, joy_ang_vel)
 
-        left_speed = self.constants.cmToPixels(inverse[0])
-        right_speed = self.constants.cmToPixels(inverse[1]) 
+        left_speed = inverse[0]
+        right_speed = inverse[1]
         self.robot.setWheelPowers(left = left_speed, right = right_speed)
 
     def __updateJoystickFieldCentric(self, values):    
         left_x, left_y = values
         joystick_threshold = self.controls.keybinds.threshold
 
-        if self.controls.menu_entered.compare():
+        if self.constants.MENU_ENTERED.compare():
             return (0,0)
 
         if (abs(left_x) > joystick_threshold or abs(left_y) > joystick_threshold):
-        
             self.robot.target_head = normalizeDegrees(math.degrees(math.atan2(left_y, left_x) + math.pi / 2))
             joy_y = math.hypot(left_y, left_x)
 
-            if not self.controls.forwards.compare():
+            if self.constants.FORWARDS.compare(False):
                 joy_y = -joy_y
                 self.robot.target_head = normalizeDegrees(self.robot.target_head + 180)
 
         else: 
             joy_y = 0
         
-        joy_x = findShortestPath(self.robot.pose.head, self.robot.target_head) * 0.02
+        error = findShortestPath(self.robot.target_head, self.robot.pose.head) / 180
+        joy_x = self.robot.head_controller.calculate(error)
+
+        if abs(joy_x) < joystick_threshold:
+            joy_x = 0
 
         return (joy_x, joy_y)
 
@@ -202,11 +205,11 @@ class Simulator():
         right_x, left_y = values
         joystick_threshold = self.controls.keybinds.threshold
 
-        if self.controls.menu_entered.compare():
+        if self.constants.MENU_ENTERED.compare():
             return (0,0)
 
         if abs(right_x) > joystick_threshold:
-            joy_x = -right_x
+            joy_x = right_x
         else: joy_x = 0
 
         if abs(left_y) > joystick_threshold:
@@ -217,13 +220,13 @@ class Simulator():
 
     def __updateJoystickButtons(self):
         if self.controls.joystick_detector[self.controls.keybinds.disable_button].rising:
-            self.controls.menu_entered.negate()
+            self.constants.MENU_ENTERED.negate()
 
-            if self.controls.menu_entered.compare():
+            if self.constants.MENU_ENTERED.compare():
                 pass
             else: pass
         
-        if self.controls.menu_entered.compare():
+        if self.constants.MENU_ENTERED.compare():
             return 0
         
         if self.controls.joystick_detector[self.controls.keybinds.erase_trail_button].rising:
@@ -231,9 +234,9 @@ class Simulator():
 
         if self.constants.FIELD_CENTRIC.compare():
             if self.controls.joystick_detector[self.controls.keybinds.direction_button].rising:
-                self.controls.forwards.negate()
+                self.constants.FORWARDS.negate()
 
-                if self.controls.forwards.compare():  
+                if self.constants.FORWARDS.compare():  
                     self.fade.reset(self.matchScreenSize(img_forwards, self.constants.screen_size.width))
                 else: self.fade.reset(self.matchScreenSize(img_backwards, self.constants.screen_size.width))
 
@@ -244,8 +247,8 @@ class Simulator():
 
 
         if self.controls.joystick_detector[self.controls.keybinds.menu_button].high:
-            self.controls.head_selection.set(True)
-        else: self.controls.head_selection.set(False)
+            self.constants.HEAD_SELECTION.set(True)
+        else: self.constants.HEAD_SELECTION.set(False)
 
         if self.controls.joystick_detector[self.controls.keybinds.menu_button].rising:
                 self.fade.reset(self.matchScreenSize(img_selecting_on, self.constants.screen_size.width))
@@ -262,7 +265,7 @@ class Simulator():
 
 
 
-        if self.controls.head_selection.compare():
+        if self.constants.HEAD_SELECTION.compare():
             target = self.robot.pose.head
 
             if self.controls.keybinds.state == "ps4":

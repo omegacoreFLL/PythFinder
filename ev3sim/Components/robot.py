@@ -1,3 +1,4 @@
+from ev3sim.Components.Controllers.PIDController import *
 from ev3sim.Components.BetterClasses.booleanEx import *
 from ev3sim.Components.Constants.constrains import *
 from ev3sim.Components.Constants.constants import *
@@ -50,15 +51,19 @@ class Robot():
         
         self.trail = Trail(self.constants)
         self.kinematics = TankKinematics(self.constrains.TRACK_WIDTH)
+        self.head_controller = PIDController(kP = constants.FIELD_CENTRIC_kP, kI = 0, kD = 0)
 
 
 
     def setConstrains(self, constrains: Constrains):
         self.constrains = constrains
 
+        self.kinematics = TankKinematics(self.constrains.TRACK_WIDTH)
+
     def setConstants(self, constants: Constants):
         self.constants = constants
 
+        self.head_controller = PIDController(kP = self.constants.FIELD_CENTRIC_kP, kI = 0, kD = 0)
         self.pose_font = pygame.font.SysFont(self.constants.TEXT_FONT, 50)
         self.image = pygame.image.load("{0}{1}.{2}".format(self.constants.ROBOT_IMG_PATH, 
                                                            self.constants.ROBOT_IMG_NAME, 
@@ -119,7 +124,6 @@ class Robot():
 
     def setPoseEstimate(self, pose):
         self.target_head = pose.head
-        self.trail.eraseTrail()
         self.pose = pose
        
     def zeroDistance(self):

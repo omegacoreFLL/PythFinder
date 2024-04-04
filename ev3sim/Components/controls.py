@@ -17,10 +17,6 @@ class Controls():
         self.keyboard_detector = self.__initKeyboardDetector()
         self.joystick_detector = self.__initJoystickDetector()
 
-        self.menu_entered = BooleanEx(False)
-        self.head_selection = BooleanEx(False)
-        self.forwards = BooleanEx(True)
-
     class Keybinds():
         def __init__(self):
             self.threshold = 0
