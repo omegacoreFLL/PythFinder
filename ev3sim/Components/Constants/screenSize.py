@@ -22,7 +22,6 @@ class ScreenSize():
         self.MIN_HEIGHT = min_screen_height
 
         self.set(width, height)
-        print(self.width, self.height)
     
     def set(self, width = None, height = None):
         #check width

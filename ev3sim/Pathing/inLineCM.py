@@ -1,10 +1,10 @@
 from ev3sim.Components.Controllers.PIDController import *
 from ev3sim.Components.BetterClasses.mathEx import *
-from Constants.constants import *
+from ev3sim.Components.Constants.constants import *
 from ev3sim.Pathing.turnDeg import *
 from ev3sim.core import *
 
-
+#unstable
 def inLineCM(cm, simulator: Simulator, chained = False,
             threshold = 0.1, 
             sensitivity = 1, 
@@ -50,7 +50,7 @@ def inLineCM(cm, simulator: Simulator, chained = False,
         fwd_error = cm - simulator.robot.distance
         fwd_error_abs = abs(fwd_error)
         forward = (fwd_controller.calculate(fwd_error) + signum(cm) * kS_fwd)
-        forward = direction_sign * forward / max_forward * cmToPixels(simulator.robot.max_vel)
+        forward = direction_sign * forward / max_forward * simulator.constants.cmToPixels(simulator.robot.max_vel)
 
 
         if correctHeading:

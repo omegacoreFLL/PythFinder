@@ -5,10 +5,10 @@ import pygame
 
 pygame.init()
 
-dist = toRadians(180)
+dist = toRadians(15)
 vel = math.radians(90)
-accel = math.radians(50)
-decel = math.radians(50)
+accel = math.radians(40)
+decel = math.radians(40)
 
 profile = TrapezoidalProfile(distance = dist, max_vel = vel, acc = accel, dec = decel)
 
@@ -23,9 +23,6 @@ while profile.isBusy:
 
     sim.robot.setWheelPowers(speeds[0], speeds[1])
     sim.update()
-    print("profile:", profile.dt)
-    print("    ")
-    print("    ")
 
 
 while sim.RUNNING():
