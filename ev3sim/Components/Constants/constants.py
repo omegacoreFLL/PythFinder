@@ -1,3 +1,4 @@
+from ev3sim.Components.Controllers.PIDCoefficients import *
 from ev3sim.Components.BetterClasses.booleanEx import *
 from ev3sim.Components.Constants.screenSize import *
 from ev3sim.Components.Constants.constrains import *
@@ -35,8 +36,12 @@ default_draw_robot_border = False
 default_menu_entered = False
 default_head_selection = False
 default_forwards = True
+default_erase_trail = True
+default_joystick_enabled = True
 
-default_field_centric_kP = 6
+default_kP_joystick_head = 6
+default_kI_joystick_head = 0
+default_kD_joystick_head = 0
 
 
 
@@ -46,7 +51,7 @@ default_max_segment_length = 100
 
 default_drawing_trail_threshold = 20
 default_trail_color = "yellow"
-default_trail_loops = 50
+default_trail_loops = 300
 default_trail_width = 2
 
 default_pixels_to_decimeters = 100
@@ -105,8 +110,10 @@ class Constants():
         self.MENU_ENTERED = 0
         self.HEAD_SELECTION = 0
         self.FORWARDS = 0
+        self.ERASE_TRAIL = 0
+        self.JOYSTICK_ENABLED = 0
 
-        self.FIELD_CENTRIC_kP = 0
+        self.COEFF_JOY_HEAD = 0
 
         self.default()
 
@@ -151,7 +158,9 @@ class Constants():
         self.TIME_UNTIL_FADE = default_time_until_fade
         self.FADE_PERCENT = default_fade_percent
 
-        self.FIELD_CENTRIC_kP = default_field_centric_kP
+        self.COEFF_JOY_HEAD = PIDCoefficients(kP = default_kP_joystick_head,
+                                              kI = default_kI_joystick_head,
+                                              kD = default_kD_joystick_head)
 
         self.DRAW_ROBOT_BORDER = BooleanEx(default_draw_robot_border)
         self.FIELD_CENTRIC = BooleanEx(default_field_centric)
@@ -159,6 +168,8 @@ class Constants():
         self.MENU_ENTERED = BooleanEx(default_menu_entered)
         self.HEAD_SELECTION = BooleanEx(default_head_selection)
         self.FORWARDS = BooleanEx(default_forwards)
+        self.ERASE_TRAIL = BooleanEx(default_erase_trail)
+        self.JOYSTICK_ENABLED = BooleanEx(default_joystick_enabled)
 
         self.screen_size = ScreenSize()
     

@@ -29,17 +29,19 @@ class Robot():
         self.past_pose = Pose(0, 0, 0)
         self.target_head = 0
 
-        self.velocity = 0
         self.left_speed = 0
         self.right_speed = 0
-        self.past_left_speed = 0
-        self.past_right_speed = 0
+
+        self.velocity = 0
         self.angular_velocity = 0
+        self.past_velocity = 0
+        self.past_angular_velocity = 0
 
         self.distance = 0
         self.start_time = 0
 
         self.is_stopped = BooleanEx(True)
+        self.head_controller = PIDController(constants.COEFF_JOY_HEAD)
 
         self.constants = 0
         self.constrains = 0
@@ -51,7 +53,6 @@ class Robot():
         
         self.trail = Trail(self.constants)
         self.kinematics = TankKinematics(self.constrains.TRACK_WIDTH)
-        self.head_controller = PIDController(kP = constants.FIELD_CENTRIC_kP, kI = 0, kD = 0)
 
 
 
@@ -63,7 +64,7 @@ class Robot():
     def setConstants(self, constants: Constants):
         self.constants = constants
 
-        self.head_controller = PIDController(kP = self.constants.FIELD_CENTRIC_kP, kI = 0, kD = 0)
+        self.head_controller.set(constants.COEFF_JOY_HEAD)
         self.pose_font = pygame.font.SysFont(self.constants.TEXT_FONT, 50)
         self.image = pygame.image.load("{0}{1}.{2}".format(self.constants.ROBOT_IMG_PATH, 
                                                            self.constants.ROBOT_IMG_NAME, 
@@ -86,6 +87,12 @@ class Robot():
         self.width_in_pixels = self.constants.ROBOT_SCALE * self.constants.cmToPixels(self.constants.ROBOT_WIDTH)
         self.height_in_pixels =  self.constants.ROBOT_SCALE * self.constants.cmToPixels(self.constants.ROBOT_HEIGHT)
 
+    def getWheelSpeeds(self):
+        forward = self.kinematics.inverseKinematics(self.velocity, self.angular_velocity)
+
+        self.left_speed = forward[0]
+        self.right_speed = forward[1]
+
 
 
     def toFieldCoords(self, pose):
@@ -107,33 +114,30 @@ class Robot():
                 self.constants.screen_size.half_h - point.x)
 
  
-    def elapsed_time(self):
-        return pygame.time.get_ticks() - self.start_time
-    
-    def setWheelPowers(self, left, right, sensitivity = 1):
-        if abs(left) < 0.01 and abs(right) < 0.01:
+ 
+    def setVelocities(self, vel, ang_vel):
+        if abs(vel) < 0.01 and abs(ang_vel) < 0.01:
             self.is_stopped.set(True)
         else: self.is_stopped.set(False)
 
-        self.past_left_speed = self.left_speed
-        self.past_right_speed = self.right_speed
+        self.past_velocity = self.velocity
+        self.past_angular_velocity = self.angular_velocity
 
-        self.left_speed = left * sensitivity
-        self.right_speed = right * sensitivity
-
+        self.velocity = self.constants.cmToPixels(vel)
+        self.angular_velocity = ang_vel
 
     def setPoseEstimate(self, pose):
         self.target_head = pose.head
         self.pose = pose
-       
+
+
+
+
     def zeroDistance(self):
         self.distance = 0
 
     def update(self, time):
-        forward = self.kinematics.forwardKinematics((self.left_speed, self.right_speed))
-
-        self.velocity = self.constants.cmToPixels(forward[0])
-        self.angular_velocity = forward[1]
+        self.getWheelSpeeds()
 
         x, y, head = self.pose.x, self.pose.y, self.pose.head
 
@@ -175,6 +179,12 @@ class Robot():
         if self.constants.DRAW_ROBOT_BORDER.compare():
             self.__drawBorder(screen)
 
+    def elapsed_time(self):
+        return pygame.time.get_ticks() - self.start_time
+   
+
+
+
     def __drawRobot(self, screen):
         self.rotating_instance = pygame.transform.rotate(self.rotating_instance, 
                         normalizeDegrees(360 - self.window_pose.head))
@@ -198,9 +208,9 @@ class Robot():
 
         screen.blit(coords, coords_rectangle)
     
-
-      
-
+    def __drawBorder(self, screen):
+        pygame.draw.lines(screen, "yellow", True, self.__findBorder(self.window_pose), 3)
+ 
     def __findBorder(self, pose):
         border = self.image.get_rect(center = (pose.x, pose.y))
 
@@ -212,7 +222,3 @@ class Robot():
         bottonLeft = (pygame.math.Vector2(border.bottomleft) - pivot).rotate(pose.head) + pivot 
 
         return [topLeft, topRight, bottomRight, bottonLeft]
-    
-    def __drawBorder(self, screen):
-        pygame.draw.lines(screen, "yellow", True, self.__findBorder(self.window_pose), 3)
- 

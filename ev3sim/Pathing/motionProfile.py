@@ -9,8 +9,10 @@ class MotionProfile(ABC):
 
         if acc < 0 and telemetry:
             print("acceleration needs to be positive")
-        if dec > 0 and telemetry:
-            print("deceleration need to be negative")
+        
+        if not dec == None:
+            if dec > 0 and telemetry:
+                print("deceleration need to be negative")
         
         if distance < 0:
             self.reversed = True
@@ -110,6 +112,7 @@ class TrapezoidalProfile(MotionProfile):
         
         position = velocity = acceleration = stageTime = 0
         time = msToS(time)
+        self.time = time
         stage = None
 
 

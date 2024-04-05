@@ -54,7 +54,8 @@ class Simulator():
             width_percent = None, backing_distance = None,
             arrow_offset = None, half_unit_measure_line = None,
             time_until_fade = None, fade_percent = None,
-            field_centric_kP = None, screen_size = None):
+            screen_size = None,
+            coefficients_joystick_heading = None):
         
         self.constants.up_to_date = False
 
@@ -119,8 +120,8 @@ class Simulator():
         if exists(fade_percent):
             self.constants.FADE_PERCENT = fade_percent
         
-        if exists(field_centric_kP):
-            self.constants.FIELD_CENTRIC_kP = field_centric_kP
+        if exists(coefficients_joystick_heading) and isinstance(coefficients_joystick_heading, PIDCoefficients):
+            self.constants.COEFF_JOY_HEAD = coefficients_joystick_heading
         if exists(screen_size):
             self.constants.screen_size = screen_size
 
@@ -133,29 +134,47 @@ class Simulator():
 
 
 
-    def chooseFieldCentric(self, fun, bool = None):
+    def chooseFieldCentric(self, fun: Fun, bool = None):
         self.constants.FIELD_CENTRIC.choose(fun, bool)
-        self.constants.up_to_date = False
+        
+        if fun == Fun.NEGATE or fun == Fun.GET:
+            self.constants.up_to_date = False
     
-    def chooseDrawRobotBorder(self, fun, bool = None):
+    def chooseDrawRobotBorder(self, fun: Fun, bool = None):
         self.constants.DRAW_BORDER.choose(fun, bool)
-        self.constants.up_to_date = False
+        
+        if fun == Fun.NEGATE or fun == Fun.GET:
+            self.constants.up_to_date = False
     
-    def chooseUsingScreenBorder(self, fun, bool = None):
+    def chooseUsingScreenBorder(self, fun: Fun, bool = None):
         self.constants.USE_SCREEN_BORDER.choose(fun, bool)
-        self.constants.up_to_date = False
+        
+        if fun == Fun.NEGATE or fun == Fun.GET:
+            self.constants.up_to_date = False
     
-    def chooseMenuEntered(self, fun, bool = None):
+    def chooseMenuEntered(self, fun: Fun, bool = None):
         self.constants.MENU_ENTERED.choose(fun, bool)
-        self.constants.up_to_date = False
+        
+        if fun == Fun.NEGATE or fun == Fun.GET:
+            self.constants.up_to_date = False
     
-    def chooseHeadSelection(self, fun, bool = None):
+    def chooseHeadSelection(self, fun: Fun, bool = None):
         self.constants.HEAD_SELECTION.choose(fun, bool)
-        self.constants.up_to_date = False
+        
+        if fun == Fun.NEGATE or fun == Fun.GET:
+            self.constants.up_to_date = False
     
-    def chooseForward(self, fun, bool = None):
+    def chooseForward(self, fun: Fun, bool = None):
         self.constants.FORWARDS.choose(fun, bool)
-        self.constants.up_to_date = False
+
+        if fun == Fun.NEGATE or fun == Fun.GET:
+            self.constants.up_to_date = False
+
+    def chooseJoystickEnabled(self, fun: Fun, bool = None):
+        self.constants.JOYSTICK_ENABLED.choose(fun, bool)
+
+        if fun == Fun.NEGATE or fun == Fun.GET:
+            self.constants.up_to_date = False
 
 
 
@@ -209,53 +228,8 @@ class Simulator():
     def __updateControls(self):
         self.controls.update()
 
-        if self.controls.using_joystick.compare():
+        if self.controls.using_joystick.compare() and self.constants.JOYSTICK_ENABLED.compare():
             self.__updateJoystick()
-        else: self.__updateKeyboard()
-
-
-
-    def __updateKeyboard(self):
-        self.__updateKeyboardVelocity()
-        self.__updateKeyboardTurn()
-    
-    def __updateKeyboardVelocity(self):
-        left_sign = 0
-        right_sign = 0
-
-        #drive left wheel
-        
-        if self.controls.keyboard_detector[left_wheel_forward_key].high:
-            left_sign = 1
-        elif self.controls.keyboard_detector[left_wheel_backward_key].high:
-            left_sign = -1
-
-        #drive right wheel
-        if self.controls.keyboard_detector[right_wheel_forward_key].high:
-            right_sign = 1
-        elif self.controls.keyboard_detector[right_wheel_backward_key].high:
-            right_sign = -1
-
-        self.robot.setWheelPowers(left = self.constants.cmToPixels(self.robot.constrains.vel) * left_sign, 
-                                    right = self.constants.cmToPixels(self.robot.constrains.vel) * right_sign)
-
-    def __updateKeyboardTurn(self):
-        if self.controls.keyboard_detector[turn_0_key].rising:
-            self.robot.pose.head = 0
-        if self.controls.keyboard_detector[turn_45_key].rising:
-            self.robot.pose.head = 45
-        if self.controls.keyboard_detector[turn_90_key].rising:
-            self.robot.pose.head = 90
-        if self.controls.keyboard_detector[turn_135_key].rising:
-            self.robot.pose.head = 135
-        if self.controls.keyboard_detector[turn_180_key].rising:
-            self.robot.pose.head = 180
-        if self.controls.keyboard_detector[turn_225_key].rising:
-            self.robot.pose.head = 225
-        if self.controls.keyboard_detector[turn_270_key].rising:
-            self.robot.pose.head = 270
-        if self.controls.keyboard_detector[turn_315_key].rising:
-            self.robot.pose.head = 315
 
 
 
@@ -272,18 +246,15 @@ class Simulator():
 
         joy_vel = joy_y * self.robot.constrains.vel
         joy_ang_vel = joy_x * self.robot.constrains.ang_vel
-        inverse = self.robot.kinematics.inverseKinematics(joy_vel, joy_ang_vel)
 
-        left_speed = inverse[0]
-        right_speed = inverse[1]
-        self.robot.setWheelPowers(left = left_speed, right = right_speed)
+        self.robot.setVelocities(joy_vel, joy_ang_vel)
 
     def __updateJoystickFieldCentric(self, values):    
         left_x, left_y = values
         joystick_threshold = self.controls.keybinds.threshold
 
-        '''if self.constants.MENU_ENTERED.compare():
-            return (0,0)'''
+        if self.constants.MENU_ENTERED.compare():
+            return (0,0)
 
         if (abs(left_x) > joystick_threshold or abs(left_y) > joystick_threshold):
             self.robot.target_head = normalizeDegrees(math.degrees(math.atan2(left_y, left_x) + math.pi / 2))
@@ -308,8 +279,8 @@ class Simulator():
         right_x, left_y = values
         joystick_threshold = self.controls.keybinds.threshold
 
-        '''if self.constants.MENU_ENTERED.compare():
-            return (0,0)'''
+        if self.constants.MENU_ENTERED.compare():
+            return (0,0)
 
         if abs(right_x) > joystick_threshold:
             joy_x = right_x
@@ -324,16 +295,13 @@ class Simulator():
     def __updateJoystickButtons(self):
         if self.controls.joystick_detector[self.controls.keybinds.disable_button].rising:
             self.constants.MENU_ENTERED.negate()
-            self.chooseFieldCentric('negate')
-            #self.set(screen_size = ScreenSize(self.constants.screen_size.width - 50, self.constants.screen_size.height - 50))
-            #self.build()
 
             if self.constants.MENU_ENTERED.compare():
                 pass
             else: pass
         
-        '''if self.constants.MENU_ENTERED.compare():
-            return 0'''
+        if self.constants.MENU_ENTERED.compare():
+            return 0
         
         if self.controls.joystick_detector[self.controls.keybinds.erase_trail_button].rising:
             self.robot.trail.hide_trail.set(True)

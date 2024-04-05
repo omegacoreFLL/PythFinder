@@ -1,15 +1,12 @@
+from ev3sim.Components.Controllers.PIDCoefficients import *
 from ev3sim.Components.BetterClasses.errorEx import *
 from ev3sim.Components.Constants.constants import *
 import pygame
 
 #generic PID controller
 class PIDController():
-    def __init__(self, kP = 0, kI = 0, kD = 0):
-        isType([kP, kI, kD], ["kP", "kI", "kD"], [[int, float], [int, float], [int, float]])
-
-        self.__kP = kP
-        self.__kD = kD
-        self.__kI = kI
+    def __init__(self, coefficients: PIDCoefficients):
+        self.__coeff = coefficients
 
         self.__proportional = 0
         self.__derivative = 0
@@ -20,28 +17,20 @@ class PIDController():
         self.__past_error = 0
         self.__past_time = 0
     
-    def setCoefficients(self, kP = None, kI = None, kD = None):
-        if exists(kP):
-            isType([kP], ["kP"], [[int, float]])
-            self.__kP = kP
-        if exists(kI):
-            isType([kI], ["kI"], [[int, float]])
-            self.__kI = kI
-        if exists(kD):
-            isType([kD], ["kD"], [[int, float]])
-            self.__kD = kD
+    def set(self, coefficients: PIDCoefficients):
+        self.__coeff = coefficients
 
     def calculate(self, error):
         isType([error], ["error"], [[int, float]])
-
+        
         self.__current_time = pygame.time.get_ticks()
 
         self.__proportional = error
         self.__derivative = (error - self.__past_error) / (self.__current_time - self.__past_time)
         self.__integral += error
 
-        power = self.__proportional * self.__kP + self.__derivative * self.__kD + self.__integral * self.__kI 
-  
+        power = self.__proportional * self.__coeff.kP + self.__integral * self.__coeff.kI + self.__derivative * self.__coeff.kD 
+
         self.__past_time = self.__current_time
         self.__past_error = error
 

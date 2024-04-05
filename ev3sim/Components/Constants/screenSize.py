@@ -3,8 +3,8 @@ default_screen_width = 1500
 
 max_screen_height = 1000
 max_screen_width = 1700
-min_screen_height = 500
-min_screen_width = 500
+min_screen_height = 700
+min_screen_width = 900
 
 
 class ScreenSize():

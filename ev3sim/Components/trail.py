@@ -32,7 +32,7 @@ class Trail():
         self.segments = [Segment(constants)]
         self.draw_trail = BooleanEx(False)
         self.hide_trail = BooleanEx(False)
-        self.erase_trail = BooleanEx(True)
+        self.erase_trail = 0
 
         self.pop_trail_loop = 0
         self.past_trail_length = 0
@@ -43,6 +43,7 @@ class Trail():
     
     def setConstants(self, constants: Constants):
         self.constants = constants
+        self.erase_trail = constants.ERASE_TRAIL
 
         for segment in self.segments:
             segment.setConstants(constants)

@@ -1,3 +1,12 @@
+from enum import Enum, auto
+
+class Fun(Enum):
+    SET = auto()
+    GET = auto()
+    NEGATE = auto()
+    COMPARE = auto()
+
+
 class BooleanEx():
     def __init__(self, value: bool):
         self.value = value
@@ -14,17 +23,17 @@ class BooleanEx():
     def compare(self, other = True):
         return self.value == other
     
-    def choose(self, fun: str, value = None):
-        if fun == "set":
+    def choose(self, fun: Fun, value = None):
+        if fun == Fun.SET:
             if value == None:
                 raise Exception("choose a boolean to be 'set'")
             self.set(value)
-        elif fun == "get":
+        elif fun == Fun.GET:
             self.get()
-        elif fun == "negate":
+        elif fun == Fun.NEGATE:
             self.negate()
-        elif fun == "compare":
+        elif fun == Fun.COMPARE:
             if value == None:
-                raise Exception("choose a boolean to be 'set'")
-            self.compare(value)
+                self.compare()
+            else: self.compare(value)
         else: raise Exception("not a valid function")
