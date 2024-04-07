@@ -10,7 +10,7 @@ import math
 
 
 default_robot_image_name = 'bot_from_above'
-default_robot_image_path = 'ev3sim/Images/'
+default_robot_image_path = 'ev3sim/Images/Robot/'
 default_robot_image_extension = 'png'
 
 default_robot_scaling_factor = 1
@@ -287,22 +287,89 @@ ps5_turn_270 = (-1, 0)
 ps5_turn_315 = (-1, 1)
 
 
-img_forwards_source = "ev3sim/Images/btn_forwards.png"
-img_backwards_source = "ev3sim/Images/btn_backwards.png"
-img_show_trail_source = "ev3sim/Images/btn_show_trail.png"
-img_hide_trail_source = "ev3sim/Images/btn_hide_trail.png"
-img_selecting_on_source = "ev3sim/Images/btn_selecting_on.png"
-img_selecting_off_source = "ev3sim/Images/btn_selecting_off.png"
+img_main_menu_source = "ev3sim/Images/Menu/Main/menu_main.png"
+img_forwards_source = "ev3sim/Images/Controls/btn_forwards.png"
+img_backwards_source = "ev3sim/Images/Controls/btn_backwards.png"
+img_menu_button_source = "ev3sim/Images/Menu/Main/menu_button.png"
+img_show_trail_source = "ev3sim/Images/Controls/btn_show_trail.png"
+img_hide_trail_source = "ev3sim/Images/Controls/btn_hide_trail.png"
+img_home_button_source = "ev3sim/Images/Menu/Main/menu_home_button.png"
+img_selecting_on_source = "ev3sim/Images/Controls/btn_selecting_on.png"
+img_selecting_off_source = "ev3sim/Images/Controls/btn_selecting_off.png"
+img_selected_menu_button_source = "ev3sim/Images/Menu/Main/selected_menu_button.png"
+img_selected_home_button_source = "ev3sim/Images/Menu/Main/selected_menu_home_button.png"
+
+img_selection_menu_source = "ev3sim/Images/Menu/Selection/selection_menu.png"
+img_interface_button_source = "ev3sim/Images/Menu/Selection/interface_button.png"
+img_pathing_button_source = "ev3sim/Images/Menu/Selection/pathing_button.png"
+img_other_button_source = "ev3sim/Images/Menu/Selection/other_button.png"
+img_robot_button_source = "ev3sim/Images/Menu/Selection/robot_button.png"
+img_trail_button_source = "ev3sim/Images/Menu/Selection/trail_button.png"
+img_selected_interface_button_source = "ev3sim/Images/Menu/Selection/selected_interface_button.png"
+img_selected_other_button_source = "ev3sim/Images/Menu/Selection/selected_other_button.png"
+img_selected_pathing_button_source = "ev3sim/Images/Menu/Selection/selected_pathing_button.png"
+img_selected_robot_button_source = "ev3sim/Images/Menu/Selection/selected_robot_button.png"
+img_selected_trail_button_source = "ev3sim/Images/Menu/Selection/selected_trail_button.png"
+
+
 
 img_forwards = pygame.image.load(img_forwards_source)
+img_main_menu = pygame.image.load(img_main_menu_source)
 img_backwards = pygame.image.load(img_backwards_source)
 img_show_trail = pygame.image.load(img_show_trail_source)
 img_hide_trail = pygame.image.load(img_hide_trail_source)
+img_menu_button = pygame.image.load(img_menu_button_source)
+img_home_button = pygame.image.load(img_home_button_source)
 img_selecting_on = pygame.image.load(img_selecting_on_source)
 img_selecting_off = pygame.image.load(img_selecting_off_source)
+img_selected_menu_button = pygame.image.load(img_selected_menu_button_source)
+img_selected_home_button = pygame.image.load(img_selected_home_button_source)
 
 
 
+img_selection_menu = pygame.image.load(img_selection_menu_source)
+img_interface_button = pygame.image.load(img_interface_button_source)
+img_pathing_button= pygame.image.load(img_pathing_button_source)
+img_other_button = pygame.image.load(img_other_button_source)
+img_robot_button = pygame.image.load(img_robot_button_source)
+img_trail_button = pygame.image.load(img_trail_button_source)
+img_selected_interface_button= pygame.image.load(img_selected_interface_button_source)
+img_selected_other_button= pygame.image.load(img_selected_other_button_source)
+img_selected_pathing_button = pygame.image.load(img_selected_pathing_button_source)
+img_selected_robot_button = pygame.image.load(img_selected_robot_button_source)
+img_selected_trail_button = pygame.image.load(img_selected_trail_button_source)
+
+
+
+
+
+
+
+
+img_main_menu = pygame.transform.scale(img_main_menu, (900, 700))
+
+img_home_button = pygame.transform.scale(img_home_button, (50, 51))
+img_menu_button = pygame.transform.scale(img_menu_button, (63, 52))
+
+img_selected_home_button = pygame.transform.scale(img_selected_home_button, (50, 51))
+img_selected_menu_button = pygame.transform.scale(img_selected_menu_button, (63, 52))
+
+img_selection_menu = pygame.transform.scale(img_selection_menu, (279, 516))
+
+img_robot_button = pygame.transform.scale(img_robot_button, (176, 51))
+img_selected_robot_button = pygame.transform.scale(img_selected_robot_button, (176, 51))
+
+img_interface_button = pygame.transform.scale(img_interface_button, (245, 51))
+img_selected_interface_button = pygame.transform.scale(img_selected_interface_button, (245, 51))
+
+img_trail_button = pygame.transform.scale(img_trail_button, (175, 51))
+img_selected_trail_button = pygame.transform.scale(img_selected_trail_button, (175, 51))
+
+img_other_button = pygame.transform.scale(img_other_button, (185, 51))
+img_selected_other_button = pygame.transform.scale(img_selected_other_button, (185, 51))
+
+img_pathing_button = pygame.transform.scale(img_pathing_button, (248, 51))
+img_selected_pathing_button = pygame.transform.scale(img_selected_pathing_button, (248, 51))
 
 
 #pathing constants

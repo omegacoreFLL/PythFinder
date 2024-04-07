@@ -1,7 +1,19 @@
 from ev3sim.Components.BetterClasses.edgeDetectorEx import *
 from ev3sim.Components.BetterClasses.booleanEx import *
 from ev3sim.Components.Constants.constants import *
+from enum import Enum
 import pygame
+
+class Dpad(Enum):
+    UP = (0, 1)
+    DOWN = (0, -1)
+    LEFT = (-1, 0)
+    RIGHT = (1, 0)
+
+class JoyType(Enum):
+    PS4 = auto()
+    PS5 = auto()
+    XBOX = auto()
 
 class Controls():
     def __init__(self):
@@ -52,7 +64,7 @@ class Controls():
             else: raise Exception ("Not a supported controller")
 
         def setXbox(self):
-            self.state = "xbox"
+            self.state = JoyType.XBOX
             self.threshold = xbox_threshold
             self.left_x = xbox_left_x
             self.left_y = xbox_left_y
@@ -75,7 +87,7 @@ class Controls():
             self.turn_315 = xbox_turn_315
         
         def setPS4(self):
-            self.state = "ps4"
+            self.state = JoyType.PS4
             self.threshold = ps4_threshold
             self.left_x = ps4_left_x
             self.left_y = ps4_left_y
@@ -98,7 +110,7 @@ class Controls():
             self.turn_315 = ps4_turn_315
         
         def setPS5(self):
-            self.state = "ps5"
+            self.state = JoyType.PS5
             self.threshold = ps5_threshold
             self.left_x = ps5_left_x
             self.left_y = ps5_left_y
@@ -120,8 +132,9 @@ class Controls():
             self.turn_270 = ps5_turn_270
             self.turn_315 = ps5_turn_315
 
-        #only for xbox and ps5
         def calculate(self, value):
+            if self.state is JoyType.PS4:
+                return None
             if value == self.turn_0:
                 return 0
             if value == self.turn_45:
@@ -140,6 +153,22 @@ class Controls():
                 return 315
 
             return None
+
+        def getKey(self, value):
+            if self.state is JoyType.PS4:
+                return None
+            if value == self.turn_0:
+                return Dpad.UP
+            if value == self.turn_90:
+                return Dpad.RIGHT
+            if value == self.turn_180:
+                return Dpad.LEFT
+            if value == self.turn_270:
+                return Dpad.RIGHT
+
+            #if you selected a combo
+            return None
+
     
     def __initKeyboardDetector(self):
         keyboard_detector = []

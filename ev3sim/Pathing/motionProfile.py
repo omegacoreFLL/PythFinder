@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from BetterClasses.MathEx import *
-from TankDrive.constants import *
+from ev3sim.Components.BetterClasses.mathEx import *
+from ev3sim.Components.Constants.constants import *
 
 
 class MotionProfile(ABC):

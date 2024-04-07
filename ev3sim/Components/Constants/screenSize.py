@@ -63,3 +63,5 @@ class ScreenSize():
     def get(self):
         return (self.width, self.height)
     
+    def getHalf(self):
+        return (self.half_w, self.half_h)

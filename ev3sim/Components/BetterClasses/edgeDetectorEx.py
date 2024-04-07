@@ -1,4 +1,4 @@
-from BetterClasses.ErrorEx import *
+from ev3sim.Components.BetterClasses.errorEx import *
 
 #general edge detector class
 class EdgeDetectorEx():

@@ -28,8 +28,9 @@ class Simulator():
         self.background = Background(self.constants)
         self.robot = Robot(self.constants)
         self.fade = Fade(self.constants)
+        self.menu = Menu(self.constants)
         self.controls = Controls()
-        #self.menu = Menu()
+        
 
 
     def build(self, constants = None):
@@ -43,6 +44,7 @@ class Simulator():
         self.background.setConstants(self.constants)
         self.robot.setConstants(self.constants)
         self.fade.setConstants(self.constants)
+        self.menu.setConstants(self.constants)
  
     def set(self, pixels_2_dec = None, fps = None, 
             robot_image_name = None, robot_image_extension = None, robot_image_path = None,
@@ -136,44 +138,45 @@ class Simulator():
 
     def chooseFieldCentric(self, fun: Fun, bool = None):
         self.constants.FIELD_CENTRIC.choose(fun, bool)
+        self.constants.FORWARDS.set(True)
         
-        if fun == Fun.NEGATE or fun == Fun.GET:
+        if fun is Fun.NEGATE or fun is Fun.GET:
             self.constants.up_to_date = False
     
     def chooseDrawRobotBorder(self, fun: Fun, bool = None):
         self.constants.DRAW_BORDER.choose(fun, bool)
         
-        if fun == Fun.NEGATE or fun == Fun.GET:
+        if fun is Fun.NEGATE or fun is Fun.GET:
             self.constants.up_to_date = False
     
     def chooseUsingScreenBorder(self, fun: Fun, bool = None):
         self.constants.USE_SCREEN_BORDER.choose(fun, bool)
         
-        if fun == Fun.NEGATE or fun == Fun.GET:
+        if fun is Fun.NEGATE or fun is Fun.GET:
             self.constants.up_to_date = False
     
     def chooseMenuEntered(self, fun: Fun, bool = None):
         self.constants.MENU_ENTERED.choose(fun, bool)
         
-        if fun == Fun.NEGATE or fun == Fun.GET:
+        if fun is Fun.NEGATE or fun is Fun.GET:
             self.constants.up_to_date = False
     
     def chooseHeadSelection(self, fun: Fun, bool = None):
         self.constants.HEAD_SELECTION.choose(fun, bool)
         
-        if fun == Fun.NEGATE or fun == Fun.GET:
+        if fun is Fun.NEGATE or fun is Fun.GET:
             self.constants.up_to_date = False
     
     def chooseForward(self, fun: Fun, bool = None):
         self.constants.FORWARDS.choose(fun, bool)
 
-        if fun == Fun.NEGATE or fun == Fun.GET:
+        if fun is Fun.NEGATE or fun is Fun.GET:
             self.constants.up_to_date = False
 
     def chooseJoystickEnabled(self, fun: Fun, bool = None):
         self.constants.JOYSTICK_ENABLED.choose(fun, bool)
 
-        if fun == Fun.NEGATE or fun == Fun.GET:
+        if fun is Fun.NEGATE or fun is Fun.GET:
             self.constants.up_to_date = False
 
 
@@ -204,8 +207,8 @@ class Simulator():
         self.background.onScreen(self.screen)
         self.robot.onScreen(self.screen)
         self.fade.onScreen(self.screen)
-        #if self.constants.MENU_ENTERED.compare():
-            #self.menu.onScreen(self.screen, self.controls.joystick)
+        if self.constants.MENU_ENTERED.compare():
+            self.menu.onScreen(self.screen, self.controls)
             
 
         pygame.display.update()
@@ -297,7 +300,7 @@ class Simulator():
             self.constants.MENU_ENTERED.negate()
 
             if self.constants.MENU_ENTERED.compare():
-                pass
+                self.menu.reset()
             else: pass
         
         if self.constants.MENU_ENTERED.compare():
@@ -342,7 +345,7 @@ class Simulator():
         if self.constants.HEAD_SELECTION.compare():
             target = self.robot.pose.head
 
-            if self.controls.keybinds.state == "ps4":
+            if self.controls.keybinds.state is JoyType.PS4:
                 if self.controls.joystick_detector[self.controls.keybinds.turn_0].rising:
                     target = 0
                 elif self.controls.joystick_detector[self.controls.keybinds.turn_90].rising:
