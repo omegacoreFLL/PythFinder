@@ -23,7 +23,8 @@ class Fade():
         self.fade_percent = 0
         self.menu_color = 0
 
-        self.setConstants(constants)
+        self.constants = constants
+        self.recalculate()
 
     
     def reset(self, object):
@@ -54,9 +55,7 @@ class Fade():
             screen.blit(self.obj, self.obj_rectangle)
 
 
-    def setConstants(self, constants: Constants):
-        self.constants = constants
-
+    def recalculate(self):
         self.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h)
-        self.font = pygame.font.SysFont(constants.TEXT_FONT, 150, 0, 40)
+        self.font = pygame.font.SysFont(self.constants.TEXT_FONT, 150, 0, 40)
     

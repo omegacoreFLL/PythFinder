@@ -33,168 +33,54 @@ class Simulator():
         
 
 
-    def build(self, constants = None):
-        if exists(constants):
-            self.constants = constants
-        self.constants.up_to_date = True
-
-        if not self.screen.get_size()  == self.constants.screen_size.get():
-            self.screen = pygame.display.set_mode(self.constants.screen_size.get())
-
-        self.background.setConstants(self.constants)
-        self.robot.setConstants(self.constants)
-        self.fade.setConstants(self.constants)
-        self.menu.setConstants(self.constants)
- 
-    def set(self, pixels_2_dec = None, fps = None, 
-            robot_image_name = None, robot_image_extension = None, robot_image_path = None,
-            robot_scale = None, robot_width = None, robot_height = None,
-            text_color = None, text_font = None,
-            max_trail_length = None, max_trail_segment_length = None,
-            draw_trail_threshold = None, trail_color = None, trail_loops = None, trail_width = None,
-            backround_color = None, axis_color = None, grid_color = None,
-            width_percent = None, backing_distance = None,
-            arrow_offset = None, half_unit_measure_line = None,
-            time_until_fade = None, fade_percent = None,
-            screen_size = None,
-            coefficients_joystick_heading = None):
-        
-        self.constants.up_to_date = False
-
-        if exists(pixels_2_dec):
-            self.constants.PIXELS_2_DEC = 0
-        if exists(fps):
-            self.constants.FPS = 0
-
-        if exists(robot_image_name):
-            self.constants.ROBOT_IMG_NAME = robot_image_name
-        if exists(robot_image_extension):
-            self.constants.ROBOT_IMG_EX = robot_image_extension
-        if exists(robot_image_path):
-            self.constants.ROBOT_IMG_PATH = robot_image_path
-
-        if exists(robot_scale):
-            self.constants.ROBOT_SCALE = robot_scale
-        if exists(robot_width):
-            self.constants.ROBOT_WIDTH = robot_width
-        if exists(robot_height):
-            self.constants.ROBOT_HEIGHT = robot_height
-
-        if exists(text_color):
-            self.constants.TEXT_COLOR = text_color
-        if exists(text_font):
-            self.constants.TEXT_FONT = text_font
-
-        if exists(max_trail_length):
-            self.constants.MAX_TRAIL_LEN = max_trail_length
-        if exists(max_trail_segment_length):
-            self.constants.MAX_TRAIL_SEGMENT_LEN = max_trail_segment_length
-
-        if exists(draw_trail_threshold):
-            self.constants.DRAW_TRAIL_THRESHOLD = draw_trail_threshold
-        if exists(trail_color):
-            self.constants.TRAIL_COLOR = trail_color
-        if exists(trail_loops):
-            self.constants.TRAIL_LOOPS = trail_loops
-        if exists(trail_width):
-            self.constants.TRAIL_WIDTH = trail_width
-
-        if exists(backround_color):
-            self.constants.BACKGROUND_COLOR = backround_color
-        if exists(axis_color):
-            self.constants.AXIS_COLOR = axis_color
-        if exists(grid_color):
-            self.constants.GRID_COLOR = grid_color
-
-        if exists(width_percent):
-            self.constants.WIDTH_PERCENT = width_percent
-
-        if exists(backing_distance):
-            self.constants.BACKING_DISTANCE = backing_distance
-        
-        if exists(arrow_offset):
-            self.constants.ARROW_OFFSET = arrow_offset
-        if exists(half_unit_measure_line):
-            self.constants.HALF_UNIT_MEASURE_LINE = half_unit_measure_line
-
-        if exists(time_until_fade):
-            self.constants.TIME_UNTIL_FADE = time_until_fade
-        if exists(fade_percent):
-            self.constants.FADE_PERCENT = fade_percent
-        
-        if exists(coefficients_joystick_heading) and isinstance(coefficients_joystick_heading, PIDCoefficients):
-            self.constants.COEFF_JOY_HEAD = coefficients_joystick_heading
-        if exists(screen_size):
-            self.constants.screen_size = screen_size
-
-        return self
-    
-
-
-    def RUNNING(self):
-        return self.running.compare()
-
-
-
     def chooseFieldCentric(self, fun: Fun, bool = None):
         self.constants.FIELD_CENTRIC.choose(fun, bool)
         self.constants.FORWARDS.set(True)
-        
-        if fun is Fun.NEGATE or fun is Fun.GET:
-            self.constants.up_to_date = False
     
     def chooseDrawRobotBorder(self, fun: Fun, bool = None):
-        self.constants.DRAW_BORDER.choose(fun, bool)
-        
-        if fun is Fun.NEGATE or fun is Fun.GET:
-            self.constants.up_to_date = False
+        self.constants.DRAW_ROBOT_BORDER.choose(fun, bool)
     
     def chooseUsingScreenBorder(self, fun: Fun, bool = None):
         self.constants.USE_SCREEN_BORDER.choose(fun, bool)
-        
-        if fun is Fun.NEGATE or fun is Fun.GET:
-            self.constants.up_to_date = False
     
     def chooseMenuEntered(self, fun: Fun, bool = None):
         self.constants.MENU_ENTERED.choose(fun, bool)
-        
-        if fun is Fun.NEGATE or fun is Fun.GET:
-            self.constants.up_to_date = False
     
     def chooseHeadSelection(self, fun: Fun, bool = None):
         self.constants.HEAD_SELECTION.choose(fun, bool)
-        
-        if fun is Fun.NEGATE or fun is Fun.GET:
-            self.constants.up_to_date = False
     
     def chooseForward(self, fun: Fun, bool = None):
         self.constants.FORWARDS.choose(fun, bool)
 
-        if fun is Fun.NEGATE or fun is Fun.GET:
-            self.constants.up_to_date = False
-
     def chooseJoystickEnabled(self, fun: Fun, bool = None):
         self.constants.JOYSTICK_ENABLED.choose(fun, bool)
 
-        if fun is Fun.NEGATE or fun is Fun.GET:
-            self.constants.up_to_date = False
 
 
+    def recalculate(self):
+        if self.constants.recalculate.compare(False):
+            return 0
+        
+        self.menu.recalculate()
+        self.fade.recalculate()
+        self.robot.recalculate()
+        self.background.recalculate()
 
 
-    def matchScreenSize(self, image, width):
+    def matchScreenSize(self, image: pygame.Surface, width):
         size_multiplier = self.constants.WIDTH_PERCENT / 100 * width / self.constants.screen_size.MAX_WIDTH
 
         return pygame.transform.scale(image, 
             (size_multiplier * image.get_width(),
             size_multiplier * image.get_height()))
 
+    def RUNNING(self):
+        return self.running.compare()
 
 
 
     def update(self):
-        if not self.constants.up_to_date:
-            self.build()
+        self.recalculate()
         self.__updateEventManager()
 
         #reset frame
@@ -209,6 +95,8 @@ class Simulator():
         self.fade.onScreen(self.screen)
         if self.constants.MENU_ENTERED.compare():
             self.menu.onScreen(self.screen, self.controls)
+
+                
             
 
         pygame.display.update()
@@ -300,8 +188,10 @@ class Simulator():
             self.constants.MENU_ENTERED.negate()
 
             if self.constants.MENU_ENTERED.compare():
+                self.constants.FREEZE_TRAIL.set(True)
                 self.menu.reset()
-            else: pass
+            else: 
+                self.constants.FREEZE_TRAIL.set(False)
         
         if self.constants.MENU_ENTERED.compare():
             return 0

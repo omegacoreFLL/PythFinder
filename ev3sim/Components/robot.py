@@ -43,10 +43,10 @@ class Robot():
         self.is_stopped = BooleanEx(True)
         self.head_controller = PIDController(constants.COEFF_JOY_HEAD)
 
-        self.constants = 0
+        self.constants = constants
         self.constrains = 0
 
-        self.setConstants(constants)
+        self.recalculate()
         self.setConstrains(Constrains())
 
         self.window_pose = self.toWindowCoords(self.pose)
@@ -61,14 +61,10 @@ class Robot():
 
         self.kinematics = TankKinematics(self.constrains.TRACK_WIDTH)
 
-    def setConstants(self, constants: Constants):
-        self.constants = constants
-
-        self.head_controller.set(constants.COEFF_JOY_HEAD)
+    def recalculate(self):
+        self.head_controller.set(self.constants.COEFF_JOY_HEAD)
         self.pose_font = pygame.font.SysFont(self.constants.TEXT_FONT, 50)
-        self.image = pygame.image.load("{0}{1}.{2}".format(self.constants.ROBOT_IMG_PATH, 
-                                                           self.constants.ROBOT_IMG_NAME, 
-                                                           self.constants.ROBOT_IMG_EX))
+        self.image = pygame.image.load(self.constants.ROBOT_IMG_SOURCE)
 
         self.getRobotSizeInPixels()
 
@@ -146,20 +142,31 @@ class Robot():
         delta_head = math.degrees(self.angular_velocity) * time
         delta_distance = self.pose.distanceTo(self.past_pose) / 10 #dec
 
-
         if self.constants.USE_SCREEN_BORDER.compare():
             next_pose = self.toWindowCoords(Pose(x + delta_x, y + delta_y, head + delta_head))
             border_points = self.__findBorder(next_pose)
             
+            out_of_screen = True
+
             for point in border_points:
+                out = False
                 if point[0] > self.constants.screen_size.width:
                     delta_y = -self.constants.BACKING_DISTANCE
+                    out = True
                 if point[0] < 0:
                     delta_y = self.constants.BACKING_DISTANCE  
+                    out = True
                 if point[1] > self.constants.screen_size.height:
                     delta_x = self.constants.BACKING_DISTANCE
+                    out = True
                 if point[1] < 0:
                     delta_x = -self.constants.BACKING_DISTANCE
+                    out = True
+                
+                out_of_screen = out and out_of_screen
+
+            if out_of_screen:
+                x, y, head, delta_x, delta_y, delta_head = 0, 0, 0, 0, 0, 0
                 
 
         x += delta_x
@@ -171,6 +178,8 @@ class Robot():
         self.past_pose = self.pose
         self.pose = Pose(x, y, normalizeDegrees(head))
         self.window_pose = self.toWindowCoords(self.pose)
+
+
 
     def onScreen(self, screen):
         self.__drawPose(screen)

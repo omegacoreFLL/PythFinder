@@ -12,12 +12,6 @@ class Segment():
 
         self.hide = BooleanEx(False)
 
-        self.constants = 0
-        self.setConstants(constants)
-    
-
-
-    def setConstants(self, constants: Constants):
         self.constants = constants
     
     def draw(self, screen):
@@ -32,28 +26,13 @@ class Trail():
         self.segments = [Segment(constants)]
         self.draw_trail = BooleanEx(False)
         self.hide_trail = BooleanEx(False)
-        self.erase_trail = 0
 
         self.pop_trail_loop = 0
         self.past_trail_length = 0
         self.current_segment = 0
 
-        self.constants = 0
-        self.setConstants(constants)
-    
-    def setConstants(self, constants: Constants):
         self.constants = constants
-        self.erase_trail = constants.ERASE_TRAIL
-
-        for segment in self.segments:
-            segment.setConstants(constants)
-
-    '''def setColor(self, segment_number: int, color = default_trail_color):
-        self.segments[segment_number].color = color
     
-    def setWidth(self, segment_number: int, width = default_trail_width):
-        self.segments[segment_number].width = width
-    '''
     def hide(self, segment_number: int, hide = False):
         self.segments[segment_number].hide.set(hide)
     
@@ -81,6 +60,9 @@ class Trail():
                 segment.draw(screen)
     
     def buildTrail(self, pose):
+        if self.constants.FREEZE_TRAIL.compare():
+            return 0
+        
         trail_length = 0
 
         for segment in self.segments:
@@ -110,7 +92,7 @@ class Trail():
         self.past_trail_length = trail_length
 
     def shouldErasePoint(self, length):
-        if self.erase_trail.compare(False):
+        if self.constants.ERASE_TRAIL.compare(False):
             return False
         
         if length == self.past_trail_length:

@@ -38,6 +38,7 @@ default_head_selection = False
 default_forwards = True
 default_erase_trail = True
 default_joystick_enabled = True
+default_freeze_trail = False
 
 default_kP_joystick_head = 6
 default_kI_joystick_head = 0
@@ -66,14 +67,15 @@ default_backing_distance = 1
 
 class Constants():
     def __init__(self, screen_size = None):
-        self.up_to_date = True
-        
+        self.recalculate = BooleanEx(False)
+
         self.PIXELS_2_DEC = 0
         self.FPS = 0
 
         self.ROBOT_IMG_NAME = 0
         self.ROBOT_IMG_EX = 0
         self.ROBOT_IMG_PATH = 0
+        self.ROBOT_IMG_SOURCE = 0
 
         self.ROBOT_SCALE = 0
         self.ROBOT_WIDTH = 0
@@ -112,6 +114,7 @@ class Constants():
         self.FORWARDS = 0
         self.ERASE_TRAIL = 0
         self.JOYSTICK_ENABLED = 0
+        self.FREEZE_TRAIL = 0
 
         self.COEFF_JOY_HEAD = 0
 
@@ -128,6 +131,7 @@ class Constants():
         self.ROBOT_IMG_NAME = default_robot_image_name
         self.ROBOT_IMG_EX = default_robot_image_extension
         self.ROBOT_IMG_PATH = default_robot_image_path
+        self.updateRobotImgSource()
 
         self.ROBOT_SCALE = default_robot_scaling_factor
         self.ROBOT_WIDTH = default_robot_width_cm
@@ -170,8 +174,22 @@ class Constants():
         self.FORWARDS = BooleanEx(default_forwards)
         self.ERASE_TRAIL = BooleanEx(default_erase_trail)
         self.JOYSTICK_ENABLED = BooleanEx(default_joystick_enabled)
+        self.FREEZE_TRAIL = BooleanEx(default_freeze_trail)
 
         self.screen_size = ScreenSize()
+    
+    def updateRobotImgSource(self, path = None, name = None, extension = None):
+        if path is not None:
+            self.ROBOT_IMG_PATH = path
+        if name is not None:
+            self.ROBOT_IMG_NAME = name
+        if extension is not None:
+            self.ROBOT_IMG_EX = extension
+
+        self.ROBOT_IMG_SOURCE = "{0}{1}.{2}".format(self.ROBOT_IMG_PATH, 
+                                                    self.ROBOT_IMG_NAME, 
+                                                    self.ROBOT_IMG_EX)
+        
     
     def pixelsToCm(self, val):
         return val / self.PIXELS_2_DEC * 10
@@ -287,6 +305,11 @@ ps5_turn_270 = (-1, 0)
 ps5_turn_315 = (-1, 1)
 
 
+
+
+
+
+
 img_main_menu_source = "ev3sim/Images/Menu/Main/menu_main.png"
 img_forwards_source = "ev3sim/Images/Controls/btn_forwards.png"
 img_backwards_source = "ev3sim/Images/Controls/btn_backwards.png"
@@ -299,18 +322,48 @@ img_selecting_off_source = "ev3sim/Images/Controls/btn_selecting_off.png"
 img_selected_menu_button_source = "ev3sim/Images/Menu/Main/selected_menu_button.png"
 img_selected_home_button_source = "ev3sim/Images/Menu/Main/selected_menu_home_button.png"
 
-img_selection_menu_source = "ev3sim/Images/Menu/Selection/selection_menu.png"
-img_interface_button_source = "ev3sim/Images/Menu/Selection/interface_button.png"
-img_pathing_button_source = "ev3sim/Images/Menu/Selection/pathing_button.png"
+
 img_other_button_source = "ev3sim/Images/Menu/Selection/other_button.png"
 img_robot_button_source = "ev3sim/Images/Menu/Selection/robot_button.png"
 img_trail_button_source = "ev3sim/Images/Menu/Selection/trail_button.png"
-img_selected_interface_button_source = "ev3sim/Images/Menu/Selection/selected_interface_button.png"
+img_selection_menu_source = "ev3sim/Images/Menu/Selection/selection_menu.png"
+img_pathing_button_source = "ev3sim/Images/Menu/Selection/pathing_button.png"
+img_interface_button_source = "ev3sim/Images/Menu/Selection/interface_button.png"
 img_selected_other_button_source = "ev3sim/Images/Menu/Selection/selected_other_button.png"
-img_selected_pathing_button_source = "ev3sim/Images/Menu/Selection/selected_pathing_button.png"
 img_selected_robot_button_source = "ev3sim/Images/Menu/Selection/selected_robot_button.png"
 img_selected_trail_button_source = "ev3sim/Images/Menu/Selection/selected_trail_button.png"
+img_selected_pathing_button_source = "ev3sim/Images/Menu/Selection/selected_pathing_button.png"
+img_selected_interface_button_source = "ev3sim/Images/Menu/Selection/selected_interface_button.png"
 
+
+img_general_menu_source = "ev3sim/Images/Menu/General/general_menu.png"
+img_left_arrow_source = "ev3sim/Images/Menu/General/Arrows/Left/left_arrow.png"
+img_right_arrow_source = "ev3sim/Images/Menu/General/Arrows/Right/right_arrow.png"
+img_selected_left_arrow_source = "ev3sim/Images/Menu/General/Arrows/Left/selected_left_arrow.png"
+img_selected_right_arrow_source = "ev3sim/Images/Menu/General/Arrows/Right/selected_right_arrow.png"
+
+
+img_other_quadrant_source = "ev3sim/Images/Menu/Other/other_quadrant.png"
+img_selected_none_source = "ev3sim/Images/selected_none.png"
+img_none_source = "ev3sim/Images/none.png"
+
+
+img_field_centric_on_source = "ev3sim/Images/Menu/Other/FieldCentric/field_centric_on.png"
+img_field_centric_off_source = "ev3sim/Images/Menu/Other/FieldCentric/field_centric_off.png"
+img_selected_field_centric_on_source = "ev3sim/Images/Menu/Other/FieldCentric/selected_field_centric_on.png"
+img_selected_field_centric_off_source = "ev3sim/Images/Menu/Other/FieldCentric/selected_field_centric_off.png"
+
+
+img_robot_border_on_source = "ev3sim/Images/Menu/Other/RobotBorder/robot_border_on.png"
+img_robot_border_off_source = "ev3sim/Images/Menu/Other/RobotBorder/robot_border_off.png"
+img_selected_robot_border_on_source = "ev3sim/Images/Menu/Other/RobotBorder/selected_robot_border_on.png"
+img_selected_robot_border_off_source = "ev3sim/Images/Menu/Other/RobotBorder/selected_robot_border_off.png"
+
+
+img_screen_border_on_source = "ev3sim/Images/Menu/Other/ScreenBorder/screen_border_on.png"
+img_screen_border_off_source = "ev3sim/Images/Menu/Other/ScreenBorder/screen_border_off.png"
+img_selected_screen_border_on_source = "ev3sim/Images/Menu/Other/ScreenBorder/selected_screen_border_on.png"
+img_selected_screen_border_off_source = "ev3sim/Images/Menu/Other/ScreenBorder/selected_screen_border_off.png"
 
 
 img_forwards = pygame.image.load(img_forwards_source)
@@ -326,27 +379,50 @@ img_selected_menu_button = pygame.image.load(img_selected_menu_button_source)
 img_selected_home_button = pygame.image.load(img_selected_home_button_source)
 
 
-
-img_selection_menu = pygame.image.load(img_selection_menu_source)
-img_interface_button = pygame.image.load(img_interface_button_source)
-img_pathing_button= pygame.image.load(img_pathing_button_source)
 img_other_button = pygame.image.load(img_other_button_source)
 img_robot_button = pygame.image.load(img_robot_button_source)
 img_trail_button = pygame.image.load(img_trail_button_source)
-img_selected_interface_button= pygame.image.load(img_selected_interface_button_source)
+img_pathing_button= pygame.image.load(img_pathing_button_source)
+img_selection_menu = pygame.image.load(img_selection_menu_source)
+img_interface_button = pygame.image.load(img_interface_button_source)
 img_selected_other_button= pygame.image.load(img_selected_other_button_source)
-img_selected_pathing_button = pygame.image.load(img_selected_pathing_button_source)
 img_selected_robot_button = pygame.image.load(img_selected_robot_button_source)
 img_selected_trail_button = pygame.image.load(img_selected_trail_button_source)
+img_selected_pathing_button = pygame.image.load(img_selected_pathing_button_source)
+img_selected_interface_button= pygame.image.load(img_selected_interface_button_source)
 
 
+img_general_menu = pygame.image.load(img_general_menu_source)
+img_left_arrow = pygame.image.load(img_left_arrow_source)
+img_right_arrow = pygame.image.load(img_right_arrow_source)
+img_selected_left_arrow = pygame.image.load(img_selected_left_arrow_source)
+img_selected_right_arrow = pygame.image.load(img_selected_right_arrow_source)
 
+img_other_quadrant = pygame.image.load(img_other_quadrant_source)
+img_selected_none = pygame.image.load(img_selected_none_source)
+img_none = pygame.image.load(img_none_source)
+
+img_field_centric_on = pygame.image.load(img_field_centric_on_source)
+img_field_centric_off = pygame.image.load(img_field_centric_off_source)
+img_selected_field_centric_on = pygame.image.load(img_selected_field_centric_on_source)
+img_selected_field_centric_off = pygame.image.load(img_selected_field_centric_off_source)
+
+img_robot_border_on = pygame.image.load(img_robot_border_on_source)
+img_robot_border_off = pygame.image.load(img_robot_border_off_source)
+img_selected_robot_border_on = pygame.image.load(img_selected_robot_border_on_source)
+img_selected_robot_border_off = pygame.image.load(img_selected_robot_border_off_source)
+
+img_screen_border_on = pygame.image.load(img_screen_border_on_source)
+img_screen_border_off = pygame.image.load(img_screen_border_off_source)
+img_selected_screen_border_on = pygame.image.load(img_selected_screen_border_on_source)
+img_selected_screen_border_off = pygame.image.load(img_selected_screen_border_off_source)
 
 
 
 
 
 img_main_menu = pygame.transform.scale(img_main_menu, (900, 700))
+img_general_menu = pygame.transform.scale(img_general_menu, (900, 700))
 
 img_home_button = pygame.transform.scale(img_home_button, (50, 51))
 img_menu_button = pygame.transform.scale(img_menu_button, (63, 52))
@@ -370,6 +446,26 @@ img_selected_other_button = pygame.transform.scale(img_selected_other_button, (1
 
 img_pathing_button = pygame.transform.scale(img_pathing_button, (248, 51))
 img_selected_pathing_button = pygame.transform.scale(img_selected_pathing_button, (248, 51))
+
+img_other_quadrant = pygame.transform.scale(img_other_quadrant, (310, 103))
+img_selected_none = pygame.transform.scale(img_selected_none, (230, 100))
+img_none = pygame.transform.scale(img_none, (230, 100))
+
+img_field_centric_on = pygame.transform.scale(img_field_centric_on, (390, 110))
+img_field_centric_off = pygame.transform.scale(img_field_centric_off, (390, 110))
+img_selected_field_centric_on = pygame.transform.scale(img_selected_field_centric_on, (390, 110))
+img_selected_field_centric_off = pygame.transform.scale(img_selected_field_centric_off, (390, 110))
+
+img_robot_border_on = pygame.transform.scale(img_robot_border_on, (390, 110))
+img_robot_border_off = pygame.transform.scale(img_robot_border_off, (390, 110))
+img_selected_robot_border_on = pygame.transform.scale(img_selected_robot_border_on, (390, 110))
+img_selected_robot_border_off = pygame.transform.scale(img_selected_robot_border_off, (390, 110))
+
+img_screen_border_on = pygame.transform.scale(img_screen_border_on, (390, 110))
+img_screen_border_off = pygame.transform.scale(img_screen_border_off, (390, 110))
+img_selected_screen_border_on = pygame.transform.scale(img_selected_screen_border_on, (390, 110))
+img_selected_screen_border_off = pygame.transform.scale(img_selected_screen_border_off, (390, 110))
+
 
 
 #pathing constants

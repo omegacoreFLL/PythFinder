@@ -26,12 +26,10 @@ class Background():
         self.x_rectangle = None
         self.y_rectangle = None
 
-        self.constants = 0
-        self.setConstants(constants)
-    
-    def setConstants(self, constants: Constants):
         self.constants = constants
-
+        self.recalculate()
+    
+    def recalculate(self):
         self.positive_y = (self.constants.screen_size.width, self.constants.screen_size.half_h) 
         self.negative_y = (0, self.constants.screen_size.half_h)
 
@@ -39,8 +37,8 @@ class Background():
         self.negative_x = (self.constants.screen_size.half_w, self.constants.screen_size.height)
 
         #coordinate system units
-        self.units_on_screen_x = int(self.constants.screen_size.half_h / constants.PIXELS_2_DEC)
-        self.units_on_screen_y = int(self.constants.screen_size.half_w / constants.PIXELS_2_DEC)
+        self.units_on_screen_x = int(self.constants.screen_size.half_h / self.constants.PIXELS_2_DEC)
+        self.units_on_screen_y = int(self.constants.screen_size.half_w / self.constants.PIXELS_2_DEC)
 
         #arrow points
         self.x_arrow_point_left = (self.positive_x[0] - self.constants.ARROW_OFFSET, self.positive_x[1] + self.constants.ARROW_OFFSET)
