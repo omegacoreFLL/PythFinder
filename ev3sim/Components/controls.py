@@ -29,6 +29,7 @@ class Controls():
         self.keyboard_detector = self.__initKeyboardDetector()
         self.joystick_detector = self.__initJoystickDetector()
 
+
     class Keybinds():
         def __init__(self):
             self.threshold = 0
@@ -53,6 +54,7 @@ class Controls():
             self.turn_315 = 0
 
             self.state = None
+            self.dpad_detector = None
         
         def setType(self, joystick_type):
             if joystick_type == "Xbox 360 Controller":
@@ -85,6 +87,13 @@ class Controls():
             self.turn_225 = xbox_turn_225
             self.turn_270 = xbox_turn_270
             self.turn_315 = xbox_turn_315
+
+            self.dpad_detector = {
+                Dpad.UP : EdgeDetectorEx(),
+                Dpad.RIGHT : EdgeDetectorEx(), 
+                Dpad.DOWN : EdgeDetectorEx(), 
+                Dpad.LEFT : EdgeDetectorEx()
+            }
         
         def setPS4(self):
             self.state = JoyType.PS4
@@ -108,6 +117,8 @@ class Controls():
             self.turn_225 = ps4_turn_225
             self.turn_270 = ps4_turn_270
             self.turn_315 = ps4_turn_315
+
+            self.dpad_detector = None
         
         def setPS5(self):
             self.state = JoyType.PS5
@@ -132,6 +143,13 @@ class Controls():
             self.turn_270 = ps5_turn_270
             self.turn_315 = ps5_turn_315
 
+            self.dpad_detector = {
+                Dpad.UP : EdgeDetectorEx(),
+                Dpad.RIGHT : EdgeDetectorEx(), 
+                Dpad.DOWN : EdgeDetectorEx(), 
+                Dpad.LEFT : EdgeDetectorEx()
+            }
+
         def calculate(self, value):
             if self.state is JoyType.PS4:
                 return None
@@ -155,19 +173,42 @@ class Controls():
             return None
 
         def getKey(self, value):
-            if self.state is JoyType.PS4:
-                return None
             if value == self.turn_0:
                 return Dpad.UP
             if value == self.turn_90:
                 return Dpad.RIGHT
             if value == self.turn_180:
-                return Dpad.LEFT
+                return Dpad.DOWN
             if value == self.turn_270:
-                return Dpad.RIGHT
+                return Dpad.LEFT
 
             #if you selected a combo
             return None
+
+        def updateDpad(self, value):
+            if self.state is JoyType.PS4:
+                return None
+            
+            current_key = self.getKey(value)
+
+            if current_key is None:
+                for key in self.dpad_detector:
+                    self.dpad_detector[key].set(False)
+                    self.dpad_detector[key].update()
+                return None
+            try:
+                self.dpad_detector[current_key].set(True)
+            except: 
+                pass
+
+            for key in self.dpad_detector:
+                if key is not current_key:
+                    self.dpad_detector[key].set(False)
+                self.dpad_detector[key].update()
+            
+            if self.dpad_detector[current_key].rising or current_key is None:
+                return current_key
+
 
     
     def __initKeyboardDetector(self):

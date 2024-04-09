@@ -366,6 +366,19 @@ img_selected_screen_border_on_source = "ev3sim/Images/Menu/Other/ScreenBorder/se
 img_selected_screen_border_off_source = "ev3sim/Images/Menu/Other/ScreenBorder/selected_screen_border_off.png"
 
 
+img_scale_source = "ev3sim/Images/Menu/Robot/scale.png"
+img_width_source = "ev3sim/Images/Menu/Robot/width.png"
+img_height_source = "ev3sim/Images/Menu/Robot/height.png"
+img_robot_image_path_source = "ev3sim/Images/Menu/Robot/robot_path.png"
+img_selected_scale_source = "ev3sim/Images/Menu/Robot/selected_scale.png"
+img_selected_width_source = "ev3sim/Images/Menu/Robot/selected_width.png"
+img_selected_height_source = "ev3sim/Images/Menu/Robot/selected_height.png"
+img_robot_indicator_source = "ev3sim/Images/Menu/Robot/robot_indicator.png"
+img_path_quadrant_source = "ev3sim/Images/Menu/Robot/robot_path_quadrant.png"
+img_specs_quadrant_source = "ev3sim/Images/Menu/Robot/robot_specs_quadrant.png"
+img_selected_robot_image_path_source = "ev3sim/Images/Menu/Robot/selected_robot_path.png"
+
+
 img_forwards = pygame.image.load(img_forwards_source)
 img_main_menu = pygame.image.load(img_main_menu_source)
 img_backwards = pygame.image.load(img_backwards_source)
@@ -417,6 +430,19 @@ img_screen_border_off = pygame.image.load(img_screen_border_off_source)
 img_selected_screen_border_on = pygame.image.load(img_selected_screen_border_on_source)
 img_selected_screen_border_off = pygame.image.load(img_selected_screen_border_off_source)
 
+img_scale = pygame.image.load(img_scale_source)
+img_width = pygame.image.load(img_width_source)
+img_height = pygame.image.load(img_height_source)
+img_path_quadrant = pygame.image.load(img_path_quadrant_source)
+img_specs_quadrant = pygame.image.load(img_specs_quadrant_source)
+img_selected_scale = pygame.image.load(img_selected_scale_source)
+img_selected_width = pygame.image.load(img_selected_width_source)
+img_selected_height = pygame.image.load(img_selected_height_source)
+img_robot_indicator = pygame.image.load(img_robot_indicator_source)
+img_robot_image_path = pygame.image.load(img_robot_image_path_source)
+img_selected_robot_image_path = pygame.image.load(img_selected_robot_image_path_source)
+
+
 
 
 
@@ -466,6 +492,19 @@ img_screen_border_off = pygame.transform.scale(img_screen_border_off, (390, 110)
 img_selected_screen_border_on = pygame.transform.scale(img_selected_screen_border_on, (390, 110))
 img_selected_screen_border_off = pygame.transform.scale(img_selected_screen_border_off, (390, 110))
 
+img_robot_indicator = pygame.transform.scale(img_robot_indicator, (200, 95))
+img_path_quadrant = pygame.transform.scale(img_path_quadrant, (700, 200))
+img_specs_quadrant = pygame.transform.scale(img_specs_quadrant, (220, 300))
+
+img_selected_robot_image_path = pygame.transform.scale(img_selected_robot_image_path, (700, 95))
+img_robot_image_path = pygame.transform.scale(img_robot_image_path, (700, 95))
+
+img_width = pygame.transform.scale(img_width, (200, 100))
+img_selected_width = pygame.transform.scale(img_selected_width, (200, 100))
+img_height = pygame.transform.scale(img_height, (200, 110))
+img_selected_height = pygame.transform.scale(img_selected_height, (200, 110))
+img_scale = pygame.transform.scale(img_scale, (200, 100))
+img_selected_scale = pygame.transform.scale(img_selected_scale, (200, 100))
 
 
 #pathing constants

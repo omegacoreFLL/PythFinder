@@ -25,9 +25,9 @@ class Robot():
         self.width_in_pixels = 0
         self.height_in_pixels = 0
 
-        self.pose = Pose(0, 0, 0)
-        self.past_pose = Pose(0, 0, 0)
-        self.target_head = 0
+        self.pose = Pose(0, 0, 90)
+        self.past_pose = Pose(0, 0, 90)
+        self.target_head = 90
 
         self.left_speed = 0
         self.right_speed = 0
@@ -73,7 +73,6 @@ class Robot():
                 (self.height_in_pixels, self.width_in_pixels))
 
         self.rotating_instance = self.image
-        self.rotating_instance = pygame.transform.rotate(self.rotating_instance, -90)
 
         self.rectangle = self.rotating_instance.get_rect()
         self.mask = pygame.mask.from_surface(self.rotating_instance)

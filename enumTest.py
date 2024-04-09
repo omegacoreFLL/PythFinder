@@ -1,5 +1,5 @@
 
-import pygame
+'''import pygame
 
 pygame.init()
 run = True
@@ -49,4 +49,20 @@ while run:
 
     pygame.display.update()    
     
-    print(_input)
+    print(_input)'''
+
+from ev3sim.Components.BetterClasses.edgeDetectorEx import *
+from ev3sim.Components.controls import *
+
+DpadDetector = {
+    Dpad.UP : EdgeDetectorEx(),
+    Dpad.DOWN : EdgeDetectorEx()
+}
+
+
+DpadDetector[Dpad.UP].set(True)
+
+for det in DpadDetector:
+    DpadDetector[det].update()
+
+print(DpadDetector[Dpad.UP].rising)

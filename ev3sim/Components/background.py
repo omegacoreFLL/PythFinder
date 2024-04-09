@@ -44,7 +44,7 @@ class Background():
         self.x_arrow_point_left = (self.positive_x[0] - self.constants.ARROW_OFFSET, self.positive_x[1] + self.constants.ARROW_OFFSET)
         self.y_arrow_point_up = (self.positive_y[0] - self.constants.ARROW_OFFSET, self.positive_y[1] - self.constants.ARROW_OFFSET)
 
-        self.xy_font = pygame.font.SysFont(self.constants.TEXT_FONT, 70)
+        self.xy_font = pygame.font.SysFont(self.constants.TEXT_FONT, 50)
 
         self.x_coord = self.xy_font.render("x", True, self.constants.TEXT_COLOR)
         self.y_coord = self.xy_font.render("y", True, self.constants.TEXT_COLOR)

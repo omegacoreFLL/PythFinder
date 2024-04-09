@@ -56,7 +56,6 @@ class Simulator():
         self.constants.JOYSTICK_ENABLED.choose(fun, bool)
 
 
-
     def recalculate(self):
         if self.constants.recalculate.compare(False):
             return 0
@@ -111,6 +110,29 @@ class Simulator():
             
             elif event.type == pygame.JOYDEVICEREMOVED:
                 self.controls.addJoystick(None)
+            
+            if event.type == pygame.KEYDOWN and self.menu.input_bool.get():
+            
+                if event.key == pygame.K_RETURN:
+                    self.menu.input_bool.set(False)
+                    self.menu.stopTextReciever()
+
+                elif event.key == pygame.K_BACKSPACE:
+                    if len(self.menu.input_text) > 1:
+                        self.menu.input_text = self.menu.input_text[:-1]
+                    else: self.menu.input_text = "_"
+                
+                else:
+                    if self.menu.input_text == "_":
+                        if self.menu.just_numbers.compare():
+                            if self.menu.isDigit(event.key):
+                                self.menu.input_text = event.unicode
+                        else: self.menu.input_text = event.unicode
+                    else:
+                        if self.menu.just_numbers.compare():
+                            if self.menu.isDigit(event.key):
+                                self.menu.input_text += event.unicode
+                        else: self.menu.input_text += event.unicode
 
             if event.type == pygame.QUIT:
                 self.running.set(False)

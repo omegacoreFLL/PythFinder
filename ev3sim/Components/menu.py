@@ -7,6 +7,7 @@ from enum import Enum
 class Range(Enum):
     MAIN_MENU = ((0, 1), (-1,0))
     SELECTION_MENU = ((0, 0), (0, 5))
+    ROBOT_MENU = ((10, 12), (0, 2))
     OTHER_MENU = ((50, 51), (0, 4))
 
 # FIRST value: LEFT -> RIGHT
@@ -22,6 +23,11 @@ class Selected(Enum):
     TRAIL = (0, 3)
     PATHING = (0, 4)
     OTHER = (0, 5)
+
+    ROBOT_PATH = (10, 1)
+    ROBOT_WIDTH = (10, 2)
+    ROBOT_HEIGHT = (11, 2)
+    ROBOT_SCALE = (12, 2)
 
     FIELD_CENTRIC = (50, 1)
     ROBOT_BORDER = (50, 2)
@@ -102,6 +108,12 @@ class Menu():
         self.range = RangeManager(Range.MAIN_MENU)
         self.selected_value = (0, -1)
 
+        self.input_text = "_"
+        self.input_bool = BooleanEx(False)
+        self.input_detector = EdgeDetectorEx()
+
+        self.just_numbers = BooleanEx(False)
+
         self.last_range = None
         self.last_invertedX = None
         self.last_invertedY = None
@@ -142,9 +154,13 @@ class Menu():
         self.controls = controls
         self.screen = screen
 
+        self.input_detector.set(self.input_bool.get())
+        self.input_detector.update()
+
         self.__updateSelections()
         self.__updateClick()
         self.__setSelections()
+        self.__updateInputText()
 
         self.main_menu.onScreen(screen)
         self.upper_bar.onScreen(screen)
@@ -160,6 +176,9 @@ class Menu():
 
 
     def __updateSelections(self):
+        if self.input_bool.compare():
+            return 0
+        
         key = self.__updatePressedDpad()
         x, y = self.selected_value
 
@@ -185,8 +204,17 @@ class Menu():
                     self.selected = Selected((0, 0))
                 elif x < 50 and y == 1:
                     self.selected = Selected((50, 1))
+            elif self.range.range is Range.ROBOT_MENU:
+                if x >= 10 and y == 0:
+                    self.selected = Selected((0, 0))
+                elif y == 1:
+                    self.selected = Selected((10, 1))
+            
         finally: 
             self.selected_value = self.selected.value
+
+    def __updateInputText(self):
+        self.robot_menu.setText(self.input_text)
 
     def __updatePressedDpad(self):
         if self.controls.keybinds.state is JoyType.PS4:
@@ -198,7 +226,8 @@ class Menu():
                     return Dpad.DOWN
                 elif self.controls.joystick_detector[self.controls.keybinds.turn_270].rising:
                     return Dpad.LEFT
-        else: return self.controls.keybinds.getKey(self.controls.joystick.get_hat(0))
+        else:
+            return self.controls.keybinds.updateDpad(self.controls.joystick.get_hat(0))
 
         return None
 
@@ -207,6 +236,10 @@ class Menu():
             if self.selected is Selected.HOME_BUTTON:
 
                 self.selection_menu.enabled.set(False)
+                self.robot_menu.enabled.set(False)
+                self.interface_menu.enabled.set(False)
+                self.trail_menu.enabled.set(False)
+                self.pathing_menu.enabled.set(False)
                 self.other_menu.enabled.set(False)
                 self.main_menu.enabled.set(True)
 
@@ -236,6 +269,9 @@ class Menu():
 
             elif self.selected is Selected.ROBOT:
 
+                self.selected = Selected.ROBOT_PATH
+                self.selected_value = self.selected.value
+
                 self.robot_menu.enabled.set(True)
 
                 self.main_menu.enabled.set(False)
@@ -245,9 +281,9 @@ class Menu():
                 self.pathing_menu.enabled.set(False)
                 self.other_menu.enabled.set(False)
 
-                self.range.setRange(Range.MAIN_MENU)
+                self.range.setRange(Range.ROBOT_MENU)
                 self.range.invertedX.set(False)
-                self.range.invertedY.set(False)
+                self.range.invertedY.set(True)
 
             elif self.selected is Selected.INTERFACE:
 
@@ -323,7 +359,43 @@ class Menu():
             elif self.selected is Selected.SCREEN_BORDER:
                 self.constants.USE_SCREEN_BORDER.negate()
     
+            elif self.selected is Selected.ROBOT_PATH:
+                self.robot_menu.input_source_bool.negate()
+                self.input_bool.negate()
 
+                if self.robot_menu.input_source_bool.compare():
+                    self.input_text = "_"
+                    self.just_numbers.set(False)
+                
+            elif self.selected is Selected.ROBOT_WIDTH:
+                self.robot_menu.input_width_bool.negate()
+                self.input_bool.negate()
+
+                if self.robot_menu.input_width_bool.compare():
+                    self.input_text = "_"
+                    self.just_numbers.set(True)
+            
+            elif self.selected is Selected.ROBOT_HEIGHT:
+                self.robot_menu.input_height_bool.negate()
+                self.input_bool.negate()
+
+                if self.robot_menu.input_height_bool.compare():
+                    self.input_text = "_"
+                    self.just_numbers.set(True)
+
+            elif self.selected is Selected.ROBOT_SCALE:
+                self.robot_menu.input_scale_bool.negate()
+                self.input_bool.negate()
+
+                if self.robot_menu.input_scale_bool.compare():
+                    self.input_text = "_"
+                    self.just_numbers.set(True)
+
+    def stopTextReciever(self):
+        self.robot_menu.input_source_bool.set(False)
+        self.robot_menu.input_height_bool.set(False)
+        self.robot_menu.input_width_bool.set(False)
+        self.robot_menu.input_scale_bool.set(False)
 
     def __setSelections(self):
         self.upper_bar.setSelection(self.selected)
@@ -339,13 +411,27 @@ class Menu():
     def recalculate(self):
         self.upper_bar.recalculate()
         self.main_menu.recalculate()
-        
+
         self.selection_menu.recalculate()
         self.robot_menu.recalculate()
         self.interface_menu.recalculate()
         self.trail_menu.recalculate()
         self.pathing_menu.recalculate()
         self.other_menu.recalculate()
+
+    def isDigit(self, value):
+        return (value == pygame.K_0 or 
+                value == pygame.K_1 or
+                value == pygame.K_2 or
+                value == pygame.K_3 or
+                value == pygame.K_4 or 
+                value == pygame.K_5 or
+                value == pygame.K_6 or
+                value == pygame.K_7 or
+                value == pygame.K_8 or 
+                value == pygame.K_9
+        )
+
 
 class UpperBar():
     def __init__(self, constants: Constants):
@@ -468,19 +554,234 @@ class RobotMenu():
         self.enabled = BooleanEx(False)
         self.constants = constants
         self.selected = None
+        self.text = None
+
+        self.input_source_bool = BooleanEx(False)
+        self.input_width_bool = BooleanEx(False)
+        self.input_height_bool = BooleanEx(False)
+        self.input_scale_bool = BooleanEx(False)
+
+        self.input_source = EdgeDetectorEx()
+        self.input_width = EdgeDetectorEx()
+        self.input_height = EdgeDetectorEx()
+        self.input_scale = EdgeDetectorEx()
+
+
+        self.path_font = pygame.font.SysFont(default_system_font, 40)
+        self.path_text = None
+        self.path_text_rect = None
+
+        self.size_font = pygame.font.SysFont(default_system_font, 80)
+        self.width_text = None
+        self.width_text_rect = None
+
+        self.height_text = None
+        self.height_text_rect = None
+
+        self.scale_text = None
+        self.scale_text_rect = None
+
+        self.input_source_text = None
+        self.input_width_text = None
+        self.input_height_text = None
+        self.input_scale_text = None
+
+        self.scale_rect = img_scale.get_rect()
+        self.width_rect = img_width.get_rect()
+        self.height_rect = img_height.get_rect()
+
+        self.path_quadrant_rect = img_path_quadrant.get_rect()
+        self.scale_quadrant_rect = img_specs_quadrant.get_rect()
+        self.width_quadrant_rect = img_specs_quadrant.get_rect()
+        self.height_quadrant_rect = img_specs_quadrant.get_rect()
+
+        self.robot_path_rect = img_robot_image_path.get_rect()
+        self.robot_indicator_rect = img_robot_indicator.get_rect()
 
         self.recalculate()
     
+
+
     def setSelection(self, selected: Selected):
         self.selected = selected
     
+    def setText(self, text: str):
+        self.text = text
+
+
+
     def recalculate(self):
-        pass
+
+        self.robot_indicator_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h - 297)
+        self.path_quadrant_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h - 110)
+        self.height_quadrant_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h + 170)
+        self.width_quadrant_rect.center = (self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 170)
+        self.scale_quadrant_rect.center = (self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 170)
+
+        self.robot_path_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h - 155)
+
+        self.height_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h + 102)
+        self.width_rect.center = (self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 102)
+        self.scale_rect.center = (self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 102)
+
+
+
+    def inputSource(self):
+        self.input_source.set(self.input_source_bool.get())
+        self.input_source.update()
+
+        if self.input_source.low:
+            self.input_source_text = self.constants.ROBOT_IMG_SOURCE 
+            return 0
+
+        if self.input_source.falling:
+            try:
+                pygame.image.load(self.input_source_text)
+                self.constants.ROBOT_IMG_SOURCE = self.input_source_text
+                self.constants.recalculate.set(True)
+            except:
+                pass
+        
+        text_length = len(self.text)
+
+        if text_length <= 40:
+            self.input_source_text = self.text
+        else: self.input_source_text = "..." + self.text[text_length - 40:]
+        
+    def inputWidth(self):
+        self.input_width.set(self.input_width_bool.get())
+        self.input_width.update()
+
+        if self.input_width.low:
+            self.input_width_text = str(self.constants.ROBOT_WIDTH)
+            return 0
+        
+        if self.input_width.falling:
+            try:
+                if int(self.input_width_text) > 4:
+                    self.constants.ROBOT_WIDTH = int(self.input_width_text)
+                else: self.constants.ROBOT_WIDTH = 5
+                
+                self.constants.recalculate.set(True)
+            except:
+                pass
+        
+        try:
+            if int(self.text) < 101:
+                self.input_width_text = self.text
+        except:
+            self.input_width_text = self.text
+
+
+    def inputHeight(self):
+        self.input_height.set(self.input_height_bool.get())
+        self.input_height.update()
+
+        if self.input_height.low:
+            self.input_height_text = str(self.constants.ROBOT_HEIGHT)
+            return 0
+        
+        if self.input_height.falling:
+            try:
+                if int(self.input_height_text) > 4:
+                    self.constants.ROBOT_HEIGHT = int(self.input_height_text)
+                else: self.constants.ROBOT_HEIGHT = 5
+
+                self.constants.recalculate.set(True)
+            except:
+                pass
+        
+        try:
+            if int(self.text) < 101:
+                self.input_height_text = self.text
+        except:
+            self.input_height_text = self.text
+
     
+    def inputScale(self):
+        self.input_scale.set(self.input_scale_bool.get())
+        self.input_scale.update()
+
+        if self.input_scale.low:
+            self.input_scale_text = str(int(self.constants.ROBOT_SCALE * 100))
+            return 0
+        
+        if self.input_scale.falling:
+            try:
+                if int(self.input_scale_text) > 9:
+                    self.constants.ROBOT_SCALE = int(self.input_scale_text) / 100
+                else: self.constants.ROBOT_SCALE = 0.1
+
+                self.constants.recalculate.set(True)
+            except:
+                pass
+        
+        try:
+            if int(self.text) < 201:
+                self.input_scale_text = self.text
+        except:
+            self.input_scale_text = self.text
+    
+
     def onScreen(self, screen):
         if self.enabled.compare(False):
             return 0
-        pass
+        
+        self.inputSource()
+        self.inputWidth()
+        self.inputHeight()
+        self.inputScale()
+
+        self.path_text = self.path_font.render(self.input_source_text, True, default_text_color)
+        self.path_text_rect = self.path_text.get_rect()
+        self.path_text_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h - 60)
+
+        self.width_text = self.size_font.render(self.input_width_text + ' cm', True, default_text_color)
+        self.width_text_rect =  self.width_text.get_rect()
+        self.width_text_rect.center = (self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 250)
+
+        self.height_text = self.size_font.render(self.input_height_text + ' cm', True, default_text_color)
+        self.height_text_rect = self.height_text.get_rect()
+        self.height_text_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h + 250)
+
+        self.scale_text = self.size_font.render(self.input_scale_text + '%', True, default_text_color)
+        self.scale_text_rect = self.scale_text.get_rect()
+        self.scale_text_rect.center = (self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 250)
+        
+        if self.selected is Selected.ROBOT_PATH:
+            robot_path_img = img_selected_robot_image_path
+        else: robot_path_img = img_robot_image_path
+
+        if self.selected is Selected.ROBOT_WIDTH:
+            robot_width_img = img_selected_width
+        else: robot_width_img = img_width
+
+        if self.selected is Selected.ROBOT_HEIGHT:
+            robot_height_img = img_selected_height
+        else: robot_height_img = img_height
+
+        if self.selected is Selected.ROBOT_SCALE:
+            robot_scale_img = img_selected_scale
+        else: robot_scale_img = img_scale
+        
+        screen.blit(img_robot_indicator, self.robot_indicator_rect)
+        screen.blit(img_path_quadrant, self.path_quadrant_rect)
+
+        screen.blit(img_specs_quadrant, self.width_quadrant_rect)
+        screen.blit(img_specs_quadrant, self.height_quadrant_rect)
+        screen.blit(img_specs_quadrant, self.scale_quadrant_rect)
+
+        screen.blit(robot_path_img, self.robot_path_rect)
+        screen.blit(robot_width_img, self.width_rect)
+        screen.blit(robot_height_img, self.height_rect)
+        screen.blit(robot_scale_img, self.scale_rect)
+
+        screen.blit(self.path_text, self.path_text_rect)
+        screen.blit(self.width_text, self.width_text_rect)
+        screen.blit(self.height_text, self.height_text_rect)
+        screen.blit(self.scale_text, self.scale_text_rect)
+
+
 
 class InterfaceMenu():  
     def __init__(self, constants: Constants):
