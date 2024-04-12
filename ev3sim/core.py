@@ -4,7 +4,7 @@ from ev3sim.Components.background import *
 from ev3sim.Components.controls import *
 from ev3sim.Components.robot import *
 from ev3sim.Components.fade import *
-from ev3sim.Components.menu import *
+from ev3sim.Components.Menu.menu import *
 
 import pygame
 import math
@@ -210,6 +210,8 @@ class Simulator():
             self.constants.MENU_ENTERED.negate()
 
             if self.constants.MENU_ENTERED.compare():
+                if self.manual_control.compare():
+                    self.robot.target_head = self.robot.pose.head
                 self.constants.FREEZE_TRAIL.set(True)
                 self.menu.reset()
             else: 

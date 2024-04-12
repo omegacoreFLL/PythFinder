@@ -1,115 +1,145 @@
-from scipy.optimize import minimize
-from matplotlib.animation import FuncAnimation
-import matplotlib.pyplot as plt
-from ev3sim.core import *
-from ev3sim.Pathing.MotionProfile import *
-import numpy as np
+from ev3sim.Components.BetterClasses.mathEx import *
+import matplotlib.pyplot as mat
+import math
+import time
 
-# Define the quintic polynomial function
-def quintic_polynomial(x, coeffs):
-    a, b, c, d, e, f = coeffs
-    return a * x ** 5 + b * x ** 4 + c * x ** 3 + d * x ** 2 + e * x + f
-
-def quintic_derivative(x, coeffs):
-    a, b, c, d, e, _ = coeffs
-    return 5 * a * x ** 4 + 4 * b * x ** 3 + 3 * c * x ** 2 + 2 * d * x + e
-
-# Define the objective function to minimize (squared error)
-def objective(coeffs):
-    y_start_pred = quintic_polynomial(x_start, coeffs)
-    v_start_pred = 5 * coeffs[0] * x_start ** 4 + 4 * coeffs[1] * x_start ** 3 + 3 * coeffs[2] * x_start ** 2 + 2 * coeffs[3] * x_start + coeffs[4]
-    a_start_pred = 20 * coeffs[0] * x_start ** 3 + 12 * coeffs[1] * x_start ** 2 + 6 * coeffs[2] * x_start + 2 * coeffs[3]
-    y_end_pred = quintic_polynomial(x_end, coeffs)
-    v_end_pred = 5 * coeffs[0] * x_end ** 4 + 4 * coeffs[1] * x_end ** 3 + 3 * coeffs[2] * x_end ** 2 + 2 * coeffs[3] * x_end + coeffs[4]
-    a_end_pred = 20 * coeffs[0] * x_end ** 3 + 12 * coeffs[1] * x_end ** 2 + 6 * coeffs[2] * x_end + 2 * coeffs[3]
-
-    return (y_start_pred - y_start) ** 2 + (v_start_pred - v_start) ** 2 + (a_start_pred - a_start) ** 2 + \
-           (y_end_pred - y_end) ** 2 + (v_end_pred - v_end) ** 2 + (a_end_pred - a_end) ** 2
+class HermitePose():
+    def __init__(self, point: Point, deriv1 = Pose(), deriv2 = Pose()):
+        self.p = point
+        self.v = deriv1
+        self.a = deriv2
+    
+    def heading(self, head):
+        self.v = Point(math.cos(head), math.sin(head))
 
 
-# Define a function to calculate the length of the curve using the trapezoidal rule
-def curve_length(coeffs, x_start, x_end, num_points=1000):
-    x_values = np.linspace(x_start, x_end, num_points)
-    y_values = quintic_polynomial(x_values, coeffs)
-    dx = (x_end - x_start) / num_points
-    dy = np.diff(y_values)
-    length = np.sum(np.sqrt(dx ** 2 + dy ** 2))
-    return length
+class QuinticHermiteSpline():
+    def __init__(self, h0: HermitePose, h1: HermitePose):
+        self.h0 = h0
+        self.h1 = h1
+        self.coeff = []
+
+        self.getCoeff()
+
+    def getCoeff(self):
+        self.__getCoeffX()
+        self.__getCoeffY()
+    
+    def __getCoeffX(self):
+        f = self.h0.p.x
+        e = self.h0.v.x
+        d = (self.h0.a.x) / 2
+
+        i0 = self.h1.p.x - (d + e + f)
+        i1 = self.h1.v.x - (e + 2 * d)
+        i2 = self.h1.a.x - 2 * d
+
+        c = 4 * i0 - 4 * i1 + i2 / 2
+        b = 7 * i1 - 15 * i0 - i2
+        a = i2 / 2 - 3 * i1 + 12 * i0
+
+        self.coeff.append((a, b, c, d, e, f))
+    
+    def __getCoeffY(self):
+        f = self.h0.p.y
+        e = self.h0.v.y
+        d = (self.h0.a.y) / 2
+
+        i0 = self.h1.p.y - (d + e + f)
+        i1 = self.h1.v.y - (e + 2 * d)
+        i2 = self.h1.a.y - 2 * d
+
+        c = 4 * i0 - 4 * i1 + i2 / 2
+        b = 7 * i1 - 15 * i0 - i2
+        a = i2 / 2 - 3 * i1 + 12 * i0
+
+        self.coeff.append((a, b, c, d, e, f))
+    
+    def calculate(self, t: float):
+        if t < 0 or t > 1:
+            raise Exception("can't do that here, little guy")
+        
+        return Point(self.x(t), self.y(t))
+    
+    def x(self, t):
+        return (self.coeff[0][0] * t ** 5 +
+                self.coeff[0][1] * t ** 4 +
+                self.coeff[0][2] * t ** 3 +
+                self.coeff[0][3] * t ** 2 +
+                self.coeff[0][4] * t +
+                self.coeff[0][5])
+
+    def dx(self, t):
+        return (self.coeff[0][0] * 5 * t ** 4 +
+                self.coeff[0][1] * 4 * t ** 3 +
+                self.coeff[0][2] * 3 * t ** 2 +
+                self.coeff[0][3] * 2 * t +
+                self.coeff[0][4])
+
+    def ddx(self, t):
+        return (self.coeff[0][0] * 20 * t ** 3 +
+                self.coeff[0][1] * 12 * t ** 2 +
+                self.coeff[0][2] * 6 * t +
+                self.coeff[0][3] * 2)
 
 
-# Define initial and final conditions
-x_start, y_start = 0, 0 # Initial point
-x_end, y_end = 2, 3  # Final point
-v_start, v_end = 0, 0  # Initial and final velocities
-a_start, a_end = 0, 0  # Initial and final accelerations
+    def y(self, t):
+        return (self.coeff[1][0] * t ** 5 +
+                self.coeff[1][1] * t ** 4 +
+                self.coeff[1][2] * t ** 3 +
+                self.coeff[1][3] * t ** 2 +
+                self.coeff[1][4] * t +
+                self.coeff[1][5])
 
-# Initial guess for coefficients
-coeffs_init = [0, 0, 0, 0, 0, 0]
+    def dy(self, t):
+        return (self.coeff[1][0] * 5 * t ** 4 +
+                self.coeff[0][1] * 4 * t ** 3 +
+                self.coeff[1][2] * 3 * t ** 2 +
+                self.coeff[1][3] * 2 * t +
+                self.coeff[1][4])
 
-# Minimize the objective function to find coefficients
-result = minimize(objective, coeffs_init, method='SLSQP', tol=1e-6)
-
-# Extract the coefficients
-coeffs = result.x
-
-# Generate some sample data points for x
-x_data = np.linspace(0, 5, 100)
-
-# Calculate the corresponding y values using the quintic polynomial function
-y_data = quintic_polynomial(x_data, coeffs)
-
-# Initialize the plot
-fig, ax = plt.subplots()
-line, = ax.plot([], [], 'b-', label='Quintic Polynomial Curve')
-tangent_line, = ax.plot([], [], 'r--', alpha=0.5, label='Tangent Line')
-point_annot = ax.text(0.1, 0.9, '', transform=ax.transAxes, fontsize=10)
-
-# Function to update the animation frame
-def update(frame):
-    ax.clear()
-    ax.plot(x_data, y_data, 'b-', label='Quintic Polynomial Curve')
-    x_point = x_data[frame]
-    y_point = quintic_polynomial(x_point, coeffs)
-    tangent_slope = quintic_derivative(x_point, coeffs)
-    tangent_line_x = [x_point - 0.5, x_point + 0.5]
-    tangent_line_y = [y_point - 0.5 * tangent_slope, y_point + 0.5 * tangent_slope]
-    ax.plot(tangent_line_x, tangent_line_y, 'r--', alpha=0.5)
-    ax.scatter(x_point, y_point, color='red')
-    point_annot.set_text(f'Point: ({x_point:.2f}, {y_point:.2f}), Slope: {tangent_slope:.2f}')
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_title('Quintic Polynomial Curve and Tangent Line')
-    ax.legend()
-    ax.grid(True)
-
-    print("angle: ", np.degrees(np.arctan(tangent_slope)))
-
-# Create the animation
-ani = FuncAnimation(fig, update, frames=len(x_data), interval=100)
-
-'''length = curve_length(coeffs, x_start, x_end)
-print("Length of the curve:", length)
-
-linear_profile = TrapezoidalProfile(distance = length, max_vel = 100, acc = 50)
-
-sim = Simulator()
-sim.manual_control.set(False)
-sim.robot.trail.draw_trail.set(True)
-
-#pygame.time.wait(4000)
-index = 0
-while linear_profile.isBusy:
-    time = pygame.time.get_ticks()
-
-    linear_value = linear_profile.calculate(time)[1]
-    tangent_slope = quintic_derivative(index * 0.01, coeffs)
-    sim.robot.target_head = np.degrees(np.arctan(tangent_slope))
-
-    angular_velocity = findShortestPath(sim.robot.target_head, sim.robot.pose.head) / 180
-    index += 1
+    def ddy(self, t):
+        return (self.coeff[1][0] * 20 * t ** 3 +
+                self.coeff[1][1] * 12 * t ** 2 +
+                self.coeff[1][2] * 6 * t +
+                self.coeff[1][3] * 2)
 
 
-    sim.robot.setVelocities(linear_value, angular_velocity)
-    sim.update()
-'''
-plt.show()
+    def getCurvatureX(self, t): 
+        return abs(self.ddx(t)) / math.sqrt((1 + self.dx(t)) ** 3)
+    
+    def getCurvatureY(self, t):
+        return abs(self.ddy(t)) / math.sqrt((1 + self.dy(t)) ** 3)
+
+
+
+
+start = HermitePose(Pose(0, 3), deriv2 = Pose(0, 80))
+start.heading(0)
+
+end = HermitePose(Pose(40, 20))
+end.heading(190)
+
+spline = QuinticHermiteSpline(start, end)
+
+first = True
+
+length = 0
+i = 0
+x, ux, uy = [], [], []
+while i <= 1:
+    current = spline.calculate(i)
+    ux.append(current.x)
+    uy.append(current.y)
+
+    i += 0.00001
+
+mat.xlabel('x - axis')
+mat.ylabel('y - axis')
+mat.title('Quintic Polynomial test')
+
+#figure, graphics = mat.subplots(1, 2)
+mat.plot(ux, uy)
+#graphics[1].plot(x, uy)
+
+mat.show()

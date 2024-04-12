@@ -6,14 +6,18 @@ import pygame
 pygame.init()
 
 dist = toRadians(320+260)
-vel = math.radians(40)
+vel = math.radians(80)
 accel = math.radians(20)
 decel = math.radians(20)
+
 
 angular_profile = TrapezoidalProfile(distance = dist, max_vel = vel, acc = accel, dec = decel)
 linear_profile = TrapezoidalProfile(distance = -200, max_vel = 50, acc = 5)
 
 sim = Simulator()
+
+sim.robot.target_head = 0
+sim.robot.setPoseEstimate(Pose())
 sim.manual_control.set(False)
 sim.robot.trail.draw_trail.set(True)
 

@@ -1,45 +1,7 @@
 from ev3sim.Components.BetterClasses.mathEx import *
 from ev3sim.Components.Constants.constants import *
+from ev3sim.Components.Menu.enums import *
 from ev3sim.Components.controls import *
-from enum import Enum
- 
- #(MIN, MAX)
-class Range(Enum):
-    MAIN_MENU = ((0, 1), (-1,0))
-    SELECTION_MENU = ((0, 0), (0, 5))
-    ROBOT_MENU = ((10, 12), (0, 2))
-    OTHER_MENU = ((50, 51), (0, 4))
-
-# FIRST value: LEFT -> RIGHT
-# SECOND value: DOWN -> UP
-class Selected(Enum):
-    ON_MAIN_PAGE = (0, -1)
-
-    MENU_BUTTON = (0, 0)
-    HOME_BUTTON = (1, 0)
-
-    ROBOT = (0, 1)
-    INTERFACE = (0, 2)
-    TRAIL = (0, 3)
-    PATHING = (0, 4)
-    OTHER = (0, 5)
-
-    ROBOT_PATH = (10, 1)
-    ROBOT_WIDTH = (10, 2)
-    ROBOT_HEIGHT = (11, 2)
-    ROBOT_SCALE = (12, 2)
-
-    FIELD_CENTRIC = (50, 1)
-    ROBOT_BORDER = (50, 2)
-    SCREEN_BORDER = (50, 3)
-    OTHER_NONE4  = (50, 4)
-
-    OTHER_NONE5 = (51, 1)
-    OTHER_NONE6 = (51, 2)
-    OTHER_NONE7 = (51, 3)
-    OTHER_NONE8 = (51, 4)
-
-
 
 
 
@@ -391,6 +353,34 @@ class Menu():
                     self.input_text = "_"
                     self.just_numbers.set(True)
 
+        if self.controls.joystick_detector[self.controls.keybinds.erase_trail_button].rising:
+            if self.selected is Selected.FIELD_CENTRIC:
+                self.constants.FIELD_CENTRIC.set(default_field_centric)
+
+            elif self.selected is Selected.ROBOT_BORDER:
+                self.constants.DRAW_ROBOT_BORDER.set(default_draw_robot_border)
+            
+            elif self.selected is Selected.SCREEN_BORDER:
+                self.constants.USE_SCREEN_BORDER.set(default_use_screen_border)
+            
+            elif self.selected is Selected.ROBOT_PATH:
+                self.constants.ROBOT_IMG_SOURCE = default_robot_image_source
+                self.constants.recalculate.set(True)
+            
+            elif self.selected is Selected.ROBOT_WIDTH:
+                self.constants.ROBOT_WIDTH = default_robot_width_cm
+                self.constants.recalculate.set(True)
+
+            elif self.selected is Selected.ROBOT_HEIGHT:
+                self.constants.ROBOT_HEIGHT = default_robot_height_cm
+                self.constants.recalculate.set(True)
+            
+            elif self.selected is Selected.ROBOT_SCALE:
+                self.constants.ROBOT_SCALE = default_robot_scaling_factor
+                self.constants.recalculate.set(True)
+            
+
+    
     def stopTextReciever(self):
         self.robot_menu.input_source_bool.set(False)
         self.robot_menu.input_height_bool.set(False)
@@ -571,7 +561,7 @@ class RobotMenu():
         self.path_text = None
         self.path_text_rect = None
 
-        self.size_font = pygame.font.SysFont(default_system_font, 80)
+        self.size_font = pygame.font.SysFont(default_system_font, 70)
         self.width_text = None
         self.width_text_rect = None
 
@@ -620,9 +610,9 @@ class RobotMenu():
 
         self.robot_path_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h - 155)
 
-        self.height_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h + 102)
-        self.width_rect.center = (self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 102)
-        self.scale_rect.center = (self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 102)
+        self.height_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h + 112)
+        self.width_rect.center = (self.constants.screen_size.half_w - 256, self.constants.screen_size.half_h + 112)
+        self.scale_rect.center = (self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 112)
 
 
 
@@ -672,7 +662,6 @@ class RobotMenu():
         except:
             self.input_width_text = self.text
 
-
     def inputHeight(self):
         self.input_height.set(self.input_height_bool.get())
         self.input_height.update()
@@ -697,7 +686,6 @@ class RobotMenu():
         except:
             self.input_height_text = self.text
 
-    
     def inputScale(self):
         self.input_scale.set(self.input_scale_bool.get())
         self.input_scale.update()
@@ -723,6 +711,7 @@ class RobotMenu():
             self.input_scale_text = self.text
     
 
+
     def onScreen(self, screen):
         if self.enabled.compare(False):
             return 0
@@ -738,15 +727,15 @@ class RobotMenu():
 
         self.width_text = self.size_font.render(self.input_width_text + ' cm', True, default_text_color)
         self.width_text_rect =  self.width_text.get_rect()
-        self.width_text_rect.center = (self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 250)
+        self.width_text_rect.center = (self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 235)
 
         self.height_text = self.size_font.render(self.input_height_text + ' cm', True, default_text_color)
         self.height_text_rect = self.height_text.get_rect()
-        self.height_text_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h + 250)
+        self.height_text_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h + 235)
 
         self.scale_text = self.size_font.render(self.input_scale_text + '%', True, default_text_color)
         self.scale_text_rect = self.scale_text.get_rect()
-        self.scale_text_rect.center = (self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 250)
+        self.scale_text_rect.center = (self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 235)
         
         if self.selected is Selected.ROBOT_PATH:
             robot_path_img = img_selected_robot_image_path
@@ -866,6 +855,8 @@ class OtherMenu():
         self.none6_rect = img_none.get_rect()
         self.none7_rect = img_none.get_rect()
         self.none8_rect = img_none.get_rect()
+
+        self.other_indicator_rect = img_other_indicator.get_rect()
         
         self.recalculate()
     
@@ -873,31 +864,33 @@ class OtherMenu():
         self.selected = selected
 
     def recalculate(self):
-        self.field_centric_rect.center = (self.constants.screen_size.half_w - 190, self.constants.screen_size.half_h - 140)
-        self.fc_quadrant_rect.center = (self.constants.screen_size.half_w - 190, self.constants.screen_size.half_h - 150)
+        self.other_indicator_rect.center = (self.constants.screen_size.half_w, self.constants.screen_size.half_h - 297)
+
+        self.field_centric_rect.center = (self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 140)
+        self.fc_quadrant_rect.center = (self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 150)
         
-        self.robot_border_rect.center = (self.constants.screen_size.half_w - 190, self.constants.screen_size.half_h - 10)
-        self.rb_quadrant_rect.center = (self.constants.screen_size.half_w - 190, self.constants.screen_size.half_h - 20) 
+        self.robot_border_rect.center = (self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 10)
+        self.rb_quadrant_rect.center = (self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 20) 
         
-        self.screen_border_rect.center = (self.constants.screen_size.half_w - 190, self.constants.screen_size.half_h + 120)
-        self.sb_quadrant_rect.center = (self.constants.screen_size.half_w - 190, self.constants.screen_size.half_h + 110) 
+        self.screen_border_rect.center = (self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 120)
+        self.sb_quadrant_rect.center = (self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 110) 
         
-        self.none4_rect.center = (self.constants.screen_size.half_w - 190, self.constants.screen_size.half_h + 250)
-        self.n4_quadrant_rect.center = (self.constants.screen_size.half_w - 190, self.constants.screen_size.half_h + 240) 
+        self.none4_rect.center = (self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 250)
+        self.n4_quadrant_rect.center = (self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 240) 
         
 
 
-        self.none5_rect.center = (self.constants.screen_size.half_w + 190, self.constants.screen_size.half_h - 145)
-        self.n5_quadrant_rect.center = (self.constants.screen_size.half_w + 190, self.constants.screen_size.half_h - 150)
+        self.none5_rect.center = (self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 145)
+        self.n5_quadrant_rect.center = (self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 150)
 
-        self.none6_rect.center = (self.constants.screen_size.half_w + 190, self.constants.screen_size.half_h - 15)
-        self.n6_quadrant_rect.center = (self.constants.screen_size.half_w + 190, self.constants.screen_size.half_h - 20)
+        self.none6_rect.center = (self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 15)
+        self.n6_quadrant_rect.center = (self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 20)
 
-        self.none7_rect.center = (self.constants.screen_size.half_w + 190, self.constants.screen_size.half_h + 115)
-        self.n7_quadrant_rect.center = (self.constants.screen_size.half_w + 190, self.constants.screen_size.half_h + 110)
+        self.none7_rect.center = (self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 115)
+        self.n7_quadrant_rect.center = (self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 110)
 
-        self.none8_rect.center = (self.constants.screen_size.half_w + 190, self.constants.screen_size.half_h + 245)
-        self.n8_quadrant_rect.center = (self.constants.screen_size.half_w + 190, self.constants.screen_size.half_h + 240)
+        self.none8_rect.center = (self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 245)
+        self.n8_quadrant_rect.center = (self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 240)
 
 
     def __getFieldCentricImg(self):
@@ -938,6 +931,8 @@ class OtherMenu():
     def onScreen(self, screen):
         if self.enabled.compare(False):
             return 0
+        
+        screen.blit(img_other_indicator, self.other_indicator_rect)
 
         screen.blit(self.__getFieldCentricImg(), self.field_centric_rect)
         screen.blit(img_other_quadrant, self.fc_quadrant_rect)
