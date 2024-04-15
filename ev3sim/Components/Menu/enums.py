@@ -1,37 +1,53 @@
-from enum import Enum
+from enum import Enum, auto
  
- #(MIN, MAX)
-class Range(Enum):
-    MAIN_MENU = ((0, 1), (-1,0))
-    SELECTION_MENU = ((0, 0), (0, 5))
-    ROBOT_MENU = ((10, 12), (0, 2))
-    OTHER_MENU = ((50, 51), (0, 4))
 
-# FIRST value: LEFT -> RIGHT
-# SECOND value: DOWN -> UP
+class ButtonType(Enum):
+    BOOL = auto()
+    INT = auto()
+    STRING = auto()
+    UNDEFINED = auto()
+
 class Selected(Enum):
-    ON_MAIN_PAGE = (0, -1)
+    ON_MAIN_PAGE = auto()
 
-    MENU_BUTTON = (0, 0)
-    HOME_BUTTON = (1, 0)
+    MENU_BUTTON = auto()
+    HOME_BUTTON = auto()
 
-    ROBOT = (0, 1)
-    INTERFACE = (0, 2)
-    TRAIL = (0, 3)
-    PATHING = (0, 4)
-    OTHER = (0, 5)
+    ROBOT = auto()
+    INTERFACE = auto()
+    TRAIL = auto()
+    PATHING = auto()
+    OTHER = auto()
 
-    ROBOT_PATH = (10, 1)
-    ROBOT_WIDTH = (10, 2)
-    ROBOT_HEIGHT = (11, 2)
-    ROBOT_SCALE = (12, 2)
+    ROBOT_PATH = auto()
+    ROBOT_WIDTH = auto()
+    ROBOT_HEIGHT = auto()
+    ROBOT_SCALE = auto()
 
-    FIELD_CENTRIC = (50, 1)
-    ROBOT_BORDER = (50, 2)
-    SCREEN_BORDER = (50, 3)
-    OTHER_NONE4  = (50, 4)
+    FIELD_CENTRIC = auto()
+    ROBOT_BORDER = auto()
+    SCREEN_BORDER = auto()
+    OTHER_NONE4  = auto()
 
-    OTHER_NONE5 = (51, 1)
-    OTHER_NONE6 = (51, 2)
-    OTHER_NONE7 = (51, 3)
-    OTHER_NONE8 = (51, 4)
+    OTHER_NONE5 = auto()
+    OTHER_NONE6 = auto()
+    OTHER_NONE7 = auto()
+    OTHER_NONE8 = auto()
+
+class MenuType(Enum):
+    UPPER_BAR = [Selected.HOME_BUTTON, Selected.MENU_BUTTON]
+    MAIN_MENU = [Selected.ON_MAIN_PAGE]
+    SELECTION_MENU = [Selected.ROBOT, Selected.INTERFACE, 
+                      Selected.TRAIL, Selected.PATHING, Selected.OTHER]
+    ROBOT_MENU = [Selected.ROBOT_PATH, Selected.ROBOT_WIDTH, Selected.ROBOT_HEIGHT, Selected.ROBOT_SCALE]
+    OTHER_MENU = [Selected.FIELD_CENTRIC, Selected.ROBOT_BORDER, Selected.SCREEN_BORDER, Selected.OTHER_NONE4,
+                  Selected.OTHER_NONE5, Selected.OTHER_NONE6, Selected.OTHER_NONE7, Selected.OTHER_NONE8]
+
+    UNDEFINED = auto()
+
+class InputType(Enum):
+    DIMENSION = ' cm'
+    PERCENT = '%'
+    FONT = ''
+    COLOR = ''
+    IMAGE_PATH = ''

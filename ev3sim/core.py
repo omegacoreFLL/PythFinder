@@ -4,7 +4,7 @@ from ev3sim.Components.background import *
 from ev3sim.Components.controls import *
 from ev3sim.Components.robot import *
 from ev3sim.Components.fade import *
-from ev3sim.Components.Menu.menu import *
+from ev3sim.Components.Menu.main import *
 
 import pygame
 import math
@@ -28,7 +28,7 @@ class Simulator():
         self.background = Background(self.constants)
         self.robot = Robot(self.constants)
         self.fade = Fade(self.constants)
-        self.menu = Menu(self.constants)
+        self.menu = Menu(MenuType.UNDEFINED, self.constants, None)
         self.controls = Controls()
         
 
@@ -93,7 +93,8 @@ class Simulator():
         self.robot.onScreen(self.screen)
         self.fade.onScreen(self.screen)
         if self.constants.MENU_ENTERED.compare():
-            self.menu.onScreen(self.screen, self.controls)
+            self.menu.addControls(self.controls)
+            self.menu.onScreen(self.screen)
 
                 
             
@@ -104,6 +105,7 @@ class Simulator():
 
 
     def __updateEventManager(self):
+        self.menu.addKey(None)
         for event in pygame.event.get():
             if event.type == pygame.JOYDEVICEADDED:
                 self.controls.addJoystick(pygame.joystick.Joystick(event.device_index))
@@ -111,28 +113,8 @@ class Simulator():
             elif event.type == pygame.JOYDEVICEREMOVED:
                 self.controls.addJoystick(None)
             
-            if event.type == pygame.KEYDOWN and self.menu.input_bool.get():
-            
-                if event.key == pygame.K_RETURN:
-                    self.menu.input_bool.set(False)
-                    self.menu.stopTextReciever()
-
-                elif event.key == pygame.K_BACKSPACE:
-                    if len(self.menu.input_text) > 1:
-                        self.menu.input_text = self.menu.input_text[:-1]
-                    else: self.menu.input_text = "_"
-                
-                else:
-                    if self.menu.input_text == "_":
-                        if self.menu.just_numbers.compare():
-                            if self.menu.isDigit(event.key):
-                                self.menu.input_text = event.unicode
-                        else: self.menu.input_text = event.unicode
-                    else:
-                        if self.menu.just_numbers.compare():
-                            if self.menu.isDigit(event.key):
-                                self.menu.input_text += event.unicode
-                        else: self.menu.input_text += event.unicode
+            if event.type == pygame.KEYDOWN:
+                self.menu.addKey(event)
 
             if event.type == pygame.QUIT:
                 self.running.set(False)

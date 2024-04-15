@@ -1,73 +1,98 @@
 from ev3sim.Components.BetterClasses.mathEx import *
 from ev3sim.Components.Constants.constants import *
+from ev3sim.Components.Menu.main import *
+from ev3sim.Components.Menu.buttons import *
 from ev3sim.Components.Menu.enums import *
 from ev3sim.Components.controls import *
 
-
-
-
 class RangeManager():
-    def __init__(self, range: Range):
+    def __init__(self, range: MenuType):
         self.invertedX = BooleanEx(False)
         self.invertedY = BooleanEx(False)
 
-        self.range = range
+        self.setRange(range)
     
-    def setRange(self, range: Range):
+    def setRange(self, range: MenuType):
         self.range = range
-    
-
+        self.invertedX.set(range.value[2])
+        self.invertedY.set(range.value[3])
 
     def getMinX(self):
-        if self.range == None:
-            return None
-        return self.range.value[0][0]
+        try: return self.range.value[0][0]
+        except: return None
     
     def getMaxX(self):
-        if self.range == None:
-            return None
-        return self.range.value[0][1]
+        try: return self.range.value[0][1]
+        except: return None
     
     def getMinY(self):
-        if self.range == None:
-            return None
-        return self.range.value[1][0]
+        try: return self.range.value[1][0]
+        except: return None
     
     def getMaxY(self):
-        if self.range == None:
-            return None
-        return self.range.value[1][1]
+        try: return self.range.value[1][1]
+        except: None
     
-
 
     def increaseX(self, x):
         if self.invertedX.compare():
-            return max(self.getMinX(), x - 1)
-        return min(self.getMaxX(), x + 1)
+            new = max(self.getMinX(), x - 1)
+
+            if new == self.getMinX() and new != x - 1:
+                return new, True
+            return new, False
+        
+        new = min(self.getMaxX(), x + 1)
+
+        if new == self.getMaxX() and new != x + 1:
+            return new, True
+        return new, False
     
     def decreaseX(self, x):
         if self.invertedX.compare():
-            return min(self.getMaxX(), x + 1)
-        return max(self.getMinX(), x - 1)
+            new = min(self.getMaxX(), x + 1)
+
+            if new == min(self.getMaxX()) and new != x + 1:
+                return new, True
+            return new, False
+        
+        new = max(self.getMinX(), x - 1)
+
+        if new == self.getMinX() and new != x - 1:
+                return new, True
+        return new, False
+    
 
     def increaseY(self, y):
         if self.invertedY.compare():
-            return max(self.getMinY(), y - 1)
-        return min(self.getMaxY(), y + 1)
+            new = max(self.getMinY(), y - 1)
+            if new == self.getMinY():
+                return new, True
+            return new, False
+        
+        new = min(self.getMaxY(), y + 1)
+        if new == self.getMaxY():
+            return new, True
+        return new, False
 
     def decreaseY(self, y):
         if self.invertedY.compare():
-            return min(self.getMaxY(), y + 1)
-        return max(self.getMinY(), y - 1)
+            new = min(self.getMaxY(), y + 1)
 
+            if new == min(self.getMaxY()) and new != y + 1:
+                return new, True
+            return new, False
         
+        new = max(self.getMinY(), y - 1)
 
-
+        if new == self.getMinY() and new != y - 1:
+                return new, True
+        return new, False
 
 class Menu():
     def __init__(self, constants: Constants):
         self.selected = Selected.ON_MAIN_PAGE
-        self.range = RangeManager(Range.MAIN_MENU)
+        self.range = RangeManager(MenuType.MAIN_MENU)
         self.selected_value = (0, -1)
 
         self.input_text = "_"
@@ -96,7 +121,7 @@ class Menu():
 
     def reset(self):
         self.selected = Selected.ON_MAIN_PAGE
-        self.range.setRange(Range.MAIN_MENU)
+        self.range.setRange(MenuType.MAIN_MENU)
         self.selected_value = (0, -1)
 
         self.main_menu.enabled.set(True)
@@ -159,14 +184,14 @@ class Menu():
             if self.selection_menu.enabled.compare(False) and self.selected is Selected.ROBOT:
                 raise Exception("wise words here")
         except: 
-            if self.range.range is Range.MAIN_MENU:
+            if self.range.range is MenuType.MAIN_MENU:
                 self.selected = Selected((x - 1, y))
-            elif self.range.range is Range.OTHER_MENU:
+            elif self.range.range is MenuType.OTHER_MENU:
                 if x >= 50 and y == 0:
                     self.selected = Selected((0, 0))
                 elif x < 50 and y == 1:
                     self.selected = Selected((50, 1))
-            elif self.range.range is Range.ROBOT_MENU:
+            elif self.range.range is MenuType.ROBOT_MENU:
                 if x >= 10 and y == 0:
                     self.selected = Selected((0, 0))
                 elif y == 1:
@@ -195,6 +220,7 @@ class Menu():
 
     def __updateClick(self):
         if self.controls.joystick_detector[self.controls.keybinds.zero_button].rising:
+            self.other_menu.setClick(True)
             if self.selected is Selected.HOME_BUTTON:
 
                 self.selection_menu.enabled.set(False)
@@ -208,7 +234,7 @@ class Menu():
                 self.selected = Selected.ON_MAIN_PAGE
                 self.selected_value = self.selected.value
 
-                self.range.setRange(Range.MAIN_MENU)
+                self.range.setRange(MenuType.MAIN_MENU)
                 self.range.invertedX.set(False)
                 self.range.invertedY.set(False)
 
@@ -221,7 +247,7 @@ class Menu():
                     self.last_invertedX = self.range.invertedX.get()
                     self.last_invertedY = self.range.invertedY.get()
 
-                    self.range.setRange(Range.SELECTION_MENU)
+                    self.range.setRange(MenuType.SELECTION_MENU)
                     self.range.invertedX.set(False)
                     self.range.invertedY.set(True)
                 else:
@@ -235,6 +261,7 @@ class Menu():
                 self.selected_value = self.selected.value
 
                 self.robot_menu.enabled.set(True)
+                self.other_menu.setClick(False)
 
                 self.main_menu.enabled.set(False)
                 self.selection_menu.enabled.set(False)
@@ -243,7 +270,7 @@ class Menu():
                 self.pathing_menu.enabled.set(False)
                 self.other_menu.enabled.set(False)
 
-                self.range.setRange(Range.ROBOT_MENU)
+                self.range.setRange(MenuType.ROBOT_MENU)
                 self.range.invertedX.set(False)
                 self.range.invertedY.set(True)
 
@@ -258,7 +285,7 @@ class Menu():
                 self.pathing_menu.enabled.set(False)
                 self.other_menu.enabled.set(False)
 
-                self.range.setRange(Range.MAIN_MENU)
+                self.range.setRange(MenuType.MAIN_MENU)
                 self.range.invertedX.set(False)
                 self.range.invertedY.set(False)
 
@@ -273,7 +300,7 @@ class Menu():
                 self.pathing_menu.enabled.set(False)
                 self.other_menu.enabled.set(False)
 
-                self.range.setRange(Range.MAIN_MENU)
+                self.range.setRange(MenuType.MAIN_MENU)
                 self.range.invertedX.set(False)
                 self.range.invertedY.set(False)
             
@@ -288,7 +315,7 @@ class Menu():
                 self.robot_menu.enabled.set(False)
                 self.other_menu.enabled.set(False)
 
-                self.range.setRange(Range.MAIN_MENU)
+                self.range.setRange(MenuType.MAIN_MENU)
                 self.range.invertedX.set(False)
                 self.range.invertedY.set(False)
             
@@ -298,6 +325,7 @@ class Menu():
                 self.selected_value = self.selected.value
 
                 self.other_menu.enabled.set(True)
+                self.other_menu.setClick(False)
 
                 self.main_menu.enabled.set(False)
                 self.selection_menu.enabled.set(False)
@@ -306,12 +334,12 @@ class Menu():
                 self.pathing_menu.enabled.set(False)
                 self.robot_menu.enabled.set(False)
 
-                self.range.setRange(Range.OTHER_MENU)
+                self.range.setRange(MenuType.OTHER_MENU)
                 self.range.invertedX.set(False)
                 self.range.invertedY.set(True)
             
             elif self.selected is Selected.FIELD_CENTRIC:
-                self.constants.FIELD_CENTRIC.negate()
+                #self.constants.FIELD_CENTRIC.negate()
                 if self.constants.FIELD_CENTRIC.compare(False):
                     self.constants.FORWARDS.set(True)
             
@@ -352,6 +380,7 @@ class Menu():
                 if self.robot_menu.input_scale_bool.compare():
                     self.input_text = "_"
                     self.just_numbers.set(True)
+        else: self.other_menu.setClick(False)
 
         if self.controls.joystick_detector[self.controls.keybinds.erase_trail_button].rising:
             if self.selected is Selected.FIELD_CENTRIC:
@@ -419,8 +448,7 @@ class Menu():
                 value == pygame.K_6 or
                 value == pygame.K_7 or
                 value == pygame.K_8 or 
-                value == pygame.K_9
-        )
+                value == pygame.K_9)
 
 
 class UpperBar():
@@ -857,7 +885,7 @@ class OtherMenu():
         self.none8_rect = img_none.get_rect()
 
         self.other_indicator_rect = img_other_indicator.get_rect()
-        
+
         self.recalculate()
     
     def setSelection(self, selected: Selected):
@@ -903,6 +931,9 @@ class OtherMenu():
                 return img_field_centric_on
         return img_field_centric_off
 
+    def setClick(self, val: bool):
+        self.click = val
+
     def __getRobotBorderImg(self):
         if self.selected is Selected.ROBOT_BORDER:
             if self.constants.DRAW_ROBOT_BORDER.compare():
@@ -928,7 +959,7 @@ class OtherMenu():
             return img_selected_none
         return img_none
     
-    def onScreen(self, screen):
+    def onScreen(self, screen: pygame.Surface):
         if self.enabled.compare(False):
             return 0
         

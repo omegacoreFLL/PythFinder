@@ -8,6 +8,3 @@ sim = Simulator()
 
 while sim.RUNNING():
     sim.update()
-
-
-

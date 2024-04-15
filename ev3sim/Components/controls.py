@@ -57,13 +57,15 @@ class Controls():
             self.dpad_detector = None
         
         def setType(self, joystick_type):
-            if joystick_type == "Xbox 360 Controller":
-                self.setXbox()
-            elif joystick_type == "PS4 Controller":
-                self.setPS4()
-            elif joystick_type == "Sony Interactive Entertainment Wireless Controller":
-                self.setPS5()
-            else: raise Exception ("Not a supported controller")
+            match joystick_type: 
+                case "Xbox 360 Controller":
+                    self.setXbox()
+                case "PS4 Controller":
+                    self.setPS4()
+                case "Sony Interactive Entertainment Wireless Controller":
+                    self.setPS5()
+                case _:
+                    raise Exception ("Not a supported controller")
 
         def setXbox(self):
             self.state = JoyType.XBOX
@@ -150,40 +152,42 @@ class Controls():
                 Dpad.LEFT : EdgeDetectorEx()
             }
 
-        def calculate(self, value):
+        def calculate(self, value: tuple):
             if self.state is JoyType.PS4:
                 return None
-            if value == self.turn_0:
-                return 0
-            if value == self.turn_45:
-                return 45
-            if value == self.turn_90:
-                return 90
-            if value == self.turn_135:
-                return 135
-            if value == self.turn_180:
-                return 180
-            if value == self.turn_225:
-                return 225
-            if value == self.turn_270:
-                return 270
-            if value == self.turn_315:
-                return 315
+            
+            match value:
+                case self.turn_0:
+                    return 0
+                case self.turn_45:
+                    return 45
+                case self.turn_90:
+                    return 90
+                case self.turn_135:
+                    return 135
+                case self.turn_180:
+                    return 180
+                case self.turn_225:
+                    return 225
+                case self.turn_270:
+                    return 270
+                case self.turn_315:
+                    return 315
+                case _:
+                    return None
 
-            return None
-
-        def getKey(self, value):
-            if value == self.turn_0:
-                return Dpad.UP
-            if value == self.turn_90:
-                return Dpad.RIGHT
-            if value == self.turn_180:
-                return Dpad.DOWN
-            if value == self.turn_270:
-                return Dpad.LEFT
-
-            #if you selected a combo
-            return None
+        def getKey(self, value: tuple):
+            match value:
+                case self.turn_0:
+                    return Dpad.UP
+                case self.turn_90:
+                    return Dpad.RIGHT
+                case self.turn_180:
+                    return Dpad.DOWN
+                case self.turn_270:
+                    return Dpad.LEFT
+                case _:
+                    return None
 
         def updateDpad(self, value):
             if self.state is JoyType.PS4:
@@ -191,24 +195,31 @@ class Controls():
             
             current_key = self.getKey(value)
 
-            if current_key is None:
-                for key in self.dpad_detector:
-                    self.dpad_detector[key].set(False)
-                    self.dpad_detector[key].update()
-                return None
-            try:
-                self.dpad_detector[current_key].set(True)
-            except: 
-                pass
-
             for key in self.dpad_detector:
                 if key is not current_key:
                     self.dpad_detector[key].set(False)
+                else: self.dpad_detector[key].set(True)
                 self.dpad_detector[key].update()
             
-            if self.dpad_detector[current_key].rising or current_key is None:
+            if current_key is None:
+                return None
+            
+            if self.dpad_detector[current_key].rising:
                 return current_key
+    
+            return None
 
+        @staticmethod
+        def inverse(key: Dpad) -> Dpad:
+            match key:
+                case Dpad.UP:
+                    return Dpad.DOWN
+                case Dpad.RIGHT:
+                    return Dpad.LEFT
+                case Dpad.DOWN:
+                    return Dpad.UP
+                case Dpad.LEFT:
+                    return Dpad.RIGHT
 
     
     def __initKeyboardDetector(self):
