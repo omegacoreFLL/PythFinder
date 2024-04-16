@@ -96,9 +96,6 @@ class Simulator():
             self.menu.addControls(self.controls)
             self.menu.onScreen(self.screen)
 
-                
-            
-
         pygame.display.update()
         self.dt = self.clock.tick(self.constants.FPS) / 1000
     

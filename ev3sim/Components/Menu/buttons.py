@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 
 from typing import List
 import pygame
+import ctypes
 
 #CONVENTION: surface list goes from smaller -> larger value (ex: FALSE -> TRUE )
 class AbsButton(ABC):
@@ -274,26 +275,30 @@ class ToggleButton(AbsButton):
             self.display_title = self.title
 
 class InputButton(AbsButton):
-    def __init__(self, name: Selected, quadrant_surface: pygame.Surface | None, title_surface: List[pygame.Surface] | pygame.Surface | None, selected_title_surface: List[pygame.Surface] | pygame.Surface | None, value=None, size=None, font=default_system_font) -> None:
+    def __init__(self, name: Selected, 
+                 quadrant_surface: pygame.Surface | None, 
+                 title_surface: List[pygame.Surface] | pygame.Surface | None, 
+                 selected_title_surface: List[pygame.Surface] | pygame.Surface | None, 
+                 constants: Constants,
+                 value=None, size = None, font = default_system_font) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
 
         self.WRITING = EdgeDetectorEx()
         self.write = BooleanEx(False)
+        self.constants = constants
 
         self.type = None
         self.dimension = None
         self.input = '_'
-
-        self.recalculate = BooleanEx(False)
     
     def setInputType(self, type: InputType, dimension: tuple | int):
         self.type = type
         self.dimension = dimension
 
-        self.display_value = self.font.render(str(self.raw_value) + self.type.value, True, default_text_color)
-        self.display_value_rect = self.display_value.get_rect()
-        try: self.display_value_rect.center = self.value_center
-        except: pass
+        if self.type is InputType.PERCENT:
+            self.raw_value *= 100
+
+        self.displayValue(self.raw_value)
     
     def isDigit(self, value):
         return (value == pygame.K_0 or 
@@ -311,35 +316,55 @@ class InputButton(AbsButton):
         try: return self.dimension[0] < value and value < self.dimension[1]
         except: pass
 
-    def change(self):
-        self.write.negate()
+    def displayValue(self, value):
+        if isinstance(self.type.value, str):
+            suffix = self.type.value
+        else: suffix = ''
 
-        if self.WRITING.rising:
+        self.display_value = self.font.render(str(value) + suffix, True, default_text_color)
+        self.display_value_rect = self.display_value.get_rect()
+        try: self.display_value_rect.center = self.value_center
+        except: pass
+
+    def change(self):
+
+        if self.write.get():
             self.input = '_'
-        elif self.WRITING.falling:
-            match self.type:
-                case InputType.DIMENSION:
+            self.displayValue(self.input)
+            return 0
+
+        if self.input == '_':
+            self.displayValue(self.raw_value)
+            return 0
+        
+        before = self.raw_value
+    
+        match self.type:
+            case InputType.DIMENSION:
+                try:
                     self.raw_value = int(self.input)
-                    self.recalculate.set(True)
-                case InputType.PERCENT:
+                    setattr(self.constants, self.name.name, self.raw_value)
+                except: pass
+            case InputType.PERCENT:
+                try:
                     self.raw_value = int(self.input)
-                    self.recalculate.set(True)
-                case InputType.FONT:
-                    ...
-                    self.recalculate.set(True)
-                case InputType.COLOR:
-                    ...
-                    self.recalculate.set(True)
-                case InputType.IMAGE_PATH:
-                    try: 
-                        pygame.image.load(self.input)
-                        self.raw_value = self.input
-                        self.recalculate.set(True)
-                    except: pass
-            
-            self.display_value = self.font.render(str(self.raw_value) + self.type.value, True, default_text_color)
-            self.display_quadrant_rect = self.display_value.get_rect()
-            self.display_title_rect.center = self.value_center
+                    setattr(self.constants, self.name.name, self.raw_value / 100)
+                except: pass
+            case InputType.FONT:
+                ...
+            case InputType.COLOR:
+                ...
+            case InputType.IMAGE_PATH:
+                try: 
+                    pygame.image.load(self.input)
+                    self.raw_value = self.input
+                    setattr(self.constants, self.name.name, self.raw_value)
+                except: pass
+        
+        if not self.raw_value == before:
+            print("pula")
+            self.constants.recalculate.set(True)
+            self.displayValue(self.raw_value)
 
     
     def update(self, selected: Selected, clicked: bool, value = None):
@@ -349,8 +374,8 @@ class InputButton(AbsButton):
         
         if selected is self.name:
             if clicked:
+                self.write.negate()
                 self.change()
-                self.display_title = self.selected_title
             self.SELECTED.set(True)
         else: self.SELECTED.set(False)
             
@@ -363,17 +388,20 @@ class InputButton(AbsButton):
         if self.SELECTED.rising:
             self.display_title = self.selected_title
         elif self.SELECTED.falling:
+            self.write.set(False)
             self.change()
             self.display_title = self.title
         
         if self.WRITING.high and not value == None:
             match value.key:
                 case pygame.K_RETURN:
+                    self.write.set(False)
                     self.change()
                 case pygame.K_BACKSPACE:
                     if len(self.input) > 1:
                         self.input = self.input[:-1]
                     else: self.input = '_'
+                    self.displayValue(self.input)
                 case _:
                     key_val = value.unicode
 
@@ -407,9 +435,7 @@ class InputButton(AbsButton):
                                 if len(self.input) + 1 <= self.dimension:
                                     self.input += key_val
 
-            self.display_value = self.font.render(str(self.input) + self.type.value, True, default_text_color)
-            self.display_quadrant_rect = self.display_value.get_rect()
-            self.display_title_rect.center = self.value_center
+                    self.displayValue(self.input)
     
 #must always give the 'value' as BooleanEx
 class BoolButton(AbsButton):
@@ -443,6 +469,8 @@ class BoolButton(AbsButton):
             if self.raw_value:
                 self.index = 1
             else: self.index = 0
+        finally:
+            self.display_title = self.selected_title[self.index]
 
     def update(self, selected, clicked: bool, value = None):
         super().update(selected, clicked, value)
@@ -450,7 +478,6 @@ class BoolButton(AbsButton):
         if selected is self.name:
             if clicked:
                 self.change()
-                self.display_title = self.selected_title[self.index]
             self.SELECTED.set(True)
         else: self.SELECTED.set(False)
 

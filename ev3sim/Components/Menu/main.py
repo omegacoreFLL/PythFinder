@@ -107,7 +107,7 @@ class Menu(AbsMenu):
 
         self.ROBOT.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
                         value = (Selected.MENU_BUTTON, None, Selected.INTERFACE, None),
-                        next = Selected.ROBOT_PATH)
+                        next = Selected.ROBOT_IMG_SOURCE)
         self.INTERFACE.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
                         value = (Selected.ROBOT, None, Selected.TRAIL, None),
                         next = None)
@@ -135,65 +135,69 @@ class Menu(AbsMenu):
 
 
     def createRobotMenu(self):
-        self.ROBOT_PATH = InputButton(name = Selected.ROBOT_PATH,
+        self.ROBOT_IMG_SOURCE = InputButton(name = Selected.ROBOT_IMG_SOURCE,
                                 quadrant_surface = img_path_quadrant,
                                 title_surface = img_robot_image_path,
                                 selected_title_surface = img_selected_robot_image_path,
-                                size = 40, value = self.constants.ROBOT_IMG_SOURCE)
+                                size = 40, value = self.constants.ROBOT_IMG_SOURCE,
+                                constants = self.constants)
         
         self.ROBOT_WIDTH = InputButton(name = Selected.ROBOT_WIDTH,
                                 quadrant_surface = img_specs_quadrant,
                                 title_surface = img_width,
                                 selected_title_surface = img_selected_width,
-                                size = 70, value = self.constants.ROBOT_WIDTH)
+                                size = 70, value = self.constants.ROBOT_WIDTH,
+                                constants = self.constants)
         
         self.ROBOT_HEIGHT = InputButton(name = Selected.ROBOT_HEIGHT,
                                 quadrant_surface = img_specs_quadrant,
                                 title_surface = img_height,
                                 selected_title_surface = img_selected_height,
-                                size = 70, value = self.constants.ROBOT_HEIGHT)
+                                size = 70, value = self.constants.ROBOT_HEIGHT,
+                                constants = self.constants)
 
         self.ROBOT_SCALE = InputButton(name = Selected.ROBOT_SCALE,
                                 quadrant_surface = img_specs_quadrant,
                                 title_surface = img_scale,
                                 selected_title_surface = img_selected_scale,
-                                size = 70, value = self.constants.ROBOT_SCALE * 100)
+                                size = 70, value = self.constants.ROBOT_SCALE,
+                                constants = self.constants)
         
 
-        self.ROBOT_PATH.setInputType(InputType.IMAGE_PATH, dimension = 70)
-        self.ROBOT_WIDTH.setInputType(InputType.DIMENSION, dimension = (0, 100))
-        self.ROBOT_HEIGHT.setInputType(InputType.DIMENSION, dimension = (0, 100))
-        self.ROBOT_SCALE.setInputType(InputType.PERCENT, dimension = (0, 200))
+        self.ROBOT_IMG_SOURCE.setInputType(InputType.IMAGE_PATH, dimension = 70)
+        self.ROBOT_WIDTH.setInputType(InputType.DIMENSION, dimension = (0, 101))
+        self.ROBOT_HEIGHT.setInputType(InputType.DIMENSION, dimension = (0, 101))
+        self.ROBOT_SCALE.setInputType(InputType.PERCENT, dimension = (0, 201))
 
 
-        self.ROBOT_PATH.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
+        self.ROBOT_IMG_SOURCE.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
                             value = (Selected.MENU_BUTTON, None, Selected.ROBOT_WIDTH, None))
         self.ROBOT_WIDTH.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
-                            value = (Selected.ROBOT_PATH, Selected.ROBOT_HEIGHT, None, None))
+                            value = (Selected.ROBOT_IMG_SOURCE, Selected.ROBOT_HEIGHT, None, None))
         self.ROBOT_HEIGHT.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
-                            value = (Selected.ROBOT_PATH, Selected.ROBOT_SCALE, None, Selected.ROBOT_WIDTH))
+                            value = (Selected.ROBOT_IMG_SOURCE, Selected.ROBOT_SCALE, None, Selected.ROBOT_WIDTH))
         self.ROBOT_SCALE.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
-                            value = (Selected.ROBOT_PATH,None, None, Selected.ROBOT_HEIGHT))
+                            value = (Selected.ROBOT_IMG_SOURCE,None, None, Selected.ROBOT_HEIGHT))
         
         self.robot_menu = Submenu(MenuType.ROBOT_MENU, self.constants, img_general_menu)
 
     def recalculateRobotMenu(self):
-        self.ROBOT_PATH.titleCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 155))
+        self.ROBOT_IMG_SOURCE.titleCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 155))
         self.ROBOT_WIDTH.titleCenter((self.constants.screen_size.half_w - 256, self.constants.screen_size.half_h + 112))
         self.ROBOT_HEIGHT.titleCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h + 112))
         self.ROBOT_SCALE.titleCenter((self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 112))
 
-        self.ROBOT_PATH.quadrantCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 110))
+        self.ROBOT_IMG_SOURCE.quadrantCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 110))
         self.ROBOT_WIDTH.quadrantCenter((self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 170))
         self.ROBOT_HEIGHT.quadrantCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h + 170))
         self.ROBOT_SCALE.quadrantCenter((self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 170))
                                         
-        self.ROBOT_PATH.valueCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 60))
+        self.ROBOT_IMG_SOURCE.valueCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 60))
         self.ROBOT_WIDTH.valueCenter((self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 235))
         self.ROBOT_HEIGHT.valueCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h + 235))
         self.ROBOT_SCALE.valueCenter((self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 235))
 
-        self.robot_menu.setButtons([self.ROBOT_PATH, self.ROBOT_WIDTH, self.ROBOT_HEIGHT, self.ROBOT_SCALE])
+        self.robot_menu.setButtons([self.ROBOT_IMG_SOURCE, self.ROBOT_WIDTH, self.ROBOT_HEIGHT, self.ROBOT_SCALE])
         self.robot_menu.backgroundCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h))
 
 
@@ -330,15 +334,6 @@ class Menu(AbsMenu):
                 
             else: menu.ENABLED.set(False)
 
-    def shouldRecalculate(self):
-        for menu in self.menus:
-            for button in menu.buttons:
-                try: 
-                    if button.recalculate.get():
-                        button.recalculate.set(False)
-                        self.recalculate()
-                except: pass
-
     def addControls(self, controls: Controls):
         self.controls = controls
 
@@ -349,7 +344,6 @@ class Menu(AbsMenu):
         self.clicked = self.controls.joystick_detector[self.controls.keybinds.zero_button].rising
         self.default = self.controls.joystick_detector[self.controls.keybinds.erase_trail_button].rising
 
-        self.shouldRecalculate()
         key = self.__updatePressedDpad()
         moved = False
 

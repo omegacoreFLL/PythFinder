@@ -19,7 +19,7 @@ class Selected(Enum):
     PATHING = auto()
     OTHER = auto()
 
-    ROBOT_PATH = auto()
+    ROBOT_IMG_SOURCE = auto()
     ROBOT_WIDTH = auto()
     ROBOT_HEIGHT = auto()
     ROBOT_SCALE = auto()
@@ -39,7 +39,7 @@ class MenuType(Enum):
     MAIN_MENU = [Selected.ON_MAIN_PAGE]
     SELECTION_MENU = [Selected.ROBOT, Selected.INTERFACE, 
                       Selected.TRAIL, Selected.PATHING, Selected.OTHER]
-    ROBOT_MENU = [Selected.ROBOT_PATH, Selected.ROBOT_WIDTH, Selected.ROBOT_HEIGHT, Selected.ROBOT_SCALE]
+    ROBOT_MENU = [Selected.ROBOT_IMG_SOURCE, Selected.ROBOT_WIDTH, Selected.ROBOT_HEIGHT, Selected.ROBOT_SCALE]
     OTHER_MENU = [Selected.FIELD_CENTRIC, Selected.ROBOT_BORDER, Selected.SCREEN_BORDER, Selected.OTHER_NONE4,
                   Selected.OTHER_NONE5, Selected.OTHER_NONE6, Selected.OTHER_NONE7, Selected.OTHER_NONE8]
 
@@ -48,6 +48,6 @@ class MenuType(Enum):
 class InputType(Enum):
     DIMENSION = ' cm'
     PERCENT = '%'
-    FONT = ''
-    COLOR = ''
-    IMAGE_PATH = ''
+    FONT = auto()
+    COLOR = auto()
+    IMAGE_PATH = auto()

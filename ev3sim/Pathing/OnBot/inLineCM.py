@@ -1,7 +1,7 @@
 from ev3sim.Components.Controllers.PIDController import *
 from ev3sim.Components.BetterClasses.mathEx import *
 from ev3sim.Components.Constants.constants import *
-from ev3sim.Pathing.turnDeg import *
+from ev3sim.Pathing.OnBot.turnDeg import *
 from ev3sim.core import *
 
 #unstable

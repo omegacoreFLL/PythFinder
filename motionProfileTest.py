@@ -1,5 +1,5 @@
 from ev3sim.Pathing.MotionProfile import *
-from ev3sim.Pathing.turnDeg import *
+from ev3sim.Pathing.OnBot.turnDeg import *
 from ev3sim.core import *
 import pygame
 
