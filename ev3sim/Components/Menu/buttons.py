@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 
 from typing import List
 import pygame
-import ctypes
 
 #CONVENTION: surface list goes from smaller -> larger value (ex: FALSE -> TRUE )
 class AbsButton(ABC):
@@ -29,6 +28,9 @@ class AbsButton(ABC):
 
         try: self.display_title = title_surface[self.index]
         except: self.display_title = title_surface
+
+        try: self.original = value.get()
+        except: self.original = value
 
         self.raw_value = value
         try: self.display_value = self.font.render(str(value), True, default_text_color)
@@ -70,6 +72,10 @@ class AbsButton(ABC):
 
 
 
+    @abstractmethod
+    def default(self, default: bool):
+        ...
+
     def getType(self) -> ButtonType:
         if isinstance(self.raw_value, (int, float)):
             return ButtonType.INT
@@ -94,13 +100,13 @@ class AbsButton(ABC):
             if len(key) == len(value):
                 for each in range(len(key)):
 
-                    if value[each] == None:
+                    if value[each] is None:
                         self.remember_links[key[each]][0] = False
                     else: self.remember_links[key[each]][0] = True
 
                     self.remember_links[key[each]][1] = value[each]
         except: 
-            if value == None:
+            if value is None:
                 self.remember_links[key][0] = False
             else: self.remember_links[key][0] = True
 
@@ -142,7 +148,7 @@ class AbsButton(ABC):
                 raise Exception("wise words here")
             except:
                 try:
-                    if not self.remember_other == None:
+                    if self.remember_other is not None:
                         if self.remember_other.remember_links[direction][0]:
                             return self.remember_other.remember_links[direction][1]
                     elif self.remember_links[direction][0]:
@@ -171,6 +177,10 @@ class EmptyButton(AbsButton):
                  value=None, size=None, font=default_system_font) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
     
+    def default(self, default: bool):
+        if not default:
+            return 0
+
     def change(self):
         ...
     
@@ -196,6 +206,11 @@ class DynamicButton(AbsButton):
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
 
         self.go_next = False
+    
+    def default(self, default: bool):
+        if not default:
+            return 0
+        ...
     
     def getNext(self):
         if self.go_next:
@@ -251,6 +266,9 @@ class ToggleButton(AbsButton):
                     self.toggle_links[key[each]] = value[each]
         except: self.toggle_links[key] = value
 
+    def default(self, default: bool):
+        if not default:
+            return 0
     
     def on(self):
         return (self.toggle, self.ON.get())
@@ -289,6 +307,7 @@ class InputButton(AbsButton):
 
         self.type = None
         self.dimension = None
+        self.selected = None
         self.input = '_'
     
     def setInputType(self, type: InputType, dimension: tuple | int):
@@ -297,6 +316,7 @@ class InputButton(AbsButton):
 
         if self.type is InputType.PERCENT:
             self.raw_value *= 100
+            self.original *= 100
 
         self.displayValue(self.raw_value)
     
@@ -312,6 +332,13 @@ class InputButton(AbsButton):
                 value == pygame.K_8 or 
                 value == pygame.K_9)
 
+    def default(self, default: bool):
+        if not default or not self.selected is self.name or self.write.get():
+            return 0
+
+        self.input = self.original
+        self.change()
+    
     def inRange(self, value):
         try: return self.dimension[0] < value and value < self.dimension[1]
         except: pass
@@ -361,16 +388,16 @@ class InputButton(AbsButton):
                     setattr(self.constants, self.name.name, self.raw_value)
                 except: pass
         
-        if not self.raw_value == before:
-            print("pula")
-            self.constants.recalculate.set(True)
-            self.displayValue(self.raw_value)
+
+        self.constants.recalculate.set(True)
+        self.displayValue(self.raw_value)
 
     
     def update(self, selected: Selected, clicked: bool, value = None):
         if not isinstance(self.type, InputType):
             raise Exception("please initialize {0}'s input type".format(self.name))
         super().update(selected, clicked, value)
+        self.selected = selected
         
         if selected is self.name:
             if clicked:
@@ -392,7 +419,7 @@ class InputButton(AbsButton):
             self.change()
             self.display_title = self.title
         
-        if self.WRITING.high and not value == None:
+        if self.WRITING.high and value is not None:
             match value.key:
                 case pygame.K_RETURN:
                     self.write.set(False)
@@ -408,8 +435,10 @@ class InputButton(AbsButton):
                     if self.input == '_':
                         match self.type:
                             case InputType.DIMENSION:
-                                if self.inRange(int(key_val)):
-                                    self.input = key_val
+                                try: 
+                                    if self.inRange(int(key_val)):
+                                        self.input = key_val
+                                except: pass
                             case InputType.PERCENT:
                                 if self.inRange(int(key_val)):
                                     self.input = key_val
@@ -422,8 +451,10 @@ class InputButton(AbsButton):
                     else: 
                         match self.type:
                             case InputType.DIMENSION:
-                                if self.inRange(int(self.input + key_val)):
-                                    self.input += key_val
+                                try:
+                                    if self.inRange(int(self.input + key_val)):
+                                        self.input += key_val
+                                except: pass
                             case InputType.PERCENT:
                                 if self.inRange(int(self.input + key_val)):
                                     self.input += key_val
@@ -436,15 +467,17 @@ class InputButton(AbsButton):
                                     self.input += key_val
 
                     self.displayValue(self.input)
-    
-#must always give the 'value' as BooleanEx
+
 class BoolButton(AbsButton):
     def __init__(self, name: Selected, quadrant_surface: pygame.Surface | None, 
                  title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  selected_title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  value=None, size=None, font=default_system_font) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
-
+        self.selected = None
+        self.getIndex()
+    
+    def getIndex(self):
         try: 
             if self.raw_value.compare():
                 self.index = 1
@@ -453,9 +486,19 @@ class BoolButton(AbsButton):
             if self.raw_value:
                 self.index = 1
             else: self.index = 0
-
         finally:
-            self.display_title = self.title[self.index]
+            if self.selected is self.name:
+                self.display_title = self.selected_title[self.index]
+            else: self.display_title = self.title[self.index]
+
+    def default(self, default: bool):
+        if not default or not self.selected is self.name:
+            return 0
+
+        try:
+            self.raw_value.set(self.original)
+        except: self.raw_value = self.original
+        finally: self.getIndex()
 
     def change(self): 
         try:
@@ -474,6 +517,7 @@ class BoolButton(AbsButton):
 
     def update(self, selected, clicked: bool, value = None):
         super().update(selected, clicked, value)
+        self.selected = selected
 
         if selected is self.name:
             if clicked:

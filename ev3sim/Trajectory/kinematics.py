@@ -13,7 +13,7 @@ class Kinematics(ABC):
         pass
 
 class TankKinematics(Kinematics):
-    def __init__(self, track_width):
+    def __init__(self, track_width = default_track_width):
         self.track_width = track_width
 
     def forwardKinematics(self, speeds: tuple):

@@ -2,12 +2,12 @@ import math
 
 
 default_max_robot_vel = 30 # cm/sec
-default_max_robot_angular_vel = math.radians(90) #rad/sec
+default_max_robot_angular_vel = math.radians(30) #rad/sec
 
 default_max_robot_acc = 10
 default_max_robot_dec = -10
-default_max_robot_ang_acc = math.radians(20)
-default_max_robot_ang_dec = math.radians(-20)
+default_max_robot_ang_acc = math.radians(90)
+default_max_robot_ang_dec = math.radians(-30)
 
 default_track_width = 9.97
 
@@ -19,13 +19,13 @@ class Constrains():
                  ang_acc = default_max_robot_ang_acc, ang_dec = default_max_robot_dec,
                  track_width = default_track_width):
         
-        self.vel = vel
-        self.ang_vel = ang_vel
+        self.MAX_VEL = abs(vel)
+        self.MAX_ANG_VEL = abs(ang_vel)
 
-        self.acc = acc
-        self.dec = dec
-        self.ang_acc = ang_acc
-        self.ang_dec = ang_dec
+        self.ACC = abs(acc)
+        self.DEC = -abs(dec)
+        self.ANG_ACC = abs(ang_acc)
+        self.ANG_DEC = -abs(ang_dec)
 
         self.TRACK_WIDTH = track_width
     
@@ -34,17 +34,17 @@ class Constrains():
             ang_acc = None, ang_dec = None,
             track_width = None):
         
-        if not vel == None:
-            self.vel = vel
-        if not ang_vel == None:
-            self.ang_vel = ang_vel
-        if not acc == None:
-            self.acc = acc
-        if not dec == None:
-            self.dec = dec
-        if not ang_acc == None:
-            self.ang_acc = ang_acc
-        if not ang_dec == None:
-            self.ang_dec = ang_dec
-        if not track_width == None:
-            self.TRACK_WIDTH = track_width
+        if vel is not None:
+            self.MAX_VEL = abs(vel)
+        if ang_vel is not None:
+            self.MAX_ANG_VEL = abs(ang_vel)
+        if acc is not None:
+            self.ACC = abs(acc)
+        if dec is not None:
+            self.DEC = -abs(dec)
+        if ang_acc is not None:
+            self.ANG_ACC = abs(ang_acc)
+        if ang_dec is not None:
+            self.ANG_DEC = -abs(ang_dec)
+        if track_width is not None:
+            self.TRACK_WIDTH = abs(track_width)

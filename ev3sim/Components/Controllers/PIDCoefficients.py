@@ -5,10 +5,10 @@ class PIDCoefficients():
         self.kD = kD
     
     def set(self, kP = None, kI = None, kD = None):
-        if not kP == None:
+        if kP is not None:
             self.kP = kP
-        if not kI == None:
+        if kI is not None:
             self.kI = kI
-        if not kD == None:
+        if kD is not None:
             self.kD = kD
         

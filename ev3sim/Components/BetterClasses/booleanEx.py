@@ -25,7 +25,7 @@ class BooleanEx():
     
     def choose(self, fun: Fun, value = None):
         if fun == Fun.SET:
-            if value == None:
+            if value is None:
                 raise Exception("choose a boolean to be 'set'")
             self.set(value)
         elif fun == Fun.GET:
@@ -33,7 +33,7 @@ class BooleanEx():
         elif fun == Fun.NEGATE:
             self.negate()
         elif fun == Fun.COMPARE:
-            if value == None:
+            if value is None:
                 self.compare()
             else: self.compare(value)
         else: raise Exception("not a valid function")

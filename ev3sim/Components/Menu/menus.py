@@ -39,9 +39,10 @@ class AbsMenu(ABC):
 
 
 
-    def update(self, selected: Selected, clicked: bool, value = None):
+    def update(self, selected: Selected, clicked: bool, default: bool = False, value = None):
         for button in self.buttons:
             button.update(selected, clicked, value)
+            button.default(default)
 
     def updateSelections(self, direction: Dpad | None) -> Selected:
         FINAL = None
@@ -51,11 +52,11 @@ class AbsMenu(ABC):
             
             try: 
                 next = button.getNext()
-                if not next == None:
+                if next is not None:
                     FINAL = next
             except: pass
 
-            if not move_to == None:
+            if move_to is not None:
                 FINAL = move_to
 
         return FINAL
@@ -76,7 +77,7 @@ class AbsMenu(ABC):
     def move(self, direction: Dpad | None):
         for button in self.buttons:
             next = button.move(direction)
-            if not next == None:
+            if next is not None:
                 return next
         return None
 
@@ -84,7 +85,7 @@ class AbsMenu(ABC):
         for button in self.buttons:
             try: 
                 next = button.getNext()
-                if not next == None:
+                if next is not None:
                     return next
             except: pass
         return None

@@ -217,7 +217,7 @@ def distance(p1: tuple, p2: tuple):
     return hypot(p2[0] - p1[0], p2[1] - p1[1])
 
 def exists(value):
-    return not value == None
+    return value is not None
 
 
 #KEY BINDS
@@ -515,9 +515,9 @@ img_selected_scale = pygame.transform.scale(img_selected_scale, (170, 85))
 
 
 #pathing constants
-kP_head = 9
+kP_head = 30
 kD_head = 1
-kS_head = 13
+kS_head = 0.6
 
 kP_fwd = 5.5 * 1.2
 kS_fwd = 20 

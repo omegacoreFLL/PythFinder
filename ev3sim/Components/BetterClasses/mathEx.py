@@ -1,4 +1,9 @@
+from typing import List
+
 import math
+import time
+
+EPSILON = 0.0000001
 
 #---Point--- and ---Pose--- classes, used for localisation
 class Point:
@@ -21,11 +26,34 @@ class Point:
         return hypot(other.x - self.x, other.y - self.y)
     
     def subtract(self, other):
-        return Point(self.x - other.x, self.y - other.y)
+        if isinstance(other, Point):
+            return Point(self.x - other.x, self.y - other.y)
+        return Point(self.x - other, self.y - other)
+    
+    def sum(self, other):
+        if isinstance(other, Point):
+            return Point(self.x + other.x, self.y + other.y)
+        return Point(self.x + other, self.y + other)
+    
+    def product(self, other):
+        if isinstance(other, Point):
+            return Point(self.x * other.x, self.y * other.y)
+        return Point(self.x * other, self.y * other)
+    
+    def div(self, other):
+        if isinstance(other, Point):
+            return Point(self.x / other.x, self.y / other.y)
+        return Point(self.x / other, self.y / other)
     
     def hypot(self):
         return hypot(self.x, self.y)
 
+    def tuple(self):
+        return (self.x, self.y)
+    
+    def atan2(self):
+        return math.atan2(self.y, self.x)
+    
 class Pose(Point):
     def __init__(self, x = 0, y = 0, head = 0):
         super().__init__(x, y)
@@ -34,7 +62,23 @@ class Pose(Point):
     def set(self, x, y, head):
         super().set(x, y)
         self.head = head 
+    
+    def rad(self):
+        return toRadians(self.head)
+    
+    def sum(self, other):
+        self.x += other.x
+        self.y += other.y
+        self.head = normalizeDegrees(self.head + other.head)
+    
+    def copy(self):
+        return Pose(self.x, self.y, self.head)
+    
+    def print(self):
+        print("x:{0} y:{1} head:{2}".format(self.x, self.y, self.head))
 
+    def point(self):
+        return Point(self.x, self.y)
 
 #enhanced math functions
 def rotateMatrix(x, y, angle):
@@ -93,3 +137,49 @@ def findShortestPath(current_angle, target_angle):
     if (error_abs <= 360 - error_abs):
         return -error
     return signum(error) * 360 - error
+
+def getTimeMs():
+    return int(time.time() * 1000)
+
+def zeros_like(list):
+    return [0] * len(list)
+
+def linspace(start, stop, num=50, endpoint=True):
+    if num <= 0:
+        raise ValueError("Number of samples must be positive")
+    
+    if endpoint:
+        step = (stop - start) / max(1, num - 1)
+    else: step = (stop - start) / max(1, num)
+
+    result = [start + i * step for i in range(num)]
+
+    if not endpoint and num > 1:
+        result[-1] = stop
+
+    return result
+
+def binary_search(val, list):
+    left = 0
+    right = len(list) - 1
+    
+    while left + 1 < right:
+        m = int((left + right) / 2)
+
+        if val == list[m]:
+            return m, list[m]
+        if val < list[m]:
+            right = m
+        else: left = m
+    
+    return left, list[left]
+
+def pointsToGraph(points: List[Point]):
+    x = []
+    y = []
+
+    for point in points:
+        x.append(point.x)
+        y.append(point.y)
+    
+    return x, y

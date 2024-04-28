@@ -165,8 +165,8 @@ class Menu(AbsMenu):
         
 
         self.ROBOT_IMG_SOURCE.setInputType(InputType.IMAGE_PATH, dimension = 70)
-        self.ROBOT_WIDTH.setInputType(InputType.DIMENSION, dimension = (0, 101))
-        self.ROBOT_HEIGHT.setInputType(InputType.DIMENSION, dimension = (0, 101))
+        self.ROBOT_WIDTH.setInputType(InputType.DIMENSION, dimension = (0, 51))
+        self.ROBOT_HEIGHT.setInputType(InputType.DIMENSION, dimension = (0, 51))
         self.ROBOT_SCALE.setInputType(InputType.PERCENT, dimension = (0, 201))
 
 
@@ -348,7 +348,7 @@ class Menu(AbsMenu):
         moved = False
 
         for menu in self.menus:
-            menu.update(self.selected, self.clicked, self.value)
+            menu.update(self.selected, self.clicked, default = self.default, value = self.value)
             toggles = menu.getToggles()
 
             for item in toggles:
@@ -358,9 +358,9 @@ class Menu(AbsMenu):
                 
 
             next = menu.updateSelections(key)
-            if not next == None and not moved: 
+            if next is not None and not moved: 
                 
-                if not key == None:
+                if key is not None:
                     inverse = Controls.Keybinds.inverse(key)
                     for each in self.menus:
                         for button in each.buttons:

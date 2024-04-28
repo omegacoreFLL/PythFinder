@@ -2,15 +2,10 @@ from ev3sim.Components.Controllers.PIDController import *
 from ev3sim.Components.BetterClasses.booleanEx import *
 from ev3sim.Components.Constants.constrains import *
 from ev3sim.Components.Constants.constants import *
-from ev3sim.Pathing.kinematics import *
+from ev3sim.Trajectory.kinematics import *
 from ev3sim.Components.trail import *
 
 import pygame
-
-
-
-
-
 
 
 class Robot():
@@ -91,22 +86,22 @@ class Robot():
 
 
     def toFieldCoords(self, pose):
-        return Pose(self.constants.screen_size.half_h - pose.y, 
-                    pose.x - self.constants.screen_size.half_w, 
+        return Pose((self.constants.screen_size.half_h - pose.y) * 10 / self.constants.PIXELS_2_DEC, 
+                    (pose.x - self.constants.screen_size.half_w) * 10 / self.constants.PIXELS_2_DEC, 
                     normalizeDegrees(pose.head - 90))
     
     def toWindowCoords(self, pose):
-        return Pose(self.constants.screen_size.half_w + pose.y, 
-                    self.constants.screen_size.half_h - pose.x, 
+        return Pose(self.constants.screen_size.half_w + pose.y * self.constants.PIXELS_2_DEC / 10, 
+                    self.constants.screen_size.half_h - pose.x * self.constants.PIXELS_2_DEC / 10, 
                     normalizeDegrees(pose.head + 90))
     
     def toFieldPoint(self, point):
-        return (self.constants.screen_size.half_h - point.y, 
-                point.x - self.constants.screen_size.half_w)
+        return ((self.constants.screen_size.half_h - point.y) * 10 / self.constants.PIXELS_2_DEC, 
+                (point.x - self.constants.screen_size.half_w) * 10 / self.constants.PIXELS_2_DEC)
 
     def toWindowPoint(self, point):
-        return (self.constants.screen_size.half_w + point.y, 
-                self.constants.screen_size.half_h - point.x)
+        return (self.constants.screen_size.half_w + point.y * self.constants.PIXELS_2_DEC / 10, 
+                self.constants.screen_size.half_h - point.x * self.constants.PIXELS_2_DEC / 10)
 
  
  
@@ -118,13 +113,14 @@ class Robot():
         self.past_velocity = self.velocity
         self.past_angular_velocity = self.angular_velocity
 
-        self.velocity = self.constants.cmToPixels(vel)
+        self.velocity = self.constants.cmToPixels(vel) * 10 / self.constants.PIXELS_2_DEC
         self.angular_velocity = ang_vel
 
     def setPoseEstimate(self, pose):
-        self.target_head = pose.head
-        self.pose = pose
-
+        self.pose = self.past_pose = Pose(pose.x, pose.y, normalizeDegrees(pose.head))
+        
+        self.window_pose = self.toWindowCoords(self.pose)
+        self.target_head = self.pose.head
 
 
 
@@ -206,9 +202,7 @@ class Robot():
         self.rotating_instance = self.image
 
     def __drawPose(self, screen):
-        centimeters = self.constants.pixelsToCmPoint(self.pose)
-
-        coords = self.pose_font.render("x: {:.2f}  y: {:.2f} h: {:.2f}".format(centimeters.x, centimeters.y, self.pose.head), 
+        coords = self.pose_font.render("x: {:.2f}  y: {:.2f} h: {:.2f}".format(self.pose.x, self.pose.y, self.pose.head), 
                                 True, self.constants.TEXT_COLOR, self.constants.BACKGROUND_COLOR)
 
         coords_rectangle = coords.get_rect()

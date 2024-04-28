@@ -25,7 +25,7 @@ class ScreenSize():
     
     def set(self, width = None, height = None):
         #check width
-        if width == None:
+        if width is None:
             self.width = default_screen_width
         elif width > max_screen_width:
             self.height = int(max_screen_width * height / width)
@@ -36,7 +36,7 @@ class ScreenSize():
         else: self.width = width
                 
         #check height
-        if height == None:
+        if height is None:
             self.height = default_screen_height
         elif height > max_screen_height:
             self.width = int(max_screen_height * width / height)
