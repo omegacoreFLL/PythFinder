@@ -160,7 +160,7 @@ class Trajectory():
         self.iterator = 0
 
         if wait:
-            for _ in range(101):
+            for _ in range(201):
                 sim.update()
 
         if perfect:
@@ -182,7 +182,7 @@ class Trajectory():
             threading.Thread(target = marker.do).start()
             self.marker_iterator += 1
 
-        
+        sim.autonomus(Auto.EXIT)
         print('\n\nTRAJECTORY COMPLETED! ;)')
 
     def generate(self, file_name: str, steps: int = 1):
@@ -359,8 +359,12 @@ class TrajectoryBuilder():
     def __init__(self, start_pose: Pose = Pose(), constrains: Constrains = None):
         self.splines = []
         self.segments = []
+
         self.linear_profiles = []
         self.angular_profiles = []
+
+        self.disp_volatile_constrains = []
+        self.temp_volatile_constrains = []
 
         self.distance = 0
         self.constrains = Constrains() if constrains is None else constrains
@@ -381,7 +385,7 @@ class TrajectoryBuilder():
         if not boolean:
             return 0
 
-        self.linear_profiles.append(MotionProfile(0, self.distance, self.constrains))
+        self.linear_profiles.append(MotionProfile(self.distance, self.constrains))
 
         self.distance = 0
 
@@ -479,19 +483,27 @@ class TrajectoryBuilder():
 
 
 
-    # TODO: add volatile constrains
-    def addConstrainsDisplacement(self, constrains: Constrains, displacement: float):
+    def addConstrainsDisplacement(self, start: float, constrains: Constrains, end: float | None = None):
+        self.disp_volatile_constrains.append(VolatileConstrains(start, constrains))
+        if end is not None:
+            self.disp_volatile_constrains.append(VolatileConstrains(end, self.constrains.copy()))
+        
         return self
 
-    def addConstrainsTemporal(self, constrains: Constrains, time: float):
+    #TODO: add temporal constrains? 
+    def addConstrainsTemporal(self, start: float, constrains: Constrains, end: float | None = None):
+        self.temp_volatile_constrains.append(VolatileConstrains(start, constrains))
+        if end is not None:
+            self.temp_volatile_constrains.append(VolatileConstrains(end, self.constrains.copy()))
+
         return self
-
-
 
 
 
     def build(self) -> Trajectory: 
         self.__createProfile(boolean = (abs(self.distance) > 0))
+        self.__sortConstrains()
+
         self.segment_number = len(self.segments)
 
         if self.segment_number == 0 or self.__nextSegmentsJustMarkers(start = self.iterator):
@@ -507,6 +519,17 @@ class TrajectoryBuilder():
 
         self.START_TIME = 0
         self.START_DIST = 0
+
+        self.last_constrains_start = 0
+
+
+        try: self.disp_next_constrains: VolatileConstrains = self.disp_volatile_constrains.pop(0)
+        except: self.disp_next_constrains = None
+
+        try: self.temp_next_constrains: VolatileConstrains = self.temp_volatile_constrains.pop(0)
+        except: self.temp_next_constrains = None
+
+
 
         while self.iterator < self.segment_number:
             segment: MotionSegment = self.segments[self.iterator]
@@ -541,6 +564,8 @@ class TrajectoryBuilder():
             
             self.iterator += 1
         
+
+
         self.__sortMarkers()
 
         self.TRAJ_DISTANCE.pop()
@@ -584,7 +609,11 @@ class TrajectoryBuilder():
 
 
     def __buildLine(self, segment: MotionSegment):
+
+        #recalculate (could have new constrains)
         profile: MotionProfile = self.linear_profiles.pop(0)
+        profile = MotionProfile(profile.distance, self.constrains, profile.start_vel)
+
         segment_distance = segment.value
 
         VELOCITY = ANGULAR_VELOCITY = t = 0
@@ -602,13 +631,18 @@ class TrajectoryBuilder():
                 self.iterator += 1
                 segment.build()
                 
-                while self.segments[self.iterator].action is MotionAction.SET_POSE and self.iterator < self.segment_number:
-                    self.__buildSetPose(self.segments[self.iterator])
-                    self.iterator += 1
+                while self.iterator < self.segment_number:
+                    if self.segments[self.iterator].action is MotionAction.SET_POSE:
+                        self.__buildSetPose(self.segments[self.iterator])
+                        self.iterator += 1
+                    else: break
 
-                segment = self.segments[self.iterator]
-                segment_distance += segment.value
+                if self.iterator < self.segment_number:
+                    segment = self.segments[self.iterator]
+                    segment_distance += segment.value
+                else: break
             
+
             VELOCITY, ANGULAR_VELOCITY = velocity, 0
 
             delta_distance = distance - past_distance
@@ -625,6 +659,70 @@ class TrajectoryBuilder():
 
             self.TRAJ_DISTANCE.append(self.START_DIST + abs(distance))
             self.TRAJ_TIME.append(self.START_TIME + t + 1)
+            self.EVALUATE = False
+
+
+            if self.temp_next_constrains is not None:
+                
+                #treat temporal constrains as displacement ones
+                #too lazy to overthink conversions, just convert on the go
+
+                if self.TRAJ_TIME[-1] == self.temp_next_constrains.start:
+                    print("\n\nafferent displacement for the constrains set at {0}ms: {1}cm"
+                          .format(self.temp_next_constrains.start,
+                                round(self.TRAJ_DISTANCE[-1], 2)))
+                    self.evaluating_displacement = self.TRAJ_DISTANCE[-1]
+                    self.evaluating_constrains = self.temp_next_constrains.constrains
+                    self.EVALUATE = True
+
+                    try: self.temp_next_constrains = self.temp_volatile_constrains.pop(0)
+                    except: self.temp_next_constrains = None
+
+
+
+            if self.disp_next_constrains is not None:
+
+                if self.TRAJ_DISTANCE[-1] >= self.disp_next_constrains.start:
+                    print("\n\nafferent time for the constrains set at {0}cm: {1}ms"
+                          .format(self.disp_next_constrains.start,
+                                self.TRAJ_TIME[-2]))
+                    self.evaluating_displacement = self.disp_next_constrains.start
+                    self.evaluating_constrains = self.disp_next_constrains.constrains
+                    self.EVALUATE = True
+
+                    try: self.disp_next_constrains = self.disp_volatile_constrains.pop(0)
+                    except: self.disp_next_constrains = None
+
+
+
+            if self.EVALUATE:
+                new_profile = MotionProfile(distance = profile.distance - self.evaluating_displacement
+                                                                        + self.last_constrains_start,
+                                        constrains = self.evaluating_constrains,
+                                        start_velocity = velocity)
+                    
+                if new_profile.recommended_distance is None:
+                    self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE,
+                                        value = profile.distance - self.evaluating_displacement +
+                                                                    self.last_constrains_start))
+                    self.segment_number += 1
+                        
+                    self.linear_profiles.insert(0, new_profile)
+                    self.last_constrains_start = self.evaluating_displacement
+                    self.constrains = self.evaluating_constrains
+
+                    break
+                else:
+                    print("\n\nthe constrains set at {0}cm displacement can't compute a continuous trajectory"
+                            .format(self.evaluating_displacement))
+                    if self.START_DIST > profile.distance + new_profile.recommended_distance:
+                        print("you're out of luck, there's no way your constrains fit in this trajectory configuration")
+                    else: print("supported interval: [{0}, {1}] cm"
+                                .format(round(self.START_DIST, 2),
+                                        round(profile.distance + new_profile.recommended_distance, 2)))
+                    
+
+
 
             past_distance = distance
 
@@ -677,7 +775,7 @@ class TrajectoryBuilder():
 
         self.segments[self.iterator] = MotionSegment(MotionAction.TURN, head)
         self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE, displacement))
-        self.linear_profiles.insert(0, MotionProfile(0, displacement, self.constrains))
+        self.linear_profiles.insert(0, MotionProfile(displacement, self.constrains))
 
         self.segment_number += 1
         self.iterator -= 1
@@ -769,7 +867,6 @@ class TrajectoryBuilder():
             case _:
                 pass
 
-
     def __buildInterruptor(self, segment: MotionSegment):
         inter : Marker.Interruptor = segment.value
 
@@ -857,7 +954,6 @@ class TrajectoryBuilder():
                 pass
         
         
-        print(erase_time)
         self.current_pose = self.segments[index].eraseAllAfter(erase_time)
 
         while self.TRAJ_TIME[-1] > erase_time + 1:
@@ -914,23 +1010,18 @@ class TrajectoryBuilder():
             
             marker_iterator += 1
     
+
+
     def __sortMarkers(self):
         self.__disp_2_temp_marker()
+        self.temp_markers = selection_sort(self.temp_markers, 'value')
 
-        #selection sort
-        sorted: bool = False
-        marker_number = len(self.temp_markers) - 1
 
-        while not sorted:
-            sorted = True
-            for i in range(marker_number):
-                if self.temp_markers[i].value > self.temp_markers[i+1].value:
-                    sorted = False
+    def __sortConstrains(self):
+        self.constrains_number = len(self.disp_volatile_constrains)
 
-                    aux = self.temp_markers[i]
-                    self.temp_markers[i] = self.temp_markers[i+1]
-                    self.temp_markers[i+1] = aux
-
+        self.disp_volatile_constrains = selection_sort(self.disp_volatile_constrains, 'start')
+        self.temp_volatile_constrains = selection_sort(self.temp_volatile_constrains, 'start')
 
 
     def __isBugged(self):

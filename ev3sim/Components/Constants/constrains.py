@@ -48,3 +48,13 @@ class Constrains():
             self.ANG_DEC = -abs(ang_dec)
         if track_width is not None:
             self.TRACK_WIDTH = abs(track_width)
+
+    def copy(self):
+        return Constrains(self.MAX_VEL, self.MAX_ANG_VEL, 
+                          self.ACC, self.DEC, self.ANG_ACC, self.ANG_DEC,
+                          self.TRACK_WIDTH)
+
+class VolatileConstrains():
+    def __init__(self, start: float, constrains: Constrains):
+        self.start = start
+        self.constrains = constrains

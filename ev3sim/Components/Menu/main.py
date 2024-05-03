@@ -388,4 +388,4 @@ class Menu(AbsMenu):
                 elif self.controls.joystick_detector[self.controls.keybinds.turn_270].rising:
                     return Dpad.LEFT
 
-        return self.controls.keybinds.updateDpad(self.controls.joystick.get_hat(0))
+        else: return self.controls.keybinds.updateDpad(self.controls.joystick.get_hat(0))

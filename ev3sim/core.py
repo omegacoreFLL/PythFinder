@@ -74,10 +74,9 @@ class Simulator():
             case Auto.EXIT:
                 self.manual_control.set(True)
                 self.robot.trail.draw_trail.set(False)
-                self.robot.trail.hide_trail.set(True)
                 self.constants.ERASE_TRAIL.set(True)
                 self.constants.USE_SCREEN_BORDER.set(True)
-                self.constants.DRAW_TABLE.set(False)
+                #self.constants.DRAW_TABLE.set(False)
             case _:
                 pass
 
@@ -146,6 +145,7 @@ class Simulator():
 
             if event.type == pygame.QUIT:
                 self.running.set(False)
+                print('\n\n')
                 pygame.quit()
 
     def __updateControls(self):

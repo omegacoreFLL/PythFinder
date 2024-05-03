@@ -16,23 +16,28 @@ def get_derivative(t: List[int], vel: List[float]):
             
         if dt != 0:
             accel = dv / dt
-            if abs(accel) > max(constrains.ACC, abs(constrains.DEC)):
-                if accel < 0:
-                    accel = constrains.DEC
-                else: accel = constrains.ACC
             return accel
     return 0
 
 
-constrains = Constrains(dec = -5)
+constrains = Constrains(dec = -30)
 traj1 = (TrajectoryBuilder(start_pose = Pose(-50, -100, 0), constrains = constrains)
-              .inLineCM(50)
-              .inLineCM(50)
+              .inLineCM(90)
+              .turnDeg(0)
+              .wait(2000)
+              .inLineCM(60)
+                    .addConstrainsTemporal(start = 2000, end = 5000, constrains = Constrains(vel = 5, acc= 31, dec = -17))
+                    #.addConstrainsDisplacement(start = 100, constrains = Constrains(vel = 5, acc= 31, dec = -17))
+                    #.addConstrainsDisplacement(start = 40, end = 90, constrains = Constrains(vel = 10, acc = 10, dec = -15))   
               .build())
 
 
-
 traj = traj1
+
+
+#for each in traj.segments:
+#    print(each.start_time, each.end_time)
+
 
 iterator = 0
 increment = 1
@@ -84,6 +89,17 @@ while iterator < segments_length:
         right_accel_points.append(get_derivative(time_points, right_vel_points))
 
     trajectory_time += increment
+
+
+#be sure that accel line ends on the x axis
+for _ in range(1):
+    velocity.append(0)
+    left_vel_points.append(0)
+    right_vel_points.append(0)
+    left_accel_points.append(0)
+    right_accel_points.append(0)
+
+    time_points.append(time_points[-1] + 1)
 
 
 print('done!')

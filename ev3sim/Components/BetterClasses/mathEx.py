@@ -3,7 +3,7 @@ from typing import List
 import math
 import time
 
-EPSILON = 0.0000001
+EPSILON = 1e-5
 
 #---Point--- and ---Pose--- classes, used for localisation
 class Point:
@@ -80,6 +80,8 @@ class Pose(Point):
     def point(self):
         return Point(self.x, self.y)
 
+
+
 #enhanced math functions
 def rotateMatrix(x, y, angle):
     rotated_x = x * math.cos(angle) - y * math.sin(angle)
@@ -144,7 +146,7 @@ def getTimeMs():
 def zeros_like(list):
     return [0] * len(list)
 
-def linspace(start, stop, num=50, endpoint=True):
+def linspace(start: int, stop: int, num: int = 50, endpoint: bool = True):
     if num <= 0:
         raise ValueError("Number of samples must be positive")
     
@@ -159,7 +161,7 @@ def linspace(start, stop, num=50, endpoint=True):
 
     return result
 
-def binary_search(val, list, atr: str = None, left = None, right = None):
+def binary_search(val, list, atr: str | None = None, left = None, right = None):
     if left == None:
         left = 0
     if right == None:
@@ -180,6 +182,22 @@ def binary_search(val, list, atr: str = None, left = None, right = None):
         else: left = m
     
     return left, list[left]
+
+def selection_sort(list, atr: str):
+    sorted: bool = False
+    length = len(list)
+
+    while not sorted:
+        sorted = True
+        for i in range(length - 1):
+            if getattr(list[i], atr) > getattr(list[i+1], atr):
+                sorted = False
+
+                aux = list[i]
+                list[i] = list[i+1]
+                list[i+1] = aux
+    
+    return list
 
 def pointsToGraph(points: List[Point]):
     x = []
