@@ -69,14 +69,14 @@ class QubicSpline():
             case 0:
                 return normalizeRadians(self.get_from_profile(t, 1).atan2())
             case 1:
-                return self.get_from_profile(t, 2).atan2()
+                return normalizeRadians(self.get_from_profile(t, 2).atan2())
 
     
     def get_curv(self, t: float):
         dx, dy = self.get_from_profile(t, 1).tuple()
         ddx, ddy = self.get_from_profile(t, 2).tuple()
 
-        return -(ddy * dx - ddx * dy) / (((dx ** 2 + dy ** 2)**(3 / 2)) + (0.000000001))
+        return (((dx ** 2 + dy ** 2)**(3 / 2))) / (ddy * dx - ddx * dy)
             
     
     def addProfile(self, profile: MotionProfile):

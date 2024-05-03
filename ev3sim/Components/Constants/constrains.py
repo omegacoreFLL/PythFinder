@@ -2,7 +2,7 @@ import math
 
 
 default_max_robot_vel = 30 # cm/sec
-default_max_robot_angular_vel = math.radians(30) #rad/sec
+default_max_robot_angular_vel = math.radians(90) #rad/sec
 
 default_max_robot_acc = 10
 default_max_robot_dec = -10

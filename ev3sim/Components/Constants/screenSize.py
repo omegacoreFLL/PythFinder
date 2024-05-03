@@ -1,6 +1,9 @@
 default_screen_height = 1000
 default_screen_width = 1500
 
+table_screen_height = 880
+table_screen_width = 1400
+
 max_screen_height = 1000
 max_screen_width = 1700
 min_screen_height = 700
@@ -60,6 +63,9 @@ class ScreenSize():
         self.half_h = self.height / 2
         self.half_w = self.width / 2
 
+    def setTable(self):
+        self.set(table_screen_width, table_screen_height)
+    
     def get(self):
         return (self.width, self.height)
     

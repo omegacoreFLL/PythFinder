@@ -159,16 +159,23 @@ def linspace(start, stop, num=50, endpoint=True):
 
     return result
 
-def binary_search(val, list):
-    left = 0
-    right = len(list) - 1
+def binary_search(val, list, atr: str = None, left = None, right = None):
+    if left == None:
+        left = 0
+    if right == None:
+        right = len(list) - 1
     
+
     while left + 1 < right:
         m = int((left + right) / 2)
+        if atr is None:
+            compare = list[m]
+        else: compare = getattr(list[m], atr)
 
-        if val == list[m]:
+
+        if val == compare:
             return m, list[m]
-        if val < list[m]:
+        if val < compare:
             right = m
         else: left = m
     
@@ -183,3 +190,6 @@ def pointsToGraph(points: List[Point]):
         y.append(point.y)
     
     return x, y
+
+def idle():
+    pass

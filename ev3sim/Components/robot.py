@@ -182,6 +182,8 @@ class Robot():
         self.__drawRobot(screen)
         if self.constants.DRAW_ROBOT_BORDER.compare():
             self.__drawBorder(screen)
+        if self.constants.DRAW_TABLE.compare():
+            self.__drawCursor(screen)
 
     def elapsed_time(self):
         return pygame.time.get_ticks() - self.start_time
@@ -203,16 +205,27 @@ class Robot():
 
     def __drawPose(self, screen):
         coords = self.pose_font.render("x: {:.2f}  y: {:.2f} h: {:.2f}".format(self.pose.x, self.pose.y, self.pose.head), 
-                                True, self.constants.TEXT_COLOR, self.constants.BACKGROUND_COLOR)
+                                True, self.constants.TEXT_COLOR)
 
         coords_rectangle = coords.get_rect()
-        coords_rectangle.center = (3 / 4 * self.constants.screen_size.width, self.constants.screen_size.height - 60)
+        coords_rectangle.center = (3 / 4 * self.constants.screen_size.width, self.constants.screen_size.height - 30)
 
         screen.blit(coords, coords_rectangle)
     
     def __drawBorder(self, screen):
         pygame.draw.lines(screen, "yellow", True, self.__findBorder(self.window_pose), 3)
  
+    def __drawCursor(self, screen):
+        x, y = pygame.mouse.get_pos()
+        to_field = self.toFieldPoint(Point(x, y))
+        coords = self.pose_font.render("x: {:.2f}  y: {:.2f}".format(to_field[0], to_field[1]), 
+                                True, self.constants.TEXT_COLOR)
+        
+        coords_rectangle = coords.get_rect()
+        coords_rectangle.center = (1 / 6 * self.constants.screen_size.width, self.constants.screen_size.height - 30)
+
+        screen.blit(coords, coords_rectangle)
+
     def __findBorder(self, pose):
         border = self.image.get_rect(center = (pose.x, pose.y))
 
@@ -224,3 +237,9 @@ class Robot():
         bottonLeft = (pygame.math.Vector2(border.bottomleft) - pivot).rotate(pose.head) + pivot 
 
         return [topLeft, topRight, bottomRight, bottonLeft]
+
+
+    def printPose(self):
+        print("\nx:{0} y:{1} head:{2}".format(round(self.pose.x, 2), 
+                                            round(self.pose.y, 2), 
+                                            round(self.pose.head, 2)))

@@ -1,15 +1,19 @@
 from ev3sim.Components.BetterClasses.booleanEx import *
 from ev3sim.Components.Constants.constants import *
 from ev3sim.Components.background import *
+from ev3sim.Components.Menu.main import *
 from ev3sim.Components.controls import *
 from ev3sim.Components.robot import *
+from ev3sim.Components.table import *
 from ev3sim.Components.fade import *
-from ev3sim.Components.Menu.main import *
+
 
 import pygame
 import math
 
-
+class Auto(Enum):
+    ENTER = auto()
+    EXIT = auto()
 
 
 class Simulator():
@@ -27,6 +31,7 @@ class Simulator():
 
         self.background = Background(self.constants)
         self.robot = Robot(self.constants)
+        self.table = Table(self.constants)
         self.fade = Fade(self.constants)
         self.menu = Menu(MenuType.UNDEFINED, self.constants, None)
         self.controls = Controls()
@@ -56,14 +61,39 @@ class Simulator():
         self.constants.JOYSTICK_ENABLED.choose(fun, bool)
 
 
+    def autonomus(self, do: Auto):
+        match do:
+            case Auto.ENTER:
+                self.robot.trail.draw_trail.set(True)
+                self.constants.ERASE_TRAIL.set(False)
+                self.manual_control.set(False)
+                self.constants.USE_SCREEN_BORDER.set(False)
+                self.constants.DRAW_TABLE.set(True)
+
+                self.robot.zeroDistance()
+            case Auto.EXIT:
+                self.manual_control.set(True)
+                self.robot.trail.draw_trail.set(False)
+                self.robot.trail.hide_trail.set(True)
+                self.constants.ERASE_TRAIL.set(True)
+                self.constants.USE_SCREEN_BORDER.set(True)
+                self.constants.DRAW_TABLE.set(False)
+            case _:
+                pass
+
+
     def recalculate(self):
         if self.constants.recalculate.compare(False):
             return 0
         
+        self.screen = pygame.display.set_mode(self.constants.screen_size.get())
         self.menu.recalculate()
         self.fade.recalculate()
         self.robot.recalculate()
+        self.table.recalculate()
         self.background.recalculate()
+
+        self.constants.recalculate.set(False)
 
 
     def matchScreenSize(self, image: pygame.Surface, width):
@@ -89,6 +119,7 @@ class Simulator():
             self.__updateControls()
         self.robot.update(self.dt)
 
+        self.table.onScreen(self.screen)
         self.background.onScreen(self.screen)
         self.robot.onScreen(self.screen)
         self.fade.onScreen(self.screen)
@@ -136,8 +167,8 @@ class Simulator():
             joy_x, joy_y = self.__updateJoystickFieldCentric((left_x, left_y))
         else: joy_x, joy_y = self.__updateJoystickRobotCentric((right_x, left_y))
 
-        joy_vel = joy_y * self.robot.constrains.vel
-        joy_ang_vel = joy_x * self.robot.constrains.ang_vel
+        joy_vel = joy_y * self.robot.constrains.MAX_VEL
+        joy_ang_vel = joy_x * self.robot.constrains.MAX_ANG_VEL
 
         self.robot.setVelocities(joy_vel, joy_ang_vel)
 

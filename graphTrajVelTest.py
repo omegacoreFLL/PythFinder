@@ -16,17 +16,18 @@ def get_derivative(t: List[int], vel: List[float]):
             
         if dt != 0:
             accel = dv / dt
+            if abs(accel) > max(constrains.ACC, abs(constrains.DEC)):
+                if accel < 0:
+                    accel = constrains.DEC
+                else: accel = constrains.ACC
             return accel
     return 0
 
 
-
-traj1 = (TrajectoryBuilder(start_pose = Pose(-30, -30, 0))
-              .toPose(Pose(20, 70, -45))
-              .toPoint(Point(100, -50))
-              .wait(3000)
-              .inLineCM(200)
-              .toPose(Pose())
+constrains = Constrains(dec = -5)
+traj1 = (TrajectoryBuilder(start_pose = Pose(-50, -100, 0), constrains = constrains)
+              .inLineCM(50)
+              .inLineCM(50)
               .build())
 
 

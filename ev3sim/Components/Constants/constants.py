@@ -22,7 +22,7 @@ default_coordinate_system_color = "white"
 default_grid_color = (63, 63, 63) #rgb
 default_background_color = "black"
 
-default_frame_rate = 100 #fps
+default_frame_rate = 1000 #fps
 default_system_font = 'graffitiyouthregular'
 default_text_color = "white"
 
@@ -40,6 +40,7 @@ default_forwards = True
 default_erase_trail = True
 default_joystick_enabled = True
 default_freeze_trail = False
+default_draw_table = False
 
 default_kP_joystick_head = 6
 default_kI_joystick_head = 0
@@ -52,7 +53,7 @@ default_max_trail_length = math.inf
 default_max_segment_length = 100
 
 default_drawing_trail_threshold = 20
-default_trail_color = "yellow"
+default_trail_color = "darkmagenta"
 default_trail_loops = 300
 default_trail_width = 2
 
@@ -116,6 +117,7 @@ class Constants():
         self.ERASE_TRAIL = 0
         self.JOYSTICK_ENABLED = 0
         self.FREEZE_TRAIL = 0
+        self.DRAW_TABLE = 0
 
         self.COEFF_JOY_HEAD = 0
 
@@ -123,7 +125,6 @@ class Constants():
 
         if exists(screen_size):
             self.screen_size = screen_size
-
 
     def default(self):
         self.PIXELS_2_DEC = default_pixels_to_decimeters
@@ -176,6 +177,7 @@ class Constants():
         self.ERASE_TRAIL = BooleanEx(default_erase_trail)
         self.JOYSTICK_ENABLED = BooleanEx(default_joystick_enabled)
         self.FREEZE_TRAIL = BooleanEx(default_freeze_trail)
+        self.DRAW_TABLE = BooleanEx(default_draw_table)
 
         self.screen_size = ScreenSize()
     
@@ -514,20 +516,24 @@ img_scale = pygame.transform.scale(img_scale, (170, 85))
 img_selected_scale = pygame.transform.scale(img_selected_scale, (170, 85))
 
 
+
+fll_table_width_cm = 227 # og - 93in
+fll_table_height_cm = 120 # og - 45in
+
+fll_table_source = 'ev3sim/Images/Table/FLL_table_MP.jpg'
+fll_table_image = pygame.image.load(fll_table_source)
+
+
+
+
 #pathing constants
 kP_head = 30
 kD_head = 1
 kS_head = 0.6
 
-kP_fwd = 5.5 * 1.2
+REAL_MAX_VEL = 27.7
 kS_fwd = 20 
-kP_correction_agresive = 20
-kP_correction_mild = 6
-kD_correction = 2
 
-forward_threshold = 18 
-
-kP_interpolating = 5 
 
 
 
