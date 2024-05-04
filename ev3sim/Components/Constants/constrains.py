@@ -1,3 +1,4 @@
+from enum import Enum, auto
 import math
 
 
@@ -11,6 +12,10 @@ default_max_robot_ang_dec = math.radians(-30)
 
 default_track_width = 9.97
 
+
+class ConstrainsType(Enum):
+    TEMPORAL = auto()
+    DISPLACEMENT = auto()
 
 
 class Constrains():
@@ -55,6 +60,8 @@ class Constrains():
                           self.TRACK_WIDTH)
 
 class VolatileConstrains():
-    def __init__(self, start: float, constrains: Constrains):
+    def __init__(self, start: float, constrains: Constrains, type: ConstrainsType):
         self.start = start
         self.constrains = constrains
+
+        self.type = type

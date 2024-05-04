@@ -133,20 +133,22 @@ class Simulator():
 
     def __updateEventManager(self):
         self.menu.addKey(None)
-        for event in pygame.event.get():
-            if event.type == pygame.JOYDEVICEADDED:
-                self.controls.addJoystick(pygame.joystick.Joystick(event.device_index))
-            
-            elif event.type == pygame.JOYDEVICEREMOVED:
-                self.controls.addJoystick(None)
-            
-            if event.type == pygame.KEYDOWN:
-                self.menu.addKey(event)
+        try:
+            for event in pygame.event.get():
+                if event.type == pygame.JOYDEVICEADDED:
+                    self.controls.addJoystick(pygame.joystick.Joystick(event.device_index))
+                
+                elif event.type == pygame.JOYDEVICEREMOVED:
+                    self.controls.addJoystick(None)
+                
+                if event.type == pygame.KEYDOWN:
+                    self.menu.addKey(event)
 
-            if event.type == pygame.QUIT:
-                self.running.set(False)
-                print('\n\n')
-                pygame.quit()
+                if event.type == pygame.QUIT:
+                    self.running.set(False)
+                    print('\n\n')
+                    pygame.quit()
+        except: pass
 
     def __updateControls(self):
         self.controls.update()

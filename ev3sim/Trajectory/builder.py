@@ -14,15 +14,16 @@ class MotionAction(Enum):
     LINE = auto()
     TO_POINT = auto()
     TO_POSE = auto()
-    TURN = auto()
+    SPLINE = auto()
 
+    TURN = auto()
     WAIT = auto()
     SET_POSE = auto()
 
     REL_MARKER = auto()
     INT_MARKER = auto()
+    REL_CONSTRAINS = auto()
 
-    SPLINE = auto()
 
 class MarkerType(Enum):
     TEMPORAL = auto()
@@ -420,6 +421,11 @@ class TrajectoryBuilder():
 
         return self
 
+    # TODO: figure out how to get ang vel from spline
+    def inSpline(self, start: Point, end: Point,
+                    start_tangent: Point, end_tangent: Point):
+        return self
+
 
 
     def wait(self, ms: int):
@@ -456,16 +462,16 @@ class TrajectoryBuilder():
                                        type = MarkerType.TEMPORAL))
         return self
     
-    def addRelativeTemporalMarker(self, ms: int, fun):
-        self.segments.append(MotionSegment(MotionAction.REL_MARKER, 
-                                           value = Marker(val = ms, fun = fun, rel = True,
-                                                          type = MarkerType.TEMPORAL)))
-        return self
-
     def addDisplacementMarker(self, dis: float, fun):
         dis = 0 if dis < 0 else dis
         self.disp_markers.append(Marker(val = dis, fun = fun, rel = False,
                                         type = MarkerType.DISPLACEMENT))
+        return self
+    
+    def addRelativeTemporalMarker(self, ms: int, fun):
+        self.segments.append(MotionSegment(MotionAction.REL_MARKER, 
+                                           value = Marker(val = ms, fun = fun, rel = True,
+                                                          type = MarkerType.TEMPORAL)))
         return self
 
     def addRelativeDisplacementMarker(self, dis: float, fun):
@@ -476,28 +482,46 @@ class TrajectoryBuilder():
 
 
 
-    # TODO: figure out how to get ang vel from spline
-    def inSpline(self, start: Point, end: Point,
-                    start_tangent: Point, end_tangent: Point):
+    def addConstrainsTemporal(self, start: float, constrains: Constrains, end: float | None = None):
+        self.temp_volatile_constrains.append(VolatileConstrains(abs(start), constrains,
+                                                                ConstrainsType.TEMPORAL))
+        if end is not None:
+            self.temp_volatile_constrains.append(VolatileConstrains(abs(end), self.constrains.copy(),
+                                                                    ConstrainsType.TEMPORAL))
+
         return self
 
-
-
     def addConstrainsDisplacement(self, start: float, constrains: Constrains, end: float | None = None):
-        self.disp_volatile_constrains.append(VolatileConstrains(start, constrains))
+        self.disp_volatile_constrains.append(VolatileConstrains(abs(start), constrains,
+                                                                ConstrainsType.DISPLACEMENT))
         if end is not None:
-            self.disp_volatile_constrains.append(VolatileConstrains(end, self.constrains.copy()))
+            self.disp_volatile_constrains.append(VolatileConstrains(abs(end), self.constrains.copy(),
+                                                                    ConstrainsType.DISPLACEMENT))
         
         return self
 
-    #TODO: add temporal constrains? 
-    def addConstrainsTemporal(self, start: float, constrains: Constrains, end: float | None = None):
-        self.temp_volatile_constrains.append(VolatileConstrains(start, constrains))
+    def addConstrainsRelativeTemporal(self, start: float, constrains: Constrains, end: float | None = None):
+        self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINS, 
+                                           value = VolatileConstrains(start, constrains, 
+                                                                      ConstrainsType.TEMPORAL)))
         if end is not None:
-            self.temp_volatile_constrains.append(VolatileConstrains(end, self.constrains.copy()))
-
+            self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINS, 
+                                           value = VolatileConstrains(end, self.constrains.copy(), 
+                                                                      ConstrainsType.TEMPORAL)))
+            
         return self
 
+    def addConstrainsRelativeDisplacement(self, start: float, constrains: Constrains, end: float | None = None):
+        self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINS, 
+                                           value = VolatileConstrains(start, constrains, 
+                                                                      ConstrainsType.DISPLACEMENT)))
+        if end is not None:
+            self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINS, 
+                                           value = VolatileConstrains(end, self.constrains.copy(), 
+                                                                      ConstrainsType.DISPLACEMENT)))
+        
+        return self
+    
 
 
     def build(self) -> Trajectory: 
@@ -521,15 +545,14 @@ class TrajectoryBuilder():
         self.START_DIST = 0
 
         self.last_constrains_start = 0
-
+        self.last_stop_distance = 0
+        self.last_stop_time = 0
 
         try: self.disp_next_constrains: VolatileConstrains = self.disp_volatile_constrains.pop(0)
         except: self.disp_next_constrains = None
 
         try: self.temp_next_constrains: VolatileConstrains = self.temp_volatile_constrains.pop(0)
         except: self.temp_next_constrains = None
-
-
 
         while self.iterator < self.segment_number:
             segment: MotionSegment = self.segments[self.iterator]
@@ -557,6 +580,9 @@ class TrajectoryBuilder():
             
             elif segment.action is MotionAction.INT_MARKER:
                 self.__buildInterruptor(segment)
+            
+            elif segment.action is MotionAction.REL_CONSTRAINS:
+                self.__buildConstrains(segment)
 
             elif segment.action is MotionAction.SET_POSE:
                 self.__buildSetPose(segment)
@@ -609,10 +635,11 @@ class TrajectoryBuilder():
 
 
     def __buildLine(self, segment: MotionSegment):
+        self.__erase_all_linear_segments_after()
 
         #recalculate (could have new constrains)
         profile: MotionProfile = self.linear_profiles.pop(0)
-        profile = MotionProfile(profile.distance, self.constrains, profile.start_vel)
+        profile = MotionProfile(profile.distance * profile.sign, self.constrains, profile.start_vel)
 
         segment_distance = segment.value
 
@@ -696,14 +723,14 @@ class TrajectoryBuilder():
 
 
             if self.EVALUATE:
-                new_profile = MotionProfile(distance = profile.distance - self.evaluating_displacement
+                new_profile = MotionProfile(distance = profile.sign * profile.distance - self.evaluating_displacement
                                                                         + self.last_constrains_start,
                                         constrains = self.evaluating_constrains,
-                                        start_velocity = velocity)
-                    
+                                        start_velocity = abs(velocity))
+
                 if new_profile.recommended_distance is None:
                     self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE,
-                                        value = profile.distance - self.evaluating_displacement +
+                                        value = profile.sign * profile.distance - self.evaluating_displacement +
                                                                     self.last_constrains_start))
                     self.segment_number += 1
                         
@@ -715,11 +742,11 @@ class TrajectoryBuilder():
                 else:
                     print("\n\nthe constrains set at {0}cm displacement can't compute a continuous trajectory"
                             .format(self.evaluating_displacement))
-                    if self.START_DIST > profile.distance + new_profile.recommended_distance:
+                    if self.START_DIST > profile.sign * profile.distance + new_profile.recommended_distance:
                         print("you're out of luck, there's no way your constrains fit in this trajectory configuration")
                     else: print("supported interval: [{0}, {1}] cm"
                                 .format(round(self.START_DIST, 2),
-                                        round(profile.distance + new_profile.recommended_distance, 2)))
+                                        round(profile.sign * profile.distance + new_profile.recommended_distance, 2)))
                     
 
 
@@ -729,6 +756,9 @@ class TrajectoryBuilder():
         segment.build()
     
     def __buildTurn(self, segment: MotionSegment):
+        if not self.__should_build():
+            return None
+        
         self.TURN = True
     
         self.current_pose.head = segment.value
@@ -743,6 +773,7 @@ class TrajectoryBuilder():
             self.segments[self.iterator].build()    
     
     def __buildWait(self, segment: MotionSegment):
+    
         waiting_time = segment.value
 
         self.START_TIME, self.START_DIST = self.TRAJ_TIME[-1], self.TRAJ_DISTANCE[-1]
@@ -806,23 +837,28 @@ class TrajectoryBuilder():
     def __buildMarker(self, segment: MotionSegment):
         marker: Marker = segment.value
 
-        if self.__nextNonMarkerSegmentIsInterruptor(self.iterator + 1): 
-            #build the marker after the interruptor
-            return 0
+        index = self.__organize()
 
-        self.segments.pop(self.iterator)
-        self.segment_number -= 1
-        self.iterator -= 1
-        early_leave = False
-
-        if self.iterator == -1:
-
+        if index == -1: 
             if not self.hasPrintThis:
                 print("\n\nwhat are you doin' mate? use a marker on what??")
                 print("there's nothing before this marker... this, or I need to go to sleep.. 💤")
 
             self.hasPrintThis = True
             early_leave = True
+        else:
+            self.__orderConsecutiveMarkers(index)
+
+            if self.segments[self.iterator].action is not MotionAction.REL_MARKER:
+                self.iterator -= 1
+                
+                return None
+
+        self.segments.pop(self.iterator)
+        self.segment_number -= 1
+        
+        self.iterator -= 1
+        early_leave = False
 
         self.hasPrintThis = False
 
@@ -867,25 +903,26 @@ class TrajectoryBuilder():
             case _:
                 pass
 
-    def __buildInterruptor(self, segment: MotionSegment):
+    def __buildInterruptor(self, segment: MotionSegment, telemetry = True, sort = True):
         inter : Marker.Interruptor = segment.value
 
+        index = self.__organize()
+
+        if index == -1: 
+            if telemetry:
+                print('\n\nFound no segment to interrupt')
+            return None, None, None, None
+        
+        if sort:
+            self.__orderConsecutiveMarkers(index)
+
+            if self.segments[self.iterator].action is not MotionAction.INT_MARKER:
+                self.iterator -= 1
+                return None, None, None, None
+        
         self.segments.pop(self.iterator)
         self.segment_number -= 1
 
-
-        index = self.iterator - 1
-
-        while index > -1:
-            if self.segments[index].action is MotionAction.LINE:
-                break
-            index -= 1
-        
-        if index == -1: 
-            print('\n\nFound no segment to interrupt')
-            return 0
-    
-        
         keys = list(self.segments[index].states.keys())
         erase_time = 0
         
@@ -904,41 +941,45 @@ class TrajectoryBuilder():
             
             self.iterator = index - 1
 
-            print('\n\nreally? interrupt at 0ms? just erase your last linear segment pff..')
-            print("don't stress out, I've already done it for you")
-            print("but please, for the love of god, get rid of this 😭")
-            return 0
+            if telemetry:
+                print('\n\nreally? interrupt at 0ms? just erase your last linear segment pff..')
+                print("don't stress out, I've already done it for you")
+                print("but please, for the love of god, get rid of this 😭")
+            return None, None, None, None
 
         start_distance = self.segments[index].get(keys[0]).displacement
         end_distance = self.segments[index].get(keys[-1]).displacement
+        total_distance = end_distance - start_distance
 
         match inter.type:
             case MarkerType.TEMPORAL: 
 
                 if abs(inter.value) >= self.segments[index].total_time:
-                    print('\n\nYour TEMPORAL marker with value {0} is out of bounds: {1}ms - {2}ms'
-                          .format(inter.value, keys[0], keys[-1]))
+                    if telemetry:
+                        print('\n\nyour temporal interruptor with value {0} is out of bounds: {1}ms - {2}ms'
+                            .format(inter.value, keys[0], keys[-1]))
                     self.iterator -= 1
-                    return 0
+                    return None, None, None, None
 
 
                 erase_time = (keys[0] + inter.value
                                     if inter.value >= 0 else 
                               keys[-1] + inter.value)
                 
-                print('\n\nafferent distance (if you care):')
-                print(round(self.segments[index].get(erase_time).displacement - start_distance, 2),'cm')
-                
+                if telemetry:
+                    print('\n\nafferent interruptor distance (if you care):')
+                    print(round(self.segments[index].get(erase_time).displacement - start_distance, 2),'cm')
+                    
                 
             case MarkerType.DISPLACEMENT:
-                total_distance = end_distance - start_distance
 
                 if abs(inter.value) > total_distance:
-                    print('\n\nYour DISPLACEMENT marker with value {0} is out of bounds: {1}cm - {2}cm'
-                          .format(inter.value, start_distance, end_distance))   
-                         
+                    if telemetry:
+                        print('\n\nyour displacement interruptor with value {0} is out of bounds: {1}cm - {2}cm'
+                            .format(inter.value, start_distance, end_distance))   
+                            
                     self.iterator -= 1
-                    return 0
+                    return None, None, None, None
 
                 search_distance = (self.segments[index].get(keys[0]).displacement + inter.value
                                             if inter.value >= 0 else 
@@ -947,15 +988,16 @@ class TrajectoryBuilder():
                 erase_time, _ = binary_search(search_distance, self.segments[index].states, 'displacement',
                                              left = keys[0], right = keys[-1])
                 
-                print('\n\nafferent time (if you care):')
-                print(erase_time - keys[0],'ms')
-                
+                if telemetry:
+                    print('\n\nafferent interruptor time (if you care):')
+                    print(erase_time - keys[0],'ms')
+                    
             case _:
                 pass
         
         
         self.current_pose = self.segments[index].eraseAllAfter(erase_time)
-
+    
         while self.TRAJ_TIME[-1] > erase_time + 1:
             self.TRAJ_TIME.pop()
             self.TRAJ_DISTANCE.pop()
@@ -965,6 +1007,119 @@ class TrajectoryBuilder():
             self.segments[i].reset()
 
         self.iterator = index
+
+        return  (self.segments[index].get(keys[-1]).displacement,
+                self.segments[index].get(erase_time).displacement, 
+                erase_time,
+                self.segments[index].get(erase_time).velocities)
+
+    def __buildConstrains(self, segment: MotionSegment):
+        constr: VolatileConstrains = self.segments[self.iterator].value
+
+        index = self.__organize()
+
+        if index == -1: 
+            print('\n\nFound no segment to set constrains')
+            return None
+
+        self.__orderConsecutiveMarkers(index)
+
+
+        #if you had inserted markers, they went on the top, so no more constrains setting rn
+        #   if this happens, abort the building and return to building the marker
+
+        if self.segments[self.iterator].action is not MotionAction.REL_CONSTRAINS:
+            self.iterator -= 1
+            return None
+
+
+        #strategy: let the interruptor do the heavy lifting for you
+        #   NASA approved 👍
+
+        type = None
+        match constr.type:
+            case ConstrainsType.TEMPORAL:
+                type = MarkerType.TEMPORAL
+            case ConstrainsType.DISPLACEMENT:
+                type = MarkerType.DISPLACEMENT
+
+        afferent_interruptor = Marker.Interruptor(constr.start, type)
+        self.segments[self.iterator] = MotionSegment(action = MotionAction.INT_MARKER,
+                                                     value = afferent_interruptor)
+        
+        #don't show the telemetry, because you didn't call an interruptor lol
+        total_distance, stop_distance, stop_time, start_vel = self.__buildInterruptor(self.segments[self.iterator], 
+                                                                                      telemetry = False,
+                                                                                      sort = False)
+        print('???')
+        if total_distance is not None:
+            distance = total_distance - stop_distance
+            new_profile = MotionProfile(distance, constr.constrains, abs(start_vel[0]))
+    
+            if new_profile.recommended_distance is None:
+                self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE, value = distance))
+                self.linear_profiles.insert(0, new_profile)
+                self.constrains = constr.constrains
+
+                self.segment_number += 1
+
+
+                # renormalize values for the next relative segments, until find another linear segment
+                # doing this for better intuition, not that it doesn't work without
+                i = self.iterator + 2
+                while i < self.segment_number:
+                    segment: MotionSegment = self.segments[i]
+
+                    if segment.action is MotionAction.REL_CONSTRAINS:
+                        match segment.value.type:
+                            case ConstrainsType.TEMPORAL:
+                                self.segments[i].value.start -= (stop_time - self.last_stop_time)
+                            case ConstrainsType.DISPLACEMENT:
+                                self.segments[i].value.start -= (stop_distance - self.last_stop_distance)
+                    
+                    elif segment.action is MotionAction.INT_MARKER:
+                        last = self.segments[i].value.value
+
+                        match segment.value.type:
+                            case MarkerType.TEMPORAL:
+                                self.segments[i].value.value -= (stop_time - self.last_stop_time)
+                            case MarkerType.DISPLACEMENT:
+                                self.segments[i].value.value -= (stop_distance - self.last_stop_distance)
+                        
+                        if self.segments[i].value.value < 0:
+                            self.segments[i].value.value = last
+
+                            #find the second previous linear segment, get rid of everything else
+                            #no concern in accidentaly exiting the list
+                            found = 0
+                            current = i - 1
+                            while found < 2:
+                                if self.segments[current].action is MotionAction.LINE:
+                                    found += 1
+                                if found < 2:
+                                    self.segments.pop(current)
+                                    self.segment_number -= 1
+                                
+                                current -=1
+
+                    else: break
+                    i +=1
+
+
+                
+                self.last_stop_distance = stop_distance
+                self.last_stop_time = stop_time
+
+                return None
+            
+
+        print('\n\nnooooooooooooooooooooooo')
+        print("well, your {0} relative constrain at {1}{2} can't exist ):"
+                .format(constr.type.name.lower(), constr.start,
+                        'ms' if constr.type is ConstrainsType.TEMPORAL else 'cm'))
+        print('next one!')
+
+
 
     def __buildSetPose(self, segment: MotionSegment):
         self.current_pose = segment.value.copy()
@@ -985,15 +1140,6 @@ class TrajectoryBuilder():
         
         return True
     
-    def __nextNonMarkerSegmentIsInterruptor(self, start):
-        for index in range(start, self.segment_number):
-            if self.segments[index].action is not MotionAction.REL_MARKER:
-                if self.segments[index].action is MotionAction.INT_MARKER:
-                    return True
-                return False
-        
-        return False
-
     def __disp_2_temp_marker(self):
         marker_iterator = 1
 
@@ -1016,12 +1162,180 @@ class TrajectoryBuilder():
         self.__disp_2_temp_marker()
         self.temp_markers = selection_sort(self.temp_markers, 'value')
 
-
     def __sortConstrains(self):
         self.constrains_number = len(self.disp_volatile_constrains)
 
         self.disp_volatile_constrains = selection_sort(self.disp_volatile_constrains, 'start')
         self.temp_volatile_constrains = selection_sort(self.temp_volatile_constrains, 'start')
+
+    def __orderConsecutiveMarkers(self, start_index):
+        # markers should be above constrain settings
+        # constrains values should be monotonically increasing
+
+        #takes care of the relative hierarchy (order of compiling):
+        #       1) RELATIVE MARKERS
+        #       2) RELATIVE CONSTRAINS
+        #       3) INTERRUPTORS
+        #
+        # absolute ones don't really matter
+
+        line_segment: MotionSegment = self.segments[start_index]
+
+        sort: bool = False
+
+        while not sort:
+            j = start_index + 1
+            sort: bool = True
+
+            while j < self.segment_number:
+                current_marker: MotionSegment = self.segments[j]
+
+                if (current_marker.action is MotionAction.REL_CONSTRAINS or
+                    current_marker.action is MotionAction.INT_MARKER or
+                    current_marker.action is MotionAction.REL_MARKER):
+                    
+                    try: #when it's a REL_CONSTRAINS object
+                        if current_marker.value.start < 0:
+                            current_marker.value.start = line_segment.value + current_marker.value.start
+                    except: pass
+                    
+                    k = j + 1
+                    while k < self.segment_number:
+                        current_marker: MotionSegment = self.segments[j]
+                        comparing_marker : MotionSegment = self.segments[k]
+
+
+                        if (comparing_marker.action is MotionAction.REL_MARKER and
+                             current_marker.action is not MotionAction.REL_MARKER):
+                                sort = False
+
+                                aux = self.segments[j]
+                                self.segments[j] = self.segments[k]
+                                self.segments[k] = aux
+
+
+                        elif (comparing_marker.action is MotionAction.REL_CONSTRAINS
+                              and current_marker.action is not MotionAction.REL_MARKER):
+
+                            try:
+                                if current_marker.value.start > comparing_marker.value.start:
+                                    sort = False
+
+                                    aux = self.segments[j]
+                                    self.segments[j] = self.segments[k]
+                                    self.segments[k] = aux
+                            except:
+                                if current_marker.action is MotionAction.INT_MARKER:
+                                    sort = False
+
+                                    aux = self.segments[j]
+                                    self.segments[j] = self.segments[k]
+                                    self.segments[k] = aux
+
+                        else: break
+                        k += 1
+                        
+                else: break
+                j += 1
+            
+
+        #debugging
+        '''print('\n\n')
+        for i in range(0, self.segment_number):
+            segment: MotionSegment = self.segments[i]
+
+            match segment.action:
+                case MotionAction.REL_MARKER:
+                    print('REL_MARKER: {0}'.format(segment.value.value))
+                case MotionAction.REL_CONSTRAINS:
+                    print('REL_CONSTRAINS: {0}'.format(segment.value.start))
+                case MotionAction.INT_MARKER:
+                    print('INT_MARKER: {0}'.format(segment.value.value))
+                case MotionAction.LINE:
+                    print('LINE: {0}'.format(segment.value))
+                case MotionAction.WAIT:
+                    print('WAIT: {0}'.format(segment.value))
+                case MotionAction.TURN:
+                    print('TURN: {0}'.format(segment.value))
+
+        print('\n\n')'''
+
+    def __find_last_marker(self, start_index):
+        for i in range(start_index, self.segment_number):
+            action = self.segments[i].action
+
+            if (action is MotionAction.LINE or
+                action is MotionAction.TO_POINT or
+                action is MotionAction.TO_POSE):
+
+                return i - 1
+        
+        return self.segment_number - 1
+
+    def __organize(self):
+        #basically making sure that every linear segment is followed by markers, no space between
+        #   if a markers exist
+        last_marker_index = self.__find_last_marker(self.iterator)
+
+
+
+        index = self.iterator - 1
+
+        while index > -1:
+            if (self.segments[index].action is MotionAction.LINE or
+                self.segments[index].action is MotionAction.WAIT):
+                break
+
+            elif (self.segments[index].action is not MotionAction.REL_CONSTRAINS and
+                  self.segments[index].action is not MotionAction.REL_MARKER and
+                  self.segments[index].action is not MotionAction.INT_MARKER):
+                #switch
+
+                aux = self.segments[index]
+                self.segments[index] = self.segments[last_marker_index]
+                self.segments[last_marker_index] = aux
+
+                self.iterator -= 1
+                last_marker_index -= 1
+
+            index -= 1
+        
+        return index
+
+    def __should_build(self):
+        # between some markers and a line segments --> nuh uh
+        #   should've searched upwards for a line and down for markers
+        #   but I'm going to search just for markers
+        #   deal with it.
+
+        for i in range(self.iterator + 1, self.segment_number):
+            if (self.segments[i].action is MotionAction.LINE or
+                self.segments[i].action is MotionAction.TO_POINT or
+                self.segments[i].action is MotionAction.TO_POSE or
+                self.segments[i].action is MotionAction.WAIT):
+
+                return True
+            
+            elif (self.segments[i].action is MotionAction.REL_CONSTRAINS or
+                  self.segments[i].action is MotionAction.REL_MARKER or
+                  self.segments[i].action is MotionAction.INT_MARKER):
+                
+                return False
+            
+        return True
+
+    def __erase_all_linear_segments_after(self):
+        index = self.iterator + 1
+
+        while index < self.segment_number:
+            if self.segments[index].action is MotionAction.LINE:
+                self.segments.pop(index)
+                self.segment_number -= 1
+
+                index += 1
+            else: break
+
+
 
 
     def __isBugged(self):
@@ -1034,3 +1348,4 @@ class TrajectoryBuilder():
             else: last = each.end_time
         
         return False
+    

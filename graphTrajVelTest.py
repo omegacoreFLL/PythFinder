@@ -21,14 +21,9 @@ def get_derivative(t: List[int], vel: List[float]):
 
 
 constrains = Constrains(dec = -30)
-traj1 = (TrajectoryBuilder(start_pose = Pose(-50, -100, 0), constrains = constrains)
-              .inLineCM(90)
-              .turnDeg(0)
-              .wait(2000)
-              .inLineCM(60)
-                    .addConstrainsTemporal(start = 2000, end = 5000, constrains = Constrains(vel = 5, acc= 31, dec = -17))
-                    #.addConstrainsDisplacement(start = 100, constrains = Constrains(vel = 5, acc= 31, dec = -17))
-                    #.addConstrainsDisplacement(start = 40, end = 90, constrains = Constrains(vel = 10, acc = 10, dec = -15))   
+traj1 = (TrajectoryBuilder(start_pose = Pose(0, -100, 0), constrains = constrains)
+              .inLineCM(130)
+                    .addConstrainsDisplacement(start = 40, end = 60, constrains = Constrains(vel = 15))
               .build())
 
 
