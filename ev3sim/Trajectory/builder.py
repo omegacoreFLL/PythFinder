@@ -55,9 +55,9 @@ class MotionState():
                  displacement: float,
                  pose: Pose, turn: bool = False):
 
-        self.velocities = velocities # [-100, 100] ; tuple -> (left, right)
+        self.velocities = velocities # (VEL, ANG_VEL) cm / s
 
-        self.time = time # ms (int)
+        self.time = time # ms
         self.displacement = displacement
         self.pose = pose
 
@@ -144,13 +144,17 @@ class Trajectory():
         self.segments = segments
 
         self.segment_number = len(self.segments)
-        self.perfect_increment = 60
+        self.perfect_increment = 40
 
 
 
-    def follow(self, sim: Simulator, perfect: bool = False, wait = True) -> None:
+    def follow(self, sim: Simulator, perfect: bool = False, 
+               wait: bool = True, steps: int = None) -> None:
         if self.trajectoryTime == 0: #empty trajectory
             return 0
+        
+        if steps is not None:
+            self.perfect_increment = steps
         
         print('\n\nFOLLOWING TRAJECTORY...')
         
@@ -1051,7 +1055,6 @@ class TrajectoryBuilder():
         total_distance, stop_distance, stop_time, start_vel = self.__buildInterruptor(self.segments[self.iterator], 
                                                                                       telemetry = False,
                                                                                       sort = False)
-        print('???')
         if total_distance is not None:
             distance = total_distance - stop_distance
             new_profile = MotionProfile(distance, constr.constrains, abs(start_vel[0]))

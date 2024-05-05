@@ -1,12 +1,34 @@
-
-from ev3sim.Components.BetterClasses.mathEx import *
-
-from ev3sim.Trajectory.feedforward import *
-from ev3sim.Trajectory.feedback import *
 from ev3sim.Trajectory.builder import *
-from ev3sim.core import *
 
 import matplotlib.pyplot as plt
+
+
+# Demo python code for plotting wheel velocities / accelerations usint matplot.
+# HOW IT WORKS:
+#       After computing a trajectory (explained in 'trajectoryGenerator.py'), it uses the collected data in
+#   the motion segments available, looping through it all to create separate lists for velocities and accelerations,
+#   as well as for the time. The derivatives are calculated algebraically with the definition: dx/dy
+#       The boolean CONNECT specifies if you want to draw lines between the plotted dots or not. Setting it to 
+#   False will enable you to spot discontinuities is graphs. If you have discontinuities on the velocity graph and
+#   you didn't interrupt intentionally any segment, then there's an issue with the code, please report it!
+#       Then we simply set the theme, colors, units, layout and names for the graphs!
+#
+# It's used to check velocity discontinuity (with a trapezoidal profile, the acceleration is always discontinuous),
+#   or just to better understand how motion profiles work
+
+
+CONNECT = False
+START_POSE = Pose(0, -100, 0)
+START_CONSTRAINS = constrains = Constrains(dec = -30)
+
+trajectory = (TrajectoryBuilder(START_POSE, START_CONSTRAINS)
+              .inLineCM(130)
+              .wait(3000)
+                    .addRelativeTemporalMarker(-1, lambda: idle)
+                    .addConstrainsDisplacement(start = 40, end = 60, constrains = Constrains(vel = 15))
+              .build())
+
+ 
 
 
 def get_derivative(t: List[int], vel: List[float]):
@@ -18,21 +40,6 @@ def get_derivative(t: List[int], vel: List[float]):
             accel = dv / dt
             return accel
     return 0
-
-
-constrains = Constrains(dec = -30)
-traj1 = (TrajectoryBuilder(start_pose = Pose(0, -100, 0), constrains = constrains)
-              .inLineCM(130)
-                    .addConstrainsDisplacement(start = 40, end = 60, constrains = Constrains(vel = 15))
-              .build())
-
-
-traj = traj1
-
-
-#for each in traj.segments:
-#    print(each.start_time, each.end_time)
-
 
 iterator = 0
 increment = 1
@@ -47,9 +54,9 @@ right_accel_points = []
 velocity = []
 
 k = TankKinematics(Constrains().TRACK_WIDTH)
-segment = traj.segments[0]
+segment = trajectory.segments[0]
 segment_time = segment.end_time
-segments_length = len(traj.segments)
+segments_length = len(trajectory.segments)
 
 
 
@@ -61,7 +68,7 @@ while iterator < segments_length:
         iterator += 1
         
         if not iterator == segments_length:
-            segment = traj.segments[iterator]
+            segment = trajectory.segments[iterator]
             segment_time = segment.end_time
         else:
             break
@@ -114,7 +121,10 @@ plt.title('{0} wheel VELOCITY'.format('left'), fontsize = 22)
 plt.xlabel('time (ms)', fontsize = 14)
 plt.ylabel('velocity (cm / s)', fontsize = 14)
 
-plt.plot(time_points, left_vel_points, color = 'green', linewidth = 3)
+if CONNECT:
+    plt.plot(time_points, left_vel_points, color = 'green', linewidth = 3)
+else: plt.scatter(time_points, left_vel_points, color = 'green', s = 1)
+
 plt.axhline(0, color = 'white', linewidth = 0.5)
 
 
@@ -124,7 +134,10 @@ plt.title('{0} wheel VELOCITY'.format('right'), fontsize = 22)
 plt.xlabel('time (ms)', fontsize = 14)
 plt.ylabel('velocity (cm / s)', fontsize = 14)
 
-plt.plot(time_points, right_vel_points, color = 'green', linewidth = 3)
+if CONNECT:
+    plt.plot(time_points, right_vel_points, color = 'green', linewidth = 3)
+else: plt.scatter(time_points, right_vel_points, color = 'green', s = 1)
+
 plt.axhline(0, color = 'white', linewidth = 0.5)
 
 
@@ -136,7 +149,10 @@ plt.title('{0} wheel ACCELERATION'.format('left'), fontsize = 22)
 plt.xlabel('time (ms)', fontsize = 14)
 plt.ylabel('acceleration (cm / s^2)', fontsize = 14)
 
-plt.plot(time_points, left_accel_points, color = 'red', linewidth = 3)
+if CONNECT:
+    plt.plot(time_points, left_accel_points, color = 'red', linewidth = 3)
+else: plt.scatter(time_points, left_accel_points, color = 'red', s = 1)
+
 plt.axhline(0, color = 'white', linewidth = 0.5)
 
 
@@ -146,22 +162,16 @@ plt.title('{0} wheel ACCELERATION'.format('right'), fontsize = 22)
 plt.xlabel('time (ms)', fontsize = 14)
 plt.ylabel('acceleration (cm / s^2)', fontsize = 14)
 
-plt.plot(time_points, right_accel_points, color = 'red', linewidth = 3)
+if CONNECT:
+    plt.plot(time_points, right_accel_points, color = 'red', linewidth = 3)
+else: plt.scatter(time_points, right_accel_points, color = 'red', s = 1)
+
 plt.axhline(0, color = 'white', linewidth = 0.5)
 
-
-
-plt.tight_layout()
 plt.subplots_adjust(wspace = 0.15, hspace = 0.4)
 
 
-#plot velocity profile
 
-plt.figure(figsize=(10, 5), facecolor = 'black')
-plt.style.use('dark_background')
-
-plt.plot(time_points, velocity, color = 'purple', linewidth = 7)
-plt.axhline(0, color = 'white', linewidth = 0.5)
 
 plt.tight_layout()
 plt.show()
