@@ -1,6 +1,5 @@
-from ev3sim.Components.BetterClasses.errorEx import *
+# general edge detector class
 
-#general edge detector class
 class EdgeDetectorEx():
     def __init__(self):
         self.__current = False
@@ -11,8 +10,8 @@ class EdgeDetectorEx():
         self.high = False
         self.low = False
     
-    def set(self, current):
-        isType([current], ["current"], [bool])
+    def set(self, 
+            current: bool):
         self.__current = current
 
     def update(self):

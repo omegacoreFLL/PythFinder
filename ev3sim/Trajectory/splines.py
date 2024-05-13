@@ -4,6 +4,13 @@ from ev3sim.Trajectory.feedforward import *
 
 from typing import List
 
+
+# file containing mathematical interpretation of polynomial splines
+#
+# not used at the moment 
+#   TODO: get splines working
+
+
 class QubicPolynomial():
     def __init__(self, n0: float, n1: float, 
                        dn0: float, dn1: float):
@@ -76,7 +83,7 @@ class QubicSpline():
         dx, dy = self.get_from_profile(t, 1).tuple()
         ddx, ddy = self.get_from_profile(t, 2).tuple()
 
-        return (((dx ** 2 + dy ** 2)**(3 / 2))) / (ddy * dx - ddx * dy)
+        return (ddy * dx - ddx * dy) / (((dx ** 2 + dy ** 2)**(3 / 2)))
             
     
     def addProfile(self, profile: MotionProfile):

@@ -1,3 +1,13 @@
+# file containing screen size data
+#
+# used for ease of writing
+#
+# contains:
+#       - default screen dimentions
+#       - limits for the screen size (could depend on the monitor size)
+#       - class to store and manage screen dimensions to satisfy the limits
+
+
 default_screen_height = 1000
 default_screen_width = 1500
 
@@ -11,7 +21,10 @@ min_screen_width = 900
 
 
 class ScreenSize():
-    def __init__(self, width = default_screen_width, height = default_screen_height):
+    def __init__(self, 
+                 width: int = default_screen_width, 
+                 height: int = default_screen_height):
+        
         self.width = 0
         self.height = 0
 
@@ -26,7 +39,10 @@ class ScreenSize():
 
         self.set(width, height)
     
-    def set(self, width = None, height = None):
+    def set(self, 
+            width: int | None = None, 
+            height: int | None = None):
+        
         #check width
         if width is None:
             self.width = default_screen_width

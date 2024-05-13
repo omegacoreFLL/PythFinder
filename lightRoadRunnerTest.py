@@ -1,5 +1,7 @@
-import numpy as np
+from ev3sim.Components.BetterClasses.mathEx import *
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 vectorize_tail = lambda f: np.vectorize(f, excluded={0})
 
@@ -167,7 +169,7 @@ def spline_param_of_disp_deriv_second(x_spline, y_spline, u):
 
 
 length = sums[-1]
-traj = accel_traj_gen(0, length, 30, 10)
+traj = accel_traj_gen(0, length, 30, 30)
 t = np.linspace(0, accel_traj_duration(traj), 1000)
 
 s = accel_traj_get_pos(traj, t)
@@ -199,7 +201,10 @@ dydtdt = (dydudu * (duds ** 2) * dsdt +
           dydu * dudsds * dsdt +
           dydu * duds * dsdtdt)
 
+velocity = []
 
+for i in range(len(dxdt)):
+    velocity.append(hypot(dxdt[i], dydt[i]))
 
 
 plt.figure(figsize=(15, 9), facecolor = 'black')
@@ -214,6 +219,6 @@ plt.grid(True)
 plt.axhline(0, color = 'white', linewidth = 1)
 plt.axvline(0, color = 'white', linewidth = 1)
 
-plt.plot(t, dydt, color='red', zorder=1, linewidth = 2)
+plt.plot(t, velocity, color='red', zorder=1, linewidth = 2)
 
 plt.show()

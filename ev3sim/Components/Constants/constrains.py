@@ -1,6 +1,13 @@
 from enum import Enum, auto
 import math
 
+# file containting constrains data
+#
+# constrains are motion limitations at a given state of time
+#
+# constrains may change along a trajectory, so this data should not be
+#   used to as the robot's REAL max velocity, which is determined
+#   by it's mechanical systems' limitations 
 
 default_max_robot_vel = 30 # cm/sec
 default_max_robot_angular_vel = math.radians(90) #rad/sec
@@ -19,10 +26,16 @@ class ConstrainsType(Enum):
 
 
 class Constrains():
-    def __init__(self, vel = default_max_robot_vel, ang_vel = default_max_robot_angular_vel,
-                 acc = default_max_robot_acc, dec = default_max_robot_dec,
-                 ang_acc = default_max_robot_ang_acc, ang_dec = default_max_robot_dec,
-                 track_width = default_track_width):
+    def __init__(self, 
+                 vel: float | int = default_max_robot_vel, 
+                 acc: float | int = default_max_robot_acc, 
+                 dec: float | int = default_max_robot_dec,
+
+                 ang_vel: float | int = default_max_robot_angular_vel,
+                 ang_acc: float | int = default_max_robot_ang_acc, 
+                 ang_dec: float | int = default_max_robot_dec,
+
+                 track_width: float | int = default_track_width):
         
         self.MAX_VEL = abs(vel)
         self.MAX_ANG_VEL = abs(ang_vel)
@@ -32,12 +45,18 @@ class Constrains():
         self.ANG_ACC = abs(ang_acc)
         self.ANG_DEC = -abs(ang_dec)
 
-        self.TRACK_WIDTH = track_width
+        self.TRACK_WIDTH = abs(track_width)
     
-    def set(self, vel = None, ang_vel = None, 
-            acc = None, dec = None, 
-            ang_acc = None, ang_dec = None,
-            track_width = None):
+    def set(self, 
+            vel: float | int | None = None, 
+            acc: float | int | None = None, 
+            dec: float | int | None = None, 
+
+            ang_vel: float | int | None = None, 
+            ang_acc: float | int | None = None, 
+            ang_dec: float | int | None = None,
+
+            track_width: float | int | None = None):
         
         if vel is not None:
             self.MAX_VEL = abs(vel)
@@ -54,10 +73,15 @@ class Constrains():
         if track_width is not None:
             self.TRACK_WIDTH = abs(track_width)
 
+    # creates a different instance to avoid unwanted modifications
     def copy(self):
-        return Constrains(self.MAX_VEL, self.MAX_ANG_VEL, 
-                          self.ACC, self.DEC, self.ANG_ACC, self.ANG_DEC,
+        return Constrains(self.MAX_VEL, self.ACC, self.DEC,  
+                          self.MAX_ANG_VEL, self.ANG_ACC, self.ANG_DEC,
                           self.TRACK_WIDTH)
+
+
+# used in constrain markers.
+# A cleaner way to store the data
 
 class VolatileConstrains():
     def __init__(self, start: float, constrains: Constrains, type: ConstrainsType):

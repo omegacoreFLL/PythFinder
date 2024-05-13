@@ -2,6 +2,16 @@ from abc import ABC, abstractmethod
 from ev3sim.Components.BetterClasses.mathEx import *
 from ev3sim.Components.Constants.constants import *
 
+# file containing robot drive kinematics
+#
+# an abstract kinematics class is used for ease of using
+#
+# for FLL purpose, the only kinematic model addressed in this file is
+#   for the two wheel differential drive (also known as 'Tank Drive').
+#   For a brief overview of the math, check out the wiki page:
+#     (https://en.wikipedia.org/wiki/Differential_wheeled_robot)
+
+
 class Kinematics(ABC):
 
     @abstractmethod

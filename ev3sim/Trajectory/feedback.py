@@ -3,6 +3,15 @@ from ev3sim.Components.BetterClasses.mathEx import *
 from ev3sim.Components.Constants.constants import *
 from ev3sim.core import *
 
+# file simulating feedback movements.
+#
+# because it's a simulator, we could've used feedforward for turning also,
+#   but the scope of this implementation was to mimic as best as we could
+#   the real behaviour of the robot. It's the reason why the robot does allways
+#   turn ~0.1° off.
+#
+# this uses a PID controller to turn the robot separately from the trajectory
+#   generated with feedback calculations.
 
 def turnDeg(deg, simulator: Simulator, 
             threshold = 0.1, 

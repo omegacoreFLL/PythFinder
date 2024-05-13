@@ -1,6 +1,16 @@
 from ev3sim.Components.BetterClasses.mathEx import *
 from ev3sim.Components.Constants.constrains import *
 
+# file containing all the feedforward control calculation.
+#
+# we use a trapezoidal motion profile (meaning velocity and acceleration constrained). It supports
+#   advanced manipulation. Specifying the start velocity enables to connect multiple motion
+#   profiles into one smooth profile, thus implementing dynamic constrains. 
+#
+# in some cases, this much freedom doesn't give the profile acc / dec to complete the distance,
+#   so it estimates the distance it can reach with the given constraines, alerting the user of
+#   the impossible case.
+
 class MotionProfile():
     def __init__(self, distance: float, constrains: Constrains, start_velocity: float = 0):
         self.constrains = constrains
@@ -91,7 +101,6 @@ class MotionProfile():
             
         return self.sign * (self.x1 + self.x2 + (self.max_vel + self.dec * (t - (self.t1 + self.t2)) / 2) * (t - (self.t1 + self.t2)))
 
-
     def get_vel(self, t: float):
         
         if t <= self.t1:
@@ -99,8 +108,7 @@ class MotionProfile():
         if t <= self.t1 + self.t2:
             return self.sign * (self.max_vel)
             
-        return self.sign * (self.max_vel + self.dec * (t - (self.t1 + self.t2)))
-        
+        return self.sign * (self.max_vel + self.dec * (t - (self.t1 + self.t2)))     
     
     def get_acc(self, t: float):
 

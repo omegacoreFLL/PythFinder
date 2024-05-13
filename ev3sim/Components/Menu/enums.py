@@ -1,5 +1,6 @@
 from enum import Enum, auto
  
+# file containing the majority of enums used for the menus
 
 class ButtonType(Enum):
     BOOL = auto()
@@ -34,6 +35,7 @@ class Selected(Enum):
     OTHER_NONE7 = auto()
     OTHER_NONE8 = auto()
 
+# menus with their respective buttons
 class MenuType(Enum):
     UPPER_BAR = [Selected.HOME_BUTTON, Selected.MENU_BUTTON]
     MAIN_MENU = [Selected.ON_MAIN_PAGE]
@@ -45,6 +47,7 @@ class MenuType(Enum):
 
     UNDEFINED = auto()
 
+# inputs with their respective display extension
 class InputType(Enum):
     DIMENSION = ' cm'
     PERCENT = '%'

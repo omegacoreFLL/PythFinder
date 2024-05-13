@@ -11,6 +11,19 @@ from ev3sim.Components.fade import *
 import pygame
 import math
 
+
+# file connecting all features into one big ecosystem of classes
+#
+# form the Simulator object, all different aspects of the simulator can be accessed and be modified
+#
+# one big feature is the implementation of dynamic constants. Any of the lower-hierarchized objects,
+#   or the user, can modify the simulator constants, and the simulator makes sure that all the objects
+#   run the latest constants available with an update system based on change detection
+#
+# the joystick logic is also run in this class, as well as all the updates, screen drawings and simulator
+#   quiting tentatives
+
+
 class Auto(Enum):
     ENTER = auto()
     EXIT = auto()

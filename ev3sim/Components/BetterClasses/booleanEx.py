@@ -7,26 +7,35 @@ class Fun(Enum):
     COMPARE = auto()
 
 
+# extended class for booleans
+
 class BooleanEx():
-    def __init__(self, value: bool):
-        self.value = value
+
+    def __init__(self, 
+                 value: bool):
+        self.__value = value
     
     def get(self):
-        return self.value
+        return self.__value
     
-    def set(self, new: bool):
-        self.value = new
+    def set(self, 
+            new: bool):
+        self.__value = new
     
     def negate(self):
-        self.value = not self.value
+        self.__value = not self.__value
     
-    def compare(self, other = True):
-        return self.value == other
+    def compare(self, 
+                other: bool = True):
+        return self.__value == other
     
-    def choose(self, fun: Fun, value = None):
+    # method including every functionalitiy
+    def choose(self, fun: Fun, 
+               value: bool | None = None):
+
         if fun == Fun.SET:
             if value is None:
-                raise Exception("choose a boolean to be 'set'")
+                raise Exception("choose a boolean to be SET")
             self.set(value)
         elif fun == Fun.GET:
             self.get()

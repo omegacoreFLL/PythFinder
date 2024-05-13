@@ -2,6 +2,13 @@ from ev3sim.Components.BetterClasses.edgeDetectorEx import *
 from ev3sim.Components.Constants.constants import *
 
 
+# file containing the Table class
+#
+# used for toggling the displaying of the FLL table
+#
+# the scale of the image depends of the source and should be tuned 
+#   everytime you change it, to match the actual real dimensions
+
 
 class Table():
     def __init__(self, constants: Constants):

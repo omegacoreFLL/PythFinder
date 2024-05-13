@@ -4,6 +4,9 @@ from ev3sim.Components.Constants.constants import *
 from enum import Enum
 import pygame
 
+# file containing user-friendly control for both joystick and keyboard buttons,
+#       which each have an afferent edge detector
+
 class Dpad(Enum):
     UP = (0, 1)
     DOWN = (0, -1)
@@ -29,7 +32,7 @@ class Controls():
         self.keyboard_detector = self.__initKeyboardDetector()
         self.joystick_detector = self.__initJoystickDetector()
 
-
+    # general use controls for different joysticks
     class Keybinds():
         def __init__(self):
             self.threshold = 0
@@ -56,6 +59,7 @@ class Controls():
             self.state = None
             self.dpad_detector = None
         
+        # set type based on the pygame's controller names
         def setType(self, joystick_type):
             match joystick_type: 
                 case "Xbox 360 Controller":
@@ -176,6 +180,7 @@ class Controls():
                 case _:
                     return None
 
+        # from raw values to enum
         def getKey(self, value: tuple):
             match value:
                 case self.turn_0:

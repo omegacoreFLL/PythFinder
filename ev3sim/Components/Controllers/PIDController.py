@@ -1,11 +1,13 @@
 from ev3sim.Components.Controllers.PIDCoefficients import *
-from ev3sim.Components.BetterClasses.errorEx import *
 from ev3sim.Components.Constants.constants import *
 import pygame
 
-#generic PID controller
+# generic PID controller
+
 class PIDController():
-    def __init__(self, coefficients: PIDCoefficients):
+    def __init__(self, 
+                 coefficients: PIDCoefficients):
+        
         self.__coeff = coefficients
 
         self.__proportional = 0
@@ -17,11 +19,12 @@ class PIDController():
         self.__past_error = 0
         self.__past_time = 0
     
-    def set(self, coefficients: PIDCoefficients):
+    def set(self, 
+            coefficients: PIDCoefficients):
         self.__coeff = coefficients
 
-    def calculate(self, error):
-        isType([error], ["error"], [[int, float]])
+    def calculate(self, 
+                  error: int | float):
         
         self.__current_time = pygame.time.get_ticks()
 

@@ -1,7 +1,11 @@
 from ev3sim.Components.Constants.constants import *
 import pygame
 
-
+# file containing a primitive approach to the fading effect
+# 
+# repetitively lowering the opacity from 100% until it reaches 0% 
+#
+# can handle text and images
 
 
 class Fade():
@@ -41,7 +45,7 @@ class Fade():
         self.obj_rectangle = self.obj.get_rect()
         self.obj_rectangle.center = self.center
     
-    def onScreen(self, screen):
+    def onScreen(self, screen: pygame.Surface):
         if self.opacity >= 0:
             current_time = pygame.time.get_ticks()
 

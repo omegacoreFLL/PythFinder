@@ -7,6 +7,10 @@ from ev3sim.Components.BetterClasses.mathEx import *
 import pygame
 import math
 
+# file containing:
+#           - default constant values, image manipulation for the interface and Constants class
+#           - default keys for joystick control
+#           - helper methods for conversion
 
 
 default_robot_image_name = 'bot_from_above'
@@ -17,6 +21,7 @@ default_robot_image_source = 'ev3sim/Images/Robot/bot_from_above.png'
 default_robot_scaling_factor = 1
 default_robot_height_cm = 20
 default_robot_width_cm = 15 
+default_robot_real_max_velocity = 27.7 # cm/s
 
 default_coordinate_system_color = "white"
 default_grid_color = (63, 63, 63) #rgb
@@ -68,7 +73,9 @@ default_backing_distance = 1
 
 
 class Constants():
-    def __init__(self, screen_size = None):
+    def __init__(self, 
+                 screen_size: ScreenSize = None):
+        
         self.recalculate = BooleanEx(False)
 
         self.PIXELS_2_DEC = 0
@@ -126,6 +133,7 @@ class Constants():
         if exists(screen_size):
             self.screen_size = screen_size
 
+    #resets all the values to default
     def default(self):
         self.PIXELS_2_DEC = default_pixels_to_decimeters
         self.FPS = default_frame_rate
@@ -181,7 +189,11 @@ class Constants():
 
         self.screen_size = ScreenSize()
     
-    def updateRobotImgSource(self, path = None, name = None, extension = None):
+    def updateRobotImgSource(self, 
+                             path = None, 
+                             name = None, 
+                             extension = None):
+        
         if path is not None:
             self.ROBOT_IMG_PATH = path
         if name is not None:
@@ -192,15 +204,20 @@ class Constants():
         self.ROBOT_IMG_SOURCE = "{0}{1}.{2}".format(self.ROBOT_IMG_PATH, 
                                                     self.ROBOT_IMG_NAME, 
                                                     self.ROBOT_IMG_EX)
+          
+    def pixelsToCm(self, 
+                   val: int):
         
-    
-    def pixelsToCm(self, val):
         return val / self.PIXELS_2_DEC * 10
 
-    def cmToPixels(self, val):
+    def cmToPixels(self, 
+                   val: int | float):
+        
         return val * self.PIXELS_2_DEC / 10
     
-    def pixelsToCmPoint(self, point: Point):
+    def pixelsToCmPoint(self, 
+                        point: Point):
+        
         return Point(self.pixelsToCm(point.x), self.pixelsToCm(point.y))
         
     

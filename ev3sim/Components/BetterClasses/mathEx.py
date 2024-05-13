@@ -5,7 +5,9 @@ import time
 
 EPSILON = 1e-5
 
-#---Point--- and ---Pose--- classes, used for localisation
+# enhanced math methods
+# Point and Pose classes, used for localisation
+
 class Point:
     def __init__(self, x = 0, y = 0):
         self.x = x
@@ -82,7 +84,7 @@ class Pose(Point):
 
 
 
-#enhanced math functions
+
 def rotateMatrix(x, y, angle):
     rotated_x = x * math.cos(angle) - y * math.sin(angle)
     rotated_y = x * math.sin(angle) - y * math.cos(angle)

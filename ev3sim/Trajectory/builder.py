@@ -254,7 +254,7 @@ class Trajectory():
                 else:
                     left, right = k.inverseKinematics(last_state.velocities[0], last_state.velocities[1])
 
-                    f.write('{0} {1} {2} {3} '.format(
+                    f.write('{0} {1} {2} {3}\n'.format(
                         round(left * 100 / REAL_MAX_VEL, 2),
                         round(right * 100 / REAL_MAX_VEL, 2),
                         round(last_state.pose.head, 2),

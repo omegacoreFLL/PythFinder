@@ -1,10 +1,20 @@
+# helper class to store and manage PID coefficients
+
 class PIDCoefficients():
-    def __init__(self, kP = 0, kI = 0, kD = 0):
+    def __init__(self, 
+                 kP: int | float = 0, 
+                 kI: int | float = 0, 
+                 kD: int | float = 0):
+        
         self.kP = kP
         self.kI = kI
         self.kD = kD
     
-    def set(self, kP = None, kI = None, kD = None):
+    def set(self,
+            kP: int | float | None = None, 
+            kI: int | float | None = None, 
+            kD: int | float | None = None):
+        
         if kP is not None:
             self.kP = kP
         if kI is not None:

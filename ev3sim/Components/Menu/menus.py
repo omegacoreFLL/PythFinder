@@ -6,9 +6,19 @@ from abc import ABC, abstractmethod
 from typing import List
 import pygame
 
+# file containing:
+#       - abstract menu containing more between-button movement logic
+#       - submenu: representing all the little menus which make up the
+#                  overall menu network
+
 class AbsMenu(ABC):
-    def __init__(self, name: MenuType, constants: Constants, background: pygame.Surface | None, 
-                 always_display: bool = False, overlap: bool = False):
+    def __init__(self, 
+                 name: MenuType, 
+                 constants: Constants, 
+                 background: pygame.Surface | None, 
+                 always_display: bool = False, 
+                 overlap: bool = False):
+        
         self.name = name
         self.ENABLED = BooleanEx(False)
         self.constants = constants
@@ -51,16 +61,17 @@ class AbsMenu(ABC):
             move_to = button.move(direction)
             
             try: 
-                next = button.getNext()
-                if next is not None:
+                next = button.getNext() # if it's a dynamic button and is pressed
+                if next is not None:    # get the button linked with the press
                     FINAL = next
             except: pass
 
-            if move_to is not None:
-                FINAL = move_to
+            if move_to is not None: # otherwise, if you detect movement on the current button
+                FINAL = move_to     # get the linked button for the specific direction
 
         return FINAL
 
+    # all the toggle buttons values in a list
     def getToggles(self):
         list = []
         for button in self.buttons:
@@ -75,15 +86,15 @@ class AbsMenu(ABC):
             except: pass
 
     def move(self, direction: Dpad | None):
-        for button in self.buttons:
+        for button in self.buttons:  # for each button, checks if it's the selected one, then moves to it
             next = button.move(direction)
             if next is not None:
                 return next
         return None
 
-    def getNext(self):
-        for button in self.buttons:
-            try: 
+    def getNext(self): 
+        for button in self.buttons:  # checks each button, and if it's a dynamic button and it's pressed,
+            try:                     #      gets the next menu it links to
                 next = button.getNext()
                 if next is not None:
                     return next
@@ -104,6 +115,9 @@ class AbsMenu(ABC):
     
 
 class Submenu(AbsMenu):
-    def __init__(self, name: MenuType, constants: Constants, background: pygame.Surface | None, 
-                 always_display: bool = False, overlap: bool = False):
+    def __init__(self, 
+                 name: MenuType, constants: Constants, 
+                 background: pygame.Surface | None, 
+                 always_display: bool = False, 
+                 overlap: bool = False):
         super().__init__(name, constants, background, always_display, overlap)

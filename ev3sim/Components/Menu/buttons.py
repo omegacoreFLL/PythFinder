@@ -7,13 +7,51 @@ from abc import ABC, abstractmethod
 from typing import List
 import pygame
 
+# file used for managing menu button-logic
+#
+# contains:
+#       - abstract class to be inherited when creating a different button type.
+#            Moving through the buttons is done with a dictionary, which 'links'
+#            every possible direction (UP, DOWN, LEFT, RIGHT) with another button.
+#            
+#            Other feature is the remembrance. This is another dictionary for all 4
+#            directions, which 'remembers' the button which you came from last time.
+#            It's basically an inverse link, but if there are more buttons linked to
+#            the current button from that direction, it remembers the last one
+#            selected. JUST if you came from that button.
+#
+#            Links for different states are also used with toggle buttons. These enable
+#            different connections when ON/OFF. These are the first crietrion looked 
+#            when moving from a button to another.
+#            
+#            Remembrance is second to be looked, then it's the normal links. If none of
+#            these exist, you do nothing trying to move in that direction.
+# 
+#       - empty button: used only for moving through buttons. Can't be pressed
+#                       but can be selected
+#       - dynamic button: used for faster moving through buttons. When clicked, they
+#                         automatically select other button
+#       - toggle button: used for ON/OFF menu applications. Supports different
+#                        links for each state
+#       - input button: it's a modified toggle button. It gets input from the
+#                       keyboard. It supports: cms, percents, colors, paths and
+#                       fonts, tho not all are implemented
+#       - bool button: maybe the most simple button, is the base of the toggle
+#                      button. Just sets constants ON/OFF, doesn't have any 
+#                      impact on the interface appearance.
+
+
 #CONVENTION: surface list goes from smaller -> larger value (ex: FALSE -> TRUE )
 class AbsButton(ABC):
-    def __init__(self, name: Selected,
+    def __init__(self, 
+                 name: Selected,
                  quadrant_surface: pygame.Surface | None, 
                  title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  selected_title_surface: List[pygame.Surface] | pygame.Surface | None,
-                 value = None, size: int | None = None, font = default_system_font) -> None:
+                 value = None, 
+                 size: int | None = None, 
+                 font = default_system_font) -> None:
+        
         self.name = name
         self.selected = None
         self.index = 0
@@ -33,6 +71,7 @@ class AbsButton(ABC):
         except: self.original = value
 
         self.raw_value = value
+
         try: self.display_value = self.font.render(str(value), True, default_text_color)
         except: self.display_value = None
 
@@ -57,6 +96,7 @@ class AbsButton(ABC):
         self.type = self.getType()
 
         self.next = None
+
         self.links = {
             Dpad.UP: None,
             Dpad.RIGHT: None,
@@ -76,6 +116,7 @@ class AbsButton(ABC):
     def default(self, default: bool):
         ...
 
+    # gets the value stored by the button
     def getType(self) -> ButtonType:
         if isinstance(self.raw_value, (int, float)):
             return ButtonType.INT
@@ -85,7 +126,11 @@ class AbsButton(ABC):
             return ButtonType.STRING
         return ButtonType.UNDEFINED
 
-    def link(self, key: Dpad | List[Dpad], value: Selected | List[Selected], next = None):
+    # links directions to other buttons
+    def link(self, 
+             key: Dpad | List[Dpad], 
+             value: Selected | List[Selected], 
+             next: Selected | None = None):
         try:
             if len(key) == len(value):
                 for each in range(len(key)):
@@ -95,23 +140,34 @@ class AbsButton(ABC):
         if isinstance(next, Selected):
             self.next = next
     
-    def remember(self, key: Dpad | List[Dpad], value: Selected | List[Selected]):
-        try:
-            if len(key) == len(value):
-                for each in range(len(key)):
-
-                    if value[each] is None:
-                        self.remember_links[key[each]][0] = False
-                    else: self.remember_links[key[each]][0] = True
-
-                    self.remember_links[key[each]][1] = value[each]
-        except: 
+    # remembers the button who led to the current button, pressing an arbitrary key
+    #
+    # default value to remember is needed, as it's how it knows to remember for that specific key
+    def remember(self, 
+                 key: Dpad | List[Dpad], 
+                 value: Selected | List[Selected]):
+        
+        if isinstance(key, Dpad):
             if value is None:
                 self.remember_links[key][0] = False
             else: self.remember_links[key][0] = True
 
             self.remember_links[key][1] = value
+            return None
+        
+        if len(key) == len(value):
+            for each in range(len(key)):
 
+                if value[each] is None:
+                    self.remember_links[key[each]][0] = False
+                else: self.remember_links[key[each]][0] = True
+
+                self.remember_links[key[each]][1] = value[each]
+        
+
+    # remembers the the same buttons as the other button
+    # 
+    # helps chaining remember relationships
     def rememberAsButton(self, other):
         if isinstance(other, AbsButton):
             self.remember_other = other
@@ -141,17 +197,17 @@ class AbsButton(ABC):
         ...
     
     def move(self, direction: Dpad | None) -> Selected:
-        if self.selected is self.name:
+        if self.selected is self.name:  # if this button is selected
             try: 
-                if self.on()[1]:
-                    return self.toggle_links[direction]
-                raise Exception("wise words here")
+                if self.on()[1]:  # only for toggle buttons
+                    return self.toggle_links[direction]  # other links when toggle is on
+                raise Exception("wise words here")  # handle usual links when toggle is off
             except:
                 try:
-                    if self.remember_other is not None:
+                    if self.remember_other is not None:  # remembrance has priority
                         if self.remember_other.remember_links[direction][0]:
                             return self.remember_other.remember_links[direction][1]
-                    elif self.remember_links[direction][0]:
+                    elif self.remember_links[direction][0]: # if there is nothing to remember, use the default link
                         return self.remember_links[direction][1]
                 
                     return self.links[direction]
@@ -171,10 +227,14 @@ class AbsButton(ABC):
 
 
 class EmptyButton(AbsButton):
-    def __init__(self, name: Selected, quadrant_surface: pygame.Surface | None, 
+    def __init__(self, 
+                 name: Selected, 
+                 quadrant_surface: pygame.Surface | None, 
                  title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  selected_title_surface: List[pygame.Surface] | pygame.Surface | None, 
-                 value=None, size=None, font=default_system_font) -> None:
+                 value = None, 
+                 size = None, 
+                 font = default_system_font) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
     
     def default(self, default: bool):
@@ -199,10 +259,14 @@ class EmptyButton(AbsButton):
             self.display_title = self.title
 
 class DynamicButton(AbsButton):
-    def __init__(self, name: Selected, quadrant_surface: pygame.Surface | None, 
+    def __init__(self, 
+                 name: Selected, 
+                 quadrant_surface: pygame.Surface | None, 
                  title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  selected_title_surface: List[pygame.Surface] | pygame.Surface | None, 
-                 value=None, size=None, font=default_system_font) -> None:
+                 value = None, 
+                 size = None, 
+                 font = default_system_font) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
 
         self.go_next = False
@@ -212,7 +276,7 @@ class DynamicButton(AbsButton):
             return 0
         ...
     
-    def getNext(self):
+    def getNext(self) -> Selected:
         if self.go_next:
             self.go_next = False
             return self.next
@@ -238,10 +302,15 @@ class DynamicButton(AbsButton):
             self.display_title = self.title
 
 class ToggleButton(AbsButton):
-    def __init__(self, name: Selected, quadrant_surface: pygame.Surface | None, 
+    def __init__(self, 
+                 name: Selected, 
+                 quadrant_surface: pygame.Surface | None, 
                  title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  selected_title_surface: List[pygame.Surface] | pygame.Surface | None, 
-                 toggle, value=None, size=None, font=default_system_font) -> None:
+                 toggle, 
+                 value = None, 
+                 size = None, 
+                 font = default_system_font) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
 
         self.toggle = toggle
@@ -293,12 +362,15 @@ class ToggleButton(AbsButton):
             self.display_title = self.title
 
 class InputButton(AbsButton):
-    def __init__(self, name: Selected, 
+    def __init__(self, 
+                 name: Selected, 
                  quadrant_surface: pygame.Surface | None, 
                  title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  selected_title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  constants: Constants,
-                 value=None, size = None, font = default_system_font) -> None:
+                 value = None, 
+                 size = None, 
+                 font = default_system_font) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
 
         self.WRITING = EdgeDetectorEx()
@@ -469,10 +541,13 @@ class InputButton(AbsButton):
                     self.displayValue(self.input)
 
 class BoolButton(AbsButton):
-    def __init__(self, name: Selected, quadrant_surface: pygame.Surface | None, 
+    def __init__(self, 
+                 name: Selected, quadrant_surface: pygame.Surface | None, 
                  title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  selected_title_surface: List[pygame.Surface] | pygame.Surface | None, 
-                 value=None, size=None, font=default_system_font) -> None:
+                 value = None, 
+                 size = None, 
+                 font = default_system_font) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
         self.selected = None
         self.getIndex()

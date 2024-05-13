@@ -4,6 +4,27 @@ from ev3sim.Components.Constants.constants import *
 import pygame 
 
 
+# file containing the robot's trail logic.
+#
+# we define the trail as the array of points representing positions in time, stored in a list.
+#
+# because loop time can mess up the appearance of the trail, the solution we came up was drawing a line between
+#   each 2 consecutive points to ensure continuity. This further expanded to the notions of trail width and trail
+#   segments.
+#
+# trail segments are trail parts, characterized by close-up points. We defined a threshold for a min
+#   distance (in pixels) between two consecutive points, which delimits individual segments. Each segment
+#   has a color and a width. The only way to get a new segment is, somehow, register a position further 
+#   than the threshold, which can be done by turning ON and OFF trail drawing.
+#
+# trail can have a maximum length, removing the first point from the list when reached, tho this length can
+#   be set to infinity and not use this feature. 
+#
+# no duplicate points are stored in the list.
+#
+# after a time threshold of not moving, the trail can start erase itself. This can be stopped with a setting
+
+
 class Segment():
     def __init__(self, constants: Constants, points = None):
         if exists(points):
@@ -38,7 +59,7 @@ class Trail():
     
 
 
-    def eraseSegment(self, number):
+    def eraseSegment(self, number: int):
         self.segments.pop(number - 1)
         self.current_segment -= 1
     
@@ -48,7 +69,9 @@ class Trail():
 
 
 
-    def drawTrail(self, screen, pose):
+    def drawTrail(self, 
+                  screen: pygame.Surface, 
+                  pose: Pose):
         if self.draw_trail.compare():
             self.buildTrail(pose)
 
@@ -59,7 +82,7 @@ class Trail():
             for segment in self.segments:
                 segment.draw(screen)
     
-    def buildTrail(self, pose):
+    def buildTrail(self, pose: Pose):
         if self.constants.FREEZE_TRAIL.compare():
             return 0
         
@@ -91,7 +114,7 @@ class Trail():
         
         self.past_trail_length = trail_length
 
-    def shouldErasePoint(self, length):
+    def shouldErasePoint(self, length: int):
         if self.constants.ERASE_TRAIL.compare(False):
             return False
         

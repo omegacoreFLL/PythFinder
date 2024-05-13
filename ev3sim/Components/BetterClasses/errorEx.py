@@ -1,5 +1,8 @@
-#custom instance-checking functions. For easier debugging
+# custom instance-checking method. For easier debugging
+# not used in the code
+
 def isType(obj, name, required_types):
+    
     if not isinstance(obj, list):
         __throw("obj", list)
     if not isinstance(name, list):

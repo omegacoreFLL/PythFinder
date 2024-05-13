@@ -8,8 +8,23 @@ from ev3sim.Components.trail import *
 import pygame
 
 
+# file containing robot information, such as:
+#   position, velocity, dimension, image
+#
+# it's used for a differential two wheel drive, but can be
+# extended to any type of wheeled robot with some modifications
+#
+# it incorporates arc based odometry, calculating it's position 
+# on the field. For a more in-depth explanation, check out this paper:
+#       (https://medium.com/@nahmed3536/wheel-odometry-model-for-differential-drive-robotics-91b85a012299)
+#
+# all the calculations are made with the wheel linear and angular velocity,
+# but indivitual wheel speeds can be computed if needed
+
+
+
 class Robot():
-    def __init__(self, constants: Constants):
+    def __init__(self, constants: Constants, kinematics: Kinematics = TankKinematics()):
 
         self.rotating_instance = None
         self.rectangle = None
@@ -39,22 +54,15 @@ class Robot():
         self.head_controller = PIDController(constants.COEFF_JOY_HEAD)
 
         self.constants = constants
-        self.constrains = 0
+        self.constrains = Constrains()
 
         self.recalculate()
-        self.setConstrains(Constrains())
 
         self.window_pose = self.toWindowCoords(self.pose)
         
         self.trail = Trail(self.constants)
-        self.kinematics = TankKinematics(self.constrains.TRACK_WIDTH)
+        self.kinematics = kinematics
 
-
-
-    def setConstrains(self, constrains: Constrains):
-        self.constrains = constrains
-
-        self.kinematics = TankKinematics(self.constrains.TRACK_WIDTH)
 
     def recalculate(self):
         self.head_controller.set(self.constants.COEFF_JOY_HEAD)
@@ -85,27 +93,30 @@ class Robot():
 
 
 
-    def toFieldCoords(self, pose):
+    def toFieldCoords(self, pose: Pose):
         return Pose((self.constants.screen_size.half_h - pose.y) * 10 / self.constants.PIXELS_2_DEC, 
                     (pose.x - self.constants.screen_size.half_w) * 10 / self.constants.PIXELS_2_DEC, 
                     normalizeDegrees(pose.head - 90))
     
-    def toWindowCoords(self, pose):
+    def toWindowCoords(self, pose: Pose):
         return Pose(self.constants.screen_size.half_w + pose.y * self.constants.PIXELS_2_DEC / 10, 
                     self.constants.screen_size.half_h - pose.x * self.constants.PIXELS_2_DEC / 10, 
                     normalizeDegrees(pose.head + 90))
     
-    def toFieldPoint(self, point):
+    def toFieldPoint(self, point: Point):
         return ((self.constants.screen_size.half_h - point.y) * 10 / self.constants.PIXELS_2_DEC, 
                 (point.x - self.constants.screen_size.half_w) * 10 / self.constants.PIXELS_2_DEC)
 
-    def toWindowPoint(self, point):
+    def toWindowPoint(self, point: Point):
         return (self.constants.screen_size.half_w + point.y * self.constants.PIXELS_2_DEC / 10, 
                 self.constants.screen_size.half_h - point.x * self.constants.PIXELS_2_DEC / 10)
 
  
  
-    def setVelocities(self, vel, ang_vel):
+    def setVelocities(self, 
+                      vel: float | int, 
+                      ang_vel: float | int):
+        
         if abs(vel) < 0.01 and abs(ang_vel) < 0.01:
             self.is_stopped.set(True)
         else: self.is_stopped.set(False)
@@ -116,7 +127,7 @@ class Robot():
         self.velocity = self.constants.cmToPixels(vel) * 10 / self.constants.PIXELS_2_DEC
         self.angular_velocity = ang_vel
 
-    def setPoseEstimate(self, pose):
+    def setPoseEstimate(self, pose: Pose):
         self.pose = self.past_pose = Pose(pose.x, pose.y, normalizeDegrees(pose.head))
         
         self.window_pose = self.toWindowCoords(self.pose)
@@ -127,7 +138,7 @@ class Robot():
     def zeroDistance(self):
         self.distance = 0
 
-    def update(self, time):
+    def update(self, time: int):
         self.getWheelSpeeds()
 
         x, y, head = self.pose.x, self.pose.y, self.pose.head
@@ -176,7 +187,7 @@ class Robot():
 
 
 
-    def onScreen(self, screen):
+    def onScreen(self, screen: pygame.Surface):
         self.__drawPose(screen)
         self.trail.drawTrail(screen, self.window_pose)
         self.__drawRobot(screen)
@@ -191,7 +202,7 @@ class Robot():
 
 
 
-    def __drawRobot(self, screen):
+    def __drawRobot(self, screen: pygame.Surface):
         self.rotating_instance = pygame.transform.rotate(self.rotating_instance, 
                         normalizeDegrees(360 - self.window_pose.head))
 
@@ -203,7 +214,7 @@ class Robot():
 
         self.rotating_instance = self.image
 
-    def __drawPose(self, screen):
+    def __drawPose(self, screen: pygame.Surface):
         coords = self.pose_font.render("x: {:.2f}  y: {:.2f} h: {:.2f}".format(self.pose.x, self.pose.y, self.pose.head), 
                                 True, self.constants.TEXT_COLOR)
 
@@ -212,10 +223,10 @@ class Robot():
 
         screen.blit(coords, coords_rectangle)
     
-    def __drawBorder(self, screen):
+    def __drawBorder(self, screen: pygame.Surface):
         pygame.draw.lines(screen, "yellow", True, self.__findBorder(self.window_pose), 3)
- 
-    def __drawCursor(self, screen):
+    
+    def __drawCursor(self, screen: pygame.Surface):
         x, y = pygame.mouse.get_pos()
         to_field = self.toFieldPoint(Point(x, y))
         coords = self.pose_font.render("x: {:.2f}  y: {:.2f}".format(to_field[0], to_field[1]), 
@@ -226,7 +237,7 @@ class Robot():
 
         screen.blit(coords, coords_rectangle)
 
-    def __findBorder(self, pose):
+    def __findBorder(self, pose: Pose):
         border = self.image.get_rect(center = (pose.x, pose.y))
 
         pivot = pygame.math.Vector2(pose.x, pose.y)
@@ -239,6 +250,7 @@ class Robot():
         return [topLeft, topRight, bottomRight, bottonLeft]
 
 
+    # debugging
     def printPose(self):
         print("\nx:{0} y:{1} head:{2}".format(round(self.pose.x, 2), 
                                             round(self.pose.y, 2), 

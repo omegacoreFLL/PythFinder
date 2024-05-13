@@ -6,20 +6,26 @@ from ev3sim.Components.Menu.enums import *
 from ev3sim.Components.controls import *
 import pygame
 
+# file combining all the logic for the menu
 
 
 class Menu(AbsMenu):
-    def __init__(self, name: MenuType, constants: Constants, background: pygame.Surface | None, 
-                 always_display: bool = False, overlap: bool = False):
+    def __init__(self, 
+                 name: MenuType, 
+                 constants: Constants, 
+                 background: pygame.Surface | None, 
+                 always_display: bool = False, 
+                 overlap: bool = False):
+
         super().__init__(name, constants, background, always_display, overlap)
 
-        self.selected = Selected.ON_MAIN_PAGE
+        self.selected = Selected.ON_MAIN_PAGE # default selection when entering the menu
 
         self.clicked = False
         self.value = '_'
 
-        self.create()
-        self.recalculate()
+        self.create() # creates each button for each menu
+        self.recalculate() # calculates the dimension of each button's afferent image
 
         self.menus = [self.main_menu, self.robot_menu, self.other_menu, self.upper_bar, self.selection_menu] 
         self.main_menu.ENABLED.set(True)
@@ -296,7 +302,7 @@ class Menu(AbsMenu):
         self.other_menu.backgroundCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h))
 
 
-
+    # called everytime when reentering the menu
     def reset(self):
         self.selected = Selected.ON_MAIN_PAGE
         self.enable()
@@ -321,12 +327,12 @@ class Menu(AbsMenu):
 
 
     def enable(self):
-        #first check in overlapping is allowed
-        for menu in self.menus:
+        
+        for menu in self.menus: # first check in overlapping is allowed
             if self.selected in menu.name.value and (menu.always_display or menu.overlap):
                 return 0
 
-        for menu in self.menus:
+        for menu in self.menus: # else shut down every other menu, keep the selected one
             menu.resetToggles()
 
             if self.selected in menu.name.value:
@@ -347,31 +353,31 @@ class Menu(AbsMenu):
         key = self.__updatePressedDpad()
         moved = False
 
-        for menu in self.menus:
+        for menu in self.menus: # loop through each menu
             menu.update(self.selected, self.clicked, default = self.default, value = self.value)
             toggles = menu.getToggles()
 
-            for item in toggles:
+            for item in toggles: # enable all the menus the toggle buttons say you to do
                 for each in self.menus:
                     if item[0] is each.name:
                         each.ENABLED.set(item[1])
                 
 
-            next = menu.updateSelections(key)
-            if next is not None and not moved: 
+            next = menu.updateSelections(key) # gets the next button to move to
+            if next is not None and not moved: # you can move only once / loop, because otherwise things go boom
                 
                 if key is not None:
                     inverse = Controls.Keybinds.inverse(key)
-                    for each in self.menus:
-                        for button in each.buttons:
-                            if button.remember_links[inverse][0] and button.name is next:
+                    for each in self.menus: # check in all the menus, in all the buttons
+                        for button in each.buttons: # the desired next button, to see if has to remember the move
+                            if button.remember_links[inverse][0] and button.name is next: 
                                 try: 
                                     if not button.on()[1]:
-                                     raise("wise words here")
+                                        raise("wise words here")
                                 except: button.remember_links[inverse][1] = self.selected
 
                 self.selected = next
-                self.enable()
+                self.enable() # update menus
                 moved = True
 
             menu.onScreen(screen)
