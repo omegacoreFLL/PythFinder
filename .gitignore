@@ -2,12 +2,13 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,visualstudiocode,dotsettings,images,python
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,visualstudiocode,dotsettings,images,python
 
+testing/
+
 ### DotSettings ###
 *.DotSettings
 
 ### Images ###
 # JPEG
-*.jpeg
 *.jpe
 *.jif
 *.jfif
