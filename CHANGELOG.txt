@@ -1,0 +1,47 @@
+Change Log
+==========
+
+
+0.0.1 (30/03/2024)
+------------------
+- First 'official' release of the EV3 enhanced hardware code (current 'pythfinder-quickstart').
+- It includes: 
+    * on-brick button managing;
+    * a robot run handler;
+    * led control;
+    * robot localisation;
+    * pure feedback-approach for pathing;
+    * PID controller;
+    * edge detector;
+
+NOTE: This release is not part of the library, it's external code for EV3 robots,
+      for it's usage it needs to be copied in the robot code folder
+
+
+0.0.2 (UNRELEASED)
+------------------
+- Creating a separate simulator project, used for visualising robot's motion.
+- Downsides:
+    * limited use, can't directly influence robot's real life motion;
+    * needs the the same code from the robot's project to be translated 
+      (micropython to python and vice versa);
+    * very limited user-friendly interface interraction;
+    * hardcoded > abstraction;
+
+
+0.0.3 ()
+-----------------
+- First easy-use version out of all.
+- Improvements:
+    * adding feedforward approach through complex trajectory building techniques,
+      with velocity-constrained motion profiles, assuring continuity, for more 
+      precise applications;
+    * markers, interruptors and volatile constrains, which are more or less
+      modifiers for the trajectory's behaviour. Markers enable you to perform
+      multithreading-related tasks inside the trajectory;
+    * in-game menu for easier manipulation of constants (NOT FULLY IMPLEMENTED)
+    * migrating to more complex abstraction for elements such as the menu or the
+      actual robot 
+    * PS4 and PS5 controllers are now supported, but not any Nintendo device
+    * visualisaltion of the velocity and acceleration profiles using matlib
+    
