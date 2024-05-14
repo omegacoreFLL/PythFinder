@@ -6,7 +6,7 @@ setup(
     license='MIT',
     author='Contraș Adrian',
     author_email='omegacoresincai@gmail.com',
-    description=open('README.md').read() + '\n\n' + open('CHANGELOG.txt').read(),
+    description='Motion Planning library designed for FLL teams',
     packages=find_packages(),
     keywords=[
         'motion-planning',
