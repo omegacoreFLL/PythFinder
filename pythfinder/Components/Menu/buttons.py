@@ -370,7 +370,8 @@ class InputButton(AbsButton):
                  constants: Constants,
                  value = None, 
                  size = None, 
-                 font = default_system_font) -> None:
+                 font = default_system_font,
+                 limit: int = math.inf) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
 
         self.WRITING = EdgeDetectorEx()
@@ -380,7 +381,9 @@ class InputButton(AbsButton):
         self.type = None
         self.dimension = None
         self.selected = None
+        self.original_value = None
         self.input = '_'
+        self.limit = limit
     
     def setInputType(self, type: InputType, dimension: tuple | int):
         self.type = type
@@ -420,7 +423,10 @@ class InputButton(AbsButton):
             suffix = self.type.value
         else: suffix = ''
 
-        self.display_value = self.font.render(str(value) + suffix, True, default_text_color)
+        if len(str(value)) > self.limit:
+            self.display_value = self.font.render('...' + str(value)[-self.limit:] + suffix, True, default_text_color)
+        else: self.display_value = self.font.render(str(value) + suffix, True, default_text_color)
+
         self.display_value_rect = self.display_value.get_rect()
         try: self.display_value_rect.center = self.value_center
         except: pass
@@ -460,8 +466,11 @@ class InputButton(AbsButton):
                     setattr(self.constants, self.name.name, self.raw_value)
                 except: pass
         
+        if not self.original_value == getattr(self.constants, self.name.name):
+            print(self.original_value, getattr(self.constants, self.name.name))
 
-        self.constants.recalculate.set(True)
+            self.original_value = getattr(self.constants, self.name.name)
+            self.constants.recalculate.set(True)
         self.displayValue(self.raw_value)
 
     

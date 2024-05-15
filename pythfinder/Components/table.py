@@ -39,7 +39,7 @@ class Table():
         self.width_in_pixels = self.constants.cmToPixels(fll_table_width_cm)
         self.height_in_pixels =  self.constants.cmToPixels(fll_table_height_cm)
 
-    def onScreen(self, screen):
+    def onScreen(self, screen: pygame.Surface):
         self.ENABLE.set(self.constants.DRAW_TABLE.get())
         self.ENABLE.update()
 
@@ -56,5 +56,8 @@ class Table():
             self.constants.recalculate.set(True)
         
         elif self.ENABLE.falling:
-            self.constants.default()
+            self.constants.screen_size.set(self.last_screen_size[0],
+                                           self.last_screen_size[1])
+            self.constants.PIXELS_2_DEC = self.last_pixels_2_dec
+
             self.constants.recalculate.set(True)

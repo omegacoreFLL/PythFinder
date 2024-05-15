@@ -173,6 +173,7 @@ class Robot():
                 out_of_screen = out and out_of_screen
 
             if out_of_screen:
+                print("\n\n✨ achievement unlocked: where am I? ✨")
                 x, y, head, delta_x, delta_y, delta_head = 0, 0, 0, 0, 0, 0
                 
 

@@ -146,6 +146,7 @@ class Menu(AbsMenu):
                                 title_surface = img_robot_image_path,
                                 selected_title_surface = img_selected_robot_image_path,
                                 size = 40, value = self.constants.ROBOT_IMG_SOURCE,
+                                limit = 40,
                                 constants = self.constants)
         
         self.ROBOT_WIDTH = InputButton(name = Selected.ROBOT_WIDTH,
@@ -227,10 +228,11 @@ class Menu(AbsMenu):
                                     title_surface = [img_screen_border_off, img_screen_border_on],
                                     selected_title_surface = [img_selected_screen_border_off, img_selected_screen_border_on])
 
-        self.NONE4 = EmptyButton(name = Selected.OTHER_NONE4,
+        self.DRAW_TABLE = BoolButton(name = Selected.DRAW_TABLE,
+                                value = self.constants.DRAW_TABLE,
                                 quadrant_surface = img_other_quadrant,
-                                title_surface = img_none,
-                                selected_title_surface = img_selected_none)
+                                title_surface = [img_draw_table_off, img_draw_table_on],
+                                selected_title_surface = [img_selected_draw_table_off, img_selected_draw_table_on])
         
         self.NONE5 = EmptyButton(name = Selected.OTHER_NONE5,
                                 quadrant_surface = img_other_quadrant,
@@ -258,8 +260,8 @@ class Menu(AbsMenu):
         self.ROBOT_BORDER.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
                                 value = (Selected.FIELD_CENTRIC, Selected.OTHER_NONE6, Selected.SCREEN_BORDER, None))
         self.SCREEN_BORDER.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
-                                value = (Selected.ROBOT_BORDER, Selected.OTHER_NONE7, Selected.OTHER_NONE4, None))
-        self.NONE4.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
+                                value = (Selected.ROBOT_BORDER, Selected.OTHER_NONE7, Selected.DRAW_TABLE, None))
+        self.DRAW_TABLE.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
                                 value = (Selected.SCREEN_BORDER, Selected.OTHER_NONE8, None, None))
         
         self.NONE5.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
@@ -269,7 +271,7 @@ class Menu(AbsMenu):
         self.NONE7.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
                                 value = (Selected.OTHER_NONE6, None, Selected.OTHER_NONE8, Selected.SCREEN_BORDER))
         self.NONE8.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
-                                value = (Selected.OTHER_NONE7, None, None, Selected.OTHER_NONE4))
+                                value = (Selected.OTHER_NONE7, None, None, Selected.DRAW_TABLE))
 
         self.other_menu = Submenu(MenuType.OTHER_MENU, self.constants, img_general_menu)
 
@@ -278,8 +280,8 @@ class Menu(AbsMenu):
         self.FIELD_CENTRIC.titleCenter((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 140))
         self.ROBOT_BORDER.titleCenter((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 10))
         self.SCREEN_BORDER.titleCenter((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 120))
-
-        self.NONE4.titleCenter((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 250))
+        self.DRAW_TABLE.titleCenter((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 250))
+        
         self.NONE5.titleCenter((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 145))
         self.NONE6.titleCenter((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 15))
         self.NONE7.titleCenter((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 115))
@@ -289,15 +291,15 @@ class Menu(AbsMenu):
         self.FIELD_CENTRIC.quadrantCenter((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 150))
         self.ROBOT_BORDER.quadrantCenter((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 20))
         self.SCREEN_BORDER.quadrantCenter((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 110))
-
-        self.NONE4.quadrantCenter((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 240))
+        self.DRAW_TABLE.quadrantCenter((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 240))
+        
         self.NONE5.quadrantCenter((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 150))
         self.NONE6.quadrantCenter((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 20))
         self.NONE7.quadrantCenter((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 110))
         self.NONE8.quadrantCenter((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 240))
 
 
-        self.other_menu.setButtons([self.FIELD_CENTRIC, self.ROBOT_BORDER, self.SCREEN_BORDER, self.NONE4,
+        self.other_menu.setButtons([self.FIELD_CENTRIC, self.ROBOT_BORDER, self.SCREEN_BORDER, self.DRAW_TABLE,
                                     self.NONE5, self.NONE6, self.NONE7, self.NONE8])
         self.other_menu.backgroundCenter((self.constants.screen_size.half_w, self.constants.screen_size.half_h))
 

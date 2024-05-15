@@ -396,6 +396,11 @@ img_screen_border_off_source = "Menu/Other/ScreenBorder/screen_border_off.png"
 img_selected_screen_border_on_source = "Menu/Other/ScreenBorder/selected_screen_border_on.png"
 img_selected_screen_border_off_source = "Menu/Other/ScreenBorder/selected_screen_border_off.png"
 
+img_draw_table_on_source = "Menu/Other/DrawTable/draw_table_on.png"
+img_draw_table_off_source = "Menu/Other/DrawTable/draw_table_off.png"
+img_selected_draw_table_on_source = "Menu/Other/DrawTable/selected_draw_table_on.png"
+img_selected_draw_table_off_source = "Menu/Other/DrawTable/selected_draw_table_off.png"
+
 
 img_scale_source = "Menu/Robot/scale.png"
 img_width_source = "Menu/Robot/width.png"
@@ -463,6 +468,11 @@ img_screen_border_off = pygame.image.load(os.path.join(device_relative_path, img
 img_selected_screen_border_on = pygame.image.load(os.path.join(device_relative_path, img_selected_screen_border_on_source))
 img_selected_screen_border_off = pygame.image.load(os.path.join(device_relative_path, img_selected_screen_border_off_source))
 
+img_draw_table_on = pygame.image.load(os.path.join(device_relative_path, img_draw_table_on_source))
+img_draw_table_off = pygame.image.load(os.path.join(device_relative_path, img_draw_table_off_source))
+img_selected_draw_table_on = pygame.image.load(os.path.join(device_relative_path, img_selected_draw_table_on_source))
+img_selected_draw_table_off = pygame.image.load(os.path.join(device_relative_path, img_selected_draw_table_off_source))
+
 img_scale = pygame.image.load(os.path.join(device_relative_path, img_scale_source))
 img_width = pygame.image.load(os.path.join(device_relative_path, img_width_source))
 img_height = pygame.image.load(os.path.join(device_relative_path, img_height_source))
@@ -526,6 +536,11 @@ img_screen_border_on = pygame.transform.scale(img_screen_border_on, (390, 110))
 img_screen_border_off = pygame.transform.scale(img_screen_border_off, (390, 110))
 img_selected_screen_border_on = pygame.transform.scale(img_selected_screen_border_on, (390, 110))
 img_selected_screen_border_off = pygame.transform.scale(img_selected_screen_border_off, (390, 110))
+
+img_draw_table_on = pygame.transform.scale(img_draw_table_on, (390, 110))
+img_draw_table_off = pygame.transform.scale(img_draw_table_off, (390, 110))
+img_selected_draw_table_on = pygame.transform.scale(img_selected_draw_table_on, (390, 110))
+img_selected_draw_table_off = pygame.transform.scale(img_selected_draw_table_off, (390, 110))
 
 img_robot_indicator = pygame.transform.scale(img_robot_indicator, (170, 95))
 img_other_indicator = pygame.transform.scale(img_other_indicator, (170, 95))
