@@ -3,13 +3,12 @@ from pythfinder.Components.Constants.constants import *
 from pythfinder.Components.background import *
 from pythfinder.Components.Menu.main import *
 from pythfinder.Components.controls import *
-from pythfinder.Components.robot import Robot
+from pythfinder.Components.robot import *
 from pythfinder.Components.table import *
 from pythfinder.Components.fade import *
 
 
 import pygame
-import math
 
 
 # file connecting all features into one big ecosystem of classes

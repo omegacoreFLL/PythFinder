@@ -1,4 +1,4 @@
-global-exclude */__pycache__/*
+global-exclude *__pycache__*
 global-exclude *.pyc
 global-include *.png 
 global-include *.jpg
@@ -6,3 +6,6 @@ global-include *.jpg
 global-include LICENSE.txt
 global-include CHANGELOG.txt
 global-include README.md
+
+global-include credits.txt
+global-include GraffitiYouth-Regular.otf

@@ -29,9 +29,10 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
     * hardcoded > abstraction;
 
 
-0.0.3 ()
+0.0.3 (15.05.2024)
 -----------------
 - First easy-use version out of all.
+- Small unusable versions were needed for packaging all the data right.
 - Improvements:
     * adding feedforward approach through complex trajectory building techniques,
       with velocity-constrained motion profiles, assuring continuity, for more 

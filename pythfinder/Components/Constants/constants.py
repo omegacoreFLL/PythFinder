@@ -13,13 +13,13 @@ import os
 #           - default keys for joystick control
 #           - helper methods for conversion
 
-script_dir = os.path.dirname(__file__)
-script_dir = os.path.join(script_dir, '..', '..', 'Images')
+
+device_relative_path = os.path.join(os.path.dirname(__file__), '..', '..', 'Images')
 
 default_robot_image_name = 'bot_from_above'
 default_robot_image_path = 'Robot/'
 default_robot_image_extension = 'png'
-default_robot_image_source = os.path.join(script_dir, 'Robot/bot_from_above.png')
+default_robot_image_source = os.path.join(device_relative_path, 'Robot/bot_from_above.png')
 
 default_robot_scaling_factor = 1
 default_robot_height_cm = 20
@@ -72,6 +72,14 @@ default_half_unit_measure_line = 10
 
 default_backing_distance = 1
 
+
+if default_system_font not in pygame.font.get_fonts():
+    print("\n\nunable to find the default font '{0}'.".format(default_system_font))
+    print("\nplease install the font from the files provided in the root")
+    print("library project or from the following link:")
+    print("      https://www.dafont.com/graffiti-youth.font")
+    print("\n\n")
+    raise Exception("FONT NOT FOUND")
 
 
 
@@ -204,7 +212,7 @@ class Constants():
         if extension is not None:
             self.ROBOT_IMG_EX = extension
 
-        self.ROBOT_IMG_SOURCE = os.path.join(script_dir, "{0}{1}.{2}".format(self.ROBOT_IMG_PATH, 
+        self.ROBOT_IMG_SOURCE = os.path.join(device_relative_path, "{0}{1}.{2}".format(self.ROBOT_IMG_PATH, 
                                                     self.ROBOT_IMG_NAME, 
                                                     self.ROBOT_IMG_EX))
           
@@ -404,70 +412,70 @@ img_robot_indicator_source = "Menu/Robot/robot_indicator.png"
 img_other_indicator_source = "Menu/Other/other_indicator.png"
 
 
-img_forwards = pygame.image.load(os.path.join(script_dir, img_forwards_source))
-img_main_menu = pygame.image.load(os.path.join(script_dir, img_main_menu_source))
-img_backwards = pygame.image.load(os.path.join(script_dir, img_backwards_source))
-img_show_trail = pygame.image.load(os.path.join(script_dir, img_show_trail_source))
-img_hide_trail = pygame.image.load(os.path.join(script_dir, img_hide_trail_source))
-img_menu_button = pygame.image.load(os.path.join(script_dir, img_menu_button_source))
-img_home_button = pygame.image.load(os.path.join(script_dir, img_home_button_source))
-img_selecting_on = pygame.image.load(os.path.join(script_dir, img_selecting_on_source))
-img_selecting_off = pygame.image.load(os.path.join(script_dir, img_selecting_off_source))
-img_selected_menu_button = pygame.image.load(os.path.join(script_dir, img_selected_menu_button_source))
-img_selected_home_button = pygame.image.load(os.path.join(script_dir, img_selected_home_button_source))
+img_forwards = pygame.image.load(os.path.join(device_relative_path, img_forwards_source))
+img_main_menu = pygame.image.load(os.path.join(device_relative_path, img_main_menu_source))
+img_backwards = pygame.image.load(os.path.join(device_relative_path, img_backwards_source))
+img_show_trail = pygame.image.load(os.path.join(device_relative_path, img_show_trail_source))
+img_hide_trail = pygame.image.load(os.path.join(device_relative_path, img_hide_trail_source))
+img_menu_button = pygame.image.load(os.path.join(device_relative_path, img_menu_button_source))
+img_home_button = pygame.image.load(os.path.join(device_relative_path, img_home_button_source))
+img_selecting_on = pygame.image.load(os.path.join(device_relative_path, img_selecting_on_source))
+img_selecting_off = pygame.image.load(os.path.join(device_relative_path, img_selecting_off_source))
+img_selected_menu_button = pygame.image.load(os.path.join(device_relative_path, img_selected_menu_button_source))
+img_selected_home_button = pygame.image.load(os.path.join(device_relative_path, img_selected_home_button_source))
 
 
-img_other_button = pygame.image.load(os.path.join(script_dir, img_other_button_source))
-img_robot_button = pygame.image.load(os.path.join(script_dir, img_robot_button_source))
-img_trail_button = pygame.image.load(os.path.join(script_dir, img_trail_button_source))
-img_pathing_button= pygame.image.load(os.path.join(script_dir, img_pathing_button_source))
-img_selection_menu = pygame.image.load(os.path.join(script_dir, img_selection_menu_source))
-img_interface_button = pygame.image.load(os.path.join(script_dir, img_interface_button_source))
-img_selected_other_button= pygame.image.load(os.path.join(script_dir, img_selected_other_button_source))
-img_selected_robot_button = pygame.image.load(os.path.join(script_dir, img_selected_robot_button_source))
-img_selected_trail_button = pygame.image.load(os.path.join(script_dir, img_selected_trail_button_source))
-img_selected_pathing_button = pygame.image.load(os.path.join(script_dir, img_selected_pathing_button_source))
-img_selected_interface_button= pygame.image.load(os.path.join(script_dir, img_selected_interface_button_source))
+img_other_button = pygame.image.load(os.path.join(device_relative_path, img_other_button_source))
+img_robot_button = pygame.image.load(os.path.join(device_relative_path, img_robot_button_source))
+img_trail_button = pygame.image.load(os.path.join(device_relative_path, img_trail_button_source))
+img_pathing_button= pygame.image.load(os.path.join(device_relative_path, img_pathing_button_source))
+img_selection_menu = pygame.image.load(os.path.join(device_relative_path, img_selection_menu_source))
+img_interface_button = pygame.image.load(os.path.join(device_relative_path, img_interface_button_source))
+img_selected_other_button= pygame.image.load(os.path.join(device_relative_path, img_selected_other_button_source))
+img_selected_robot_button = pygame.image.load(os.path.join(device_relative_path, img_selected_robot_button_source))
+img_selected_trail_button = pygame.image.load(os.path.join(device_relative_path, img_selected_trail_button_source))
+img_selected_pathing_button = pygame.image.load(os.path.join(device_relative_path, img_selected_pathing_button_source))
+img_selected_interface_button= pygame.image.load(os.path.join(device_relative_path, img_selected_interface_button_source))
 
 
-img_general_menu = pygame.image.load(os.path.join(script_dir, img_general_menu_source))
-img_left_arrow = pygame.image.load(os.path.join(script_dir, img_left_arrow_source))
-img_right_arrow = pygame.image.load(os.path.join(script_dir, img_right_arrow_source))
-img_selected_left_arrow = pygame.image.load(os.path.join(script_dir, img_selected_left_arrow_source))
-img_selected_right_arrow = pygame.image.load(os.path.join(script_dir, img_selected_right_arrow_source))
+img_general_menu = pygame.image.load(os.path.join(device_relative_path, img_general_menu_source))
+img_left_arrow = pygame.image.load(os.path.join(device_relative_path, img_left_arrow_source))
+img_right_arrow = pygame.image.load(os.path.join(device_relative_path, img_right_arrow_source))
+img_selected_left_arrow = pygame.image.load(os.path.join(device_relative_path, img_selected_left_arrow_source))
+img_selected_right_arrow = pygame.image.load(os.path.join(device_relative_path, img_selected_right_arrow_source))
 
-img_other_quadrant = pygame.image.load(os.path.join(script_dir, img_other_quadrant_source))
-img_selected_none = pygame.image.load(os.path.join(script_dir, img_selected_none_source))
-img_none = pygame.image.load(os.path.join(script_dir, img_none_source))
+img_other_quadrant = pygame.image.load(os.path.join(device_relative_path, img_other_quadrant_source))
+img_selected_none = pygame.image.load(os.path.join(device_relative_path, img_selected_none_source))
+img_none = pygame.image.load(os.path.join(device_relative_path, img_none_source))
 
-img_field_centric_on = pygame.image.load(os.path.join(script_dir, img_field_centric_on_source))
-img_field_centric_off = pygame.image.load(os.path.join(script_dir, img_field_centric_off_source))
-img_selected_field_centric_on = pygame.image.load(os.path.join(script_dir, img_selected_field_centric_on_source))
-img_selected_field_centric_off = pygame.image.load(os.path.join(script_dir, img_selected_field_centric_off_source))
+img_field_centric_on = pygame.image.load(os.path.join(device_relative_path, img_field_centric_on_source))
+img_field_centric_off = pygame.image.load(os.path.join(device_relative_path, img_field_centric_off_source))
+img_selected_field_centric_on = pygame.image.load(os.path.join(device_relative_path, img_selected_field_centric_on_source))
+img_selected_field_centric_off = pygame.image.load(os.path.join(device_relative_path, img_selected_field_centric_off_source))
 
-img_robot_border_on = pygame.image.load(os.path.join(script_dir, img_robot_border_on_source))
-img_robot_border_off = pygame.image.load(os.path.join(script_dir, img_robot_border_off_source))
-img_selected_robot_border_on = pygame.image.load(os.path.join(script_dir, img_selected_robot_border_on_source))
-img_selected_robot_border_off = pygame.image.load(os.path.join(script_dir, img_selected_robot_border_off_source))
+img_robot_border_on = pygame.image.load(os.path.join(device_relative_path, img_robot_border_on_source))
+img_robot_border_off = pygame.image.load(os.path.join(device_relative_path, img_robot_border_off_source))
+img_selected_robot_border_on = pygame.image.load(os.path.join(device_relative_path, img_selected_robot_border_on_source))
+img_selected_robot_border_off = pygame.image.load(os.path.join(device_relative_path, img_selected_robot_border_off_source))
 
-img_screen_border_on = pygame.image.load(os.path.join(script_dir, img_screen_border_on_source))
-img_screen_border_off = pygame.image.load(os.path.join(script_dir, img_screen_border_off_source))
-img_selected_screen_border_on = pygame.image.load(os.path.join(script_dir, img_selected_screen_border_on_source))
-img_selected_screen_border_off = pygame.image.load(os.path.join(script_dir, img_selected_screen_border_off_source))
+img_screen_border_on = pygame.image.load(os.path.join(device_relative_path, img_screen_border_on_source))
+img_screen_border_off = pygame.image.load(os.path.join(device_relative_path, img_screen_border_off_source))
+img_selected_screen_border_on = pygame.image.load(os.path.join(device_relative_path, img_selected_screen_border_on_source))
+img_selected_screen_border_off = pygame.image.load(os.path.join(device_relative_path, img_selected_screen_border_off_source))
 
-img_scale = pygame.image.load(os.path.join(script_dir, img_scale_source))
-img_width = pygame.image.load(os.path.join(script_dir, img_width_source))
-img_height = pygame.image.load(os.path.join(script_dir, img_height_source))
-img_path_quadrant = pygame.image.load(os.path.join(script_dir, img_path_quadrant_source))
-img_specs_quadrant = pygame.image.load(os.path.join(script_dir, img_specs_quadrant_source))
-img_selected_scale = pygame.image.load(os.path.join(script_dir, img_selected_scale_source))
-img_selected_width = pygame.image.load(os.path.join(script_dir, img_selected_width_source))
-img_selected_height = pygame.image.load(os.path.join(script_dir, img_selected_height_source))
-img_robot_image_path = pygame.image.load(os.path.join(script_dir, img_robot_image_path_source))
-img_selected_robot_image_path = pygame.image.load(os.path.join(script_dir, img_selected_robot_image_path_source))
+img_scale = pygame.image.load(os.path.join(device_relative_path, img_scale_source))
+img_width = pygame.image.load(os.path.join(device_relative_path, img_width_source))
+img_height = pygame.image.load(os.path.join(device_relative_path, img_height_source))
+img_path_quadrant = pygame.image.load(os.path.join(device_relative_path, img_path_quadrant_source))
+img_specs_quadrant = pygame.image.load(os.path.join(device_relative_path, img_specs_quadrant_source))
+img_selected_scale = pygame.image.load(os.path.join(device_relative_path, img_selected_scale_source))
+img_selected_width = pygame.image.load(os.path.join(device_relative_path, img_selected_width_source))
+img_selected_height = pygame.image.load(os.path.join(device_relative_path, img_selected_height_source))
+img_robot_image_path = pygame.image.load(os.path.join(device_relative_path, img_robot_image_path_source))
+img_selected_robot_image_path = pygame.image.load(os.path.join(device_relative_path, img_selected_robot_image_path_source))
 
-img_robot_indicator = pygame.image.load(os.path.join(script_dir, img_robot_indicator_source))
-img_other_indicator = pygame.image.load(os.path.join(script_dir, img_other_indicator_source))
+img_robot_indicator = pygame.image.load(os.path.join(device_relative_path, img_robot_indicator_source))
+img_other_indicator = pygame.image.load(os.path.join(device_relative_path, img_other_indicator_source))
 
 
 
@@ -541,7 +549,7 @@ fll_table_width_cm = 227 # og - 93in
 fll_table_height_cm = 120 # og - 45in
 
 fll_table_source = 'Table/FLL_table_MP.jpg'
-fll_table_image = pygame.image.load(os.path.join(script_dir, fll_table_source))
+fll_table_image = pygame.image.load(os.path.join(device_relative_path, fll_table_source))
 
 
 

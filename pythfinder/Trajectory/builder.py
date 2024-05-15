@@ -7,6 +7,7 @@ from pythfinder.Trajectory.kinematics import *
 from pythfinder.Trajectory.feedback import *
 from pythfinder.Trajectory.splines import *
 
+import matplotlib.pyplot as mplt
 from enum import Enum, auto
 import threading
 
@@ -150,7 +151,8 @@ class Trajectory():
 
     def follow(self, sim: Simulator, perfect: bool = False, 
                wait: bool = True, steps: int = None) -> None:
-        if self.trajectoryTime == 0: #empty trajectory
+        if self.trajectoryTime == 0: 
+            print("\n\ncan't follow an empty trajectory")
             return 0
         
         if steps is not None:
@@ -191,6 +193,10 @@ class Trajectory():
         print('\n\nTRAJECTORY COMPLETED! ;)')
 
     def generate(self, file_name: str, steps: int = 1):
+        if self.trajectoryTime == 0:
+            print("\n\ncan't generate data from an empty trajectory")
+            return 0
+        
         print('\n\nwriting precious values into * {0}.txt * ...'.format(file_name))
 
         with open('{0}.txt'.format(file_name), "w") as f:
@@ -265,8 +271,162 @@ class Trajectory():
                     appearance = 1
 
                 time += steps
-            
 
+    def graph(self, connect: bool = True,
+              velocity: bool = True,
+              acceleration: bool = True):
+        
+        if self.trajectoryTime == 0: 
+            print("\n\ncan't graph an empty trajectory")
+            return 0
+
+        if not velocity and not acceleration:
+            print("\n\nno velocity: checked")
+            print("no acceleration: checked")
+            print("wait... what am I supposed to graph then???")
+            print("\nyour greatest dreams and some pizza, right?")
+            return 0
+        
+        print(' ')
+        print('computing graph...')
+
+        self.TIME: list = []
+        time: int = 0
+
+        self.VEL_LEFT: list = []
+        self.ACC_LEFT: list = []
+
+        self.VEL_RIGHT: list = []
+        self.ACC_RIGHT: list = []
+
+        iterator = 0
+        k = TankKinematics()
+        segment: MotionSegment = self.segments[0]
+        segment_time = segment.end_time
+
+        while iterator < self.segment_number:    
+            if time > segment_time:
+                iterator += 1
+                
+                if not iterator == self.segment_number:
+                    segment: MotionSegment = self.segments[iterator]
+                    segment_time = segment.end_time
+                else:
+                    break
+
+            state = segment.get(time)
+
+            VEL, ANG_VEL = state.velocities
+            left, right = k.inverseKinematics(VEL, ANG_VEL)
+                
+            self.VEL_LEFT.append(left)
+            self.VEL_RIGHT.append(right)
+            self.TIME.append(time)
+
+            if segment.action is not MotionAction.LINE:
+                self.ACC_LEFT.append(0)
+                self.ACC_RIGHT.append(0)
+            else:
+                self.ACC_LEFT.append(self.__getDerivative(self.TIME, self.VEL_LEFT))
+                self.ACC_RIGHT.append(self.__getDerivative(self.TIME, self.VEL_RIGHT))
+
+            time += 1
+
+        #be sure that accel line ends on the x axis
+        self.VEL_LEFT.append(0)
+        self.VEL_RIGHT.append(0)
+        self.ACC_LEFT.append(0)
+        self.ACC_RIGHT.append(0)
+
+        self.TIME.append(self.TIME[-1] + 1)
+
+        print('done!')
+
+        print(' ')
+        print('plotting...')
+
+        mplt.figure(figsize=(13, 7), facecolor = 'black')
+        mplt.style.use('dark_background')
+
+        quadrants = 0
+        q_index = 1
+
+        if velocity:
+            quadrants += 1
+        if acceleration:
+            quadrants += 1
+        
+        #plot velocities
+        if velocity:
+
+            mplt.subplot(quadrants, 2, q_index)
+            mplt.title('{0} wheel VELOCITY'.format('left'), fontsize = 22)
+            mplt.xlabel('time (ms)', fontsize = 14)
+            mplt.ylabel('velocity (cm / s)', fontsize = 14)
+
+            if connect:
+                mplt.plot(self.TIME, self.VEL_LEFT, color = 'green', linewidth = 3)
+            else: mplt.scatter(self.TIME, self.VEL_LEFT, color = 'green', s = 1)
+
+            mplt.axhline(0, color = 'white', linewidth = 0.5)
+            q_index += 1
+
+
+            mplt.subplot(quadrants, 2, q_index)
+            mplt.title('{0} wheel VELOCITY'.format('right'), fontsize = 22)
+            mplt.xlabel('time (ms)', fontsize = 14)
+            mplt.ylabel('velocity (cm / s)', fontsize = 14)
+
+            if connect:
+                mplt.plot(self.TIME, self.VEL_RIGHT, color = 'green', linewidth = 3)
+            else: mplt.scatter(self.TIME, self.VEL_RIGHT, color = 'green', s = 1)
+
+            mplt.axhline(0, color = 'white', linewidth = 0.5)
+            q_index += 1
+
+
+        if acceleration:
+
+            mplt.subplot(quadrants, 2, q_index)
+            mplt.title('{0} wheel ACCELERATION'.format('left'), fontsize = 22)
+            mplt.xlabel('time (ms)', fontsize = 14)
+            mplt.ylabel('acceleration (cm / s^2)', fontsize = 14)
+
+            if connect:
+                mplt.plot(self.TIME, self.ACC_LEFT, color = 'red', linewidth = 3)
+            else: mplt.scatter(self.TIME, self.ACC_LEFT, color = 'red', s = 1)
+
+            mplt.axhline(0, color = 'white', linewidth = 0.5)
+            q_index += 1
+
+
+            mplt.subplot(quadrants, 2, q_index)
+            mplt.title('{0} wheel ACCELERATION'.format('right'), fontsize = 22)
+            mplt.xlabel('time (ms)', fontsize = 14)
+            mplt.ylabel('acceleration (cm / s^2)', fontsize = 14)
+
+            if connect:
+                mplt.plot(self.TIME, self.ACC_RIGHT, color = 'red', linewidth = 3)
+            else: mplt.scatter(self.TIME, self.ACC_RIGHT, color = 'red', s = 1)
+
+            mplt.axhline(0, color = 'white', linewidth = 0.5)
+            q_index += 1
+
+
+        mplt.subplots_adjust(wspace = 0.15, hspace = 0.4) 
+        mplt.tight_layout()
+        mplt.show()
+
+
+    def __getDerivative(self, t: List[int], vel: List[float]):
+        if len(vel) > 1:
+            dt = (t[-1] - t[-2]) / 1000 #ms to s
+            dv = vel[-1] - vel[-2]
+                
+            if dt != 0:
+                accel = dv / dt
+                return accel
+        return 0
 
     def __perfectFollow(self, sim: Simulator) -> None:
         past_angle = None
