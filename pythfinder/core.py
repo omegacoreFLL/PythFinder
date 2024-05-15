@@ -3,7 +3,7 @@ from pythfinder.Components.Constants.constants import *
 from pythfinder.Components.background import *
 from pythfinder.Components.Menu.main import *
 from pythfinder.Components.controls import *
-from pythfinder.Components.robot import *
+from pythfinder.Components.robot import Robot
 from pythfinder.Components.table import *
 from pythfinder.Components.fade import *
 
@@ -43,10 +43,10 @@ class Simulator():
         self.dt = 0
 
         self.background = Background(self.constants)
-        self.robot = Robot(self.constants)
         self.table = Table(self.constants)
         self.fade = Fade(self.constants)
         self.menu = Menu(MenuType.UNDEFINED, self.constants, None)
+        self.robot = Robot(self.constants)
         self.controls = Controls()
         
 

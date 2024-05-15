@@ -6,6 +6,7 @@ from pythfinder.Trajectory.kinematics import *
 from pythfinder.Components.trail import *
 
 import pygame
+import math
 
 
 # file containing robot information, such as:
@@ -24,7 +25,7 @@ import pygame
 
 
 class Robot():
-    def __init__(self, constants: Constants, kinematics: Kinematics = TankKinematics()):
+    def __init__(self, constants: Constants):
 
         self.rotating_instance = None
         self.rectangle = None
@@ -61,7 +62,7 @@ class Robot():
         self.window_pose = self.toWindowCoords(self.pose)
         
         self.trail = Trail(self.constants)
-        self.kinematics = kinematics
+        self.kinematics = TankKinematics()
 
 
     def recalculate(self):

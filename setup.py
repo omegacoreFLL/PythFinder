@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pythfinder',
-    version='0.0.3.2',
+    version='0.0.3.13',
     license='MIT',
     author='Contraș Adrian',
     author_email='omegacoresincai@gmail.com',
@@ -16,6 +16,7 @@ setup(
         'first-robotics',
         'fll'
     ],
-    install_requires=['']
+    install_requires=[''],
+    include_package_data=True,
     
 )

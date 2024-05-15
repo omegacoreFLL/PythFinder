@@ -1,0 +1,8 @@
+global-exclude */__pycache__/*
+global-exclude *.pyc
+global-include *.png 
+global-include *.jpg
+
+global-include LICENSE.txt
+global-include CHANGELOG.txt
+global-include README.md

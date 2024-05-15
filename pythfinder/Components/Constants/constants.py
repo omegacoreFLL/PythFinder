@@ -6,17 +6,20 @@ from pythfinder.Components.BetterClasses.mathEx import *
 
 import pygame
 import math
+import os
 
 # file containing:
 #           - default constant values, image manipulation for the interface and Constants class
 #           - default keys for joystick control
 #           - helper methods for conversion
 
+script_dir = os.path.dirname(__file__)
+script_dir = os.path.join(script_dir, '..', '..', 'Images')
 
 default_robot_image_name = 'bot_from_above'
-default_robot_image_path = 'pythfinder/Images/Robot/'
+default_robot_image_path = 'Robot/'
 default_robot_image_extension = 'png'
-default_robot_image_source = 'pythfinder/Images/Robot/bot_from_above.png'
+default_robot_image_source = os.path.join(script_dir, 'Robot/bot_from_above.png')
 
 default_robot_scaling_factor = 1
 default_robot_height_cm = 20
@@ -201,9 +204,9 @@ class Constants():
         if extension is not None:
             self.ROBOT_IMG_EX = extension
 
-        self.ROBOT_IMG_SOURCE = "{0}{1}.{2}".format(self.ROBOT_IMG_PATH, 
+        self.ROBOT_IMG_SOURCE = os.path.join(script_dir, "{0}{1}.{2}".format(self.ROBOT_IMG_PATH, 
                                                     self.ROBOT_IMG_NAME, 
-                                                    self.ROBOT_IMG_EX)
+                                                    self.ROBOT_IMG_EX))
           
     def pixelsToCm(self, 
                    val: int):
@@ -330,141 +333,141 @@ ps5_turn_315 = (-1, 1)
 
 
 
-img_main_menu_source = "pythfinder/Images/Menu/Main/menu_main.png"
-img_forwards_source = "pythfinder/Images/Controls/btn_forwards.png"
-img_backwards_source = "pythfinder/Images/Controls/btn_backwards.png"
-img_menu_button_source = "pythfinder/Images/Menu/Main/menu_button.png"
-img_show_trail_source = "pythfinder/Images/Controls/btn_show_trail.png"
-img_hide_trail_source = "pythfinder/Images/Controls/btn_hide_trail.png"
-img_home_button_source = "pythfinder/Images/Menu/Main/menu_home_button.png"
-img_selecting_on_source = "pythfinder/Images/Controls/btn_selecting_on.png"
-img_selecting_off_source = "pythfinder/Images/Controls/btn_selecting_off.png"
-img_selected_menu_button_source = "pythfinder/Images/Menu/Main/selected_menu_button.png"
-img_selected_home_button_source = "pythfinder/Images/Menu/Main/selected_menu_home_button.png"
+img_main_menu_source = "Menu/Main/menu_main.png"
+img_forwards_source = "Controls/btn_forwards.png"
+img_backwards_source = "Controls/btn_backwards.png"
+img_menu_button_source = "Menu/Main/menu_button.png"
+img_show_trail_source = "Controls/btn_show_trail.png"
+img_hide_trail_source = "Controls/btn_hide_trail.png"
+img_home_button_source = "Menu/Main/menu_home_button.png"
+img_selecting_on_source = "Controls/btn_selecting_on.png"
+img_selecting_off_source = "Controls/btn_selecting_off.png"
+img_selected_menu_button_source = "Menu/Main/selected_menu_button.png"
+img_selected_home_button_source = "Menu/Main/selected_menu_home_button.png"
 
 
-img_other_button_source = "pythfinder/Images/Menu/Selection/other_button.png"
-img_robot_button_source = "pythfinder/Images/Menu/Selection/robot_button.png"
-img_trail_button_source = "pythfinder/Images/Menu/Selection/trail_button.png"
-img_selection_menu_source = "pythfinder/Images/Menu/Selection/selection_menu.png"
-img_pathing_button_source = "pythfinder/Images/Menu/Selection/pathing_button.png"
-img_interface_button_source = "pythfinder/Images/Menu/Selection/interface_button.png"
-img_selected_other_button_source = "pythfinder/Images/Menu/Selection/selected_other_button.png"
-img_selected_robot_button_source = "pythfinder/Images/Menu/Selection/selected_robot_button.png"
-img_selected_trail_button_source = "pythfinder/Images/Menu/Selection/selected_trail_button.png"
-img_selected_pathing_button_source = "pythfinder/Images/Menu/Selection/selected_pathing_button.png"
-img_selected_interface_button_source = "pythfinder/Images/Menu/Selection/selected_interface_button.png"
+img_other_button_source = "Menu/Selection/other_button.png"
+img_robot_button_source = "Menu/Selection/robot_button.png"
+img_trail_button_source = "Menu/Selection/trail_button.png"
+img_selection_menu_source = "Menu/Selection/selection_menu.png"
+img_pathing_button_source = "Menu/Selection/pathing_button.png"
+img_interface_button_source = "Menu/Selection/interface_button.png"
+img_selected_other_button_source = "Menu/Selection/selected_other_button.png"
+img_selected_robot_button_source = "Menu/Selection/selected_robot_button.png"
+img_selected_trail_button_source = "Menu/Selection/selected_trail_button.png"
+img_selected_pathing_button_source = "Menu/Selection/selected_pathing_button.png"
+img_selected_interface_button_source = "Menu/Selection/selected_interface_button.png"
 
 
-img_general_menu_source = "pythfinder/Images/Menu/General/general_menu.png"
-img_left_arrow_source = "pythfinder/Images/Menu/General/Arrows/Left/left_arrow.png"
-img_right_arrow_source = "pythfinder/Images/Menu/General/Arrows/Right/right_arrow.png"
-img_selected_left_arrow_source = "pythfinder/Images/Menu/General/Arrows/Left/selected_left_arrow.png"
-img_selected_right_arrow_source = "pythfinder/Images/Menu/General/Arrows/Right/selected_right_arrow.png"
+img_general_menu_source = "Menu/General/general_menu.png"
+img_left_arrow_source = "Menu/General/Arrows/Left/left_arrow.png"
+img_right_arrow_source = "Menu/General/Arrows/Right/right_arrow.png"
+img_selected_left_arrow_source = "Menu/General/Arrows/Left/selected_left_arrow.png"
+img_selected_right_arrow_source = "Menu/General/Arrows/Right/selected_right_arrow.png"
 
 
-img_other_quadrant_source = "pythfinder/Images/Menu/Other/other_quadrant.png"
-img_selected_none_source = "pythfinder/Images/selected_none.png"
-img_none_source = "pythfinder/Images/none.png"
+img_other_quadrant_source = "Menu/Other/other_quadrant.png"
+img_selected_none_source = "selected_none.png"
+img_none_source = "none.png"
 
 
-img_field_centric_on_source = "pythfinder/Images/Menu/Other/FieldCentric/field_centric_on.png"
-img_field_centric_off_source = "pythfinder/Images/Menu/Other/FieldCentric/field_centric_off.png"
-img_selected_field_centric_on_source = "pythfinder/Images/Menu/Other/FieldCentric/selected_field_centric_on.png"
-img_selected_field_centric_off_source = "pythfinder/Images/Menu/Other/FieldCentric/selected_field_centric_off.png"
+img_field_centric_on_source = "Menu/Other/FieldCentric/field_centric_on.png"
+img_field_centric_off_source = "Menu/Other/FieldCentric/field_centric_off.png"
+img_selected_field_centric_on_source = "Menu/Other/FieldCentric/selected_field_centric_on.png"
+img_selected_field_centric_off_source = "Menu/Other/FieldCentric/selected_field_centric_off.png"
 
 
-img_robot_border_on_source = "pythfinder/Images/Menu/Other/RobotBorder/robot_border_on.png"
-img_robot_border_off_source = "pythfinder/Images/Menu/Other/RobotBorder/robot_border_off.png"
-img_selected_robot_border_on_source = "pythfinder/Images/Menu/Other/RobotBorder/selected_robot_border_on.png"
-img_selected_robot_border_off_source = "pythfinder/Images/Menu/Other/RobotBorder/selected_robot_border_off.png"
+img_robot_border_on_source = "Menu/Other/RobotBorder/robot_border_on.png"
+img_robot_border_off_source = "Menu/Other/RobotBorder/robot_border_off.png"
+img_selected_robot_border_on_source = "Menu/Other/RobotBorder/selected_robot_border_on.png"
+img_selected_robot_border_off_source = "Menu/Other/RobotBorder/selected_robot_border_off.png"
 
 
-img_screen_border_on_source = "pythfinder/Images/Menu/Other/ScreenBorder/screen_border_on.png"
-img_screen_border_off_source = "pythfinder/Images/Menu/Other/ScreenBorder/screen_border_off.png"
-img_selected_screen_border_on_source = "pythfinder/Images/Menu/Other/ScreenBorder/selected_screen_border_on.png"
-img_selected_screen_border_off_source = "pythfinder/Images/Menu/Other/ScreenBorder/selected_screen_border_off.png"
+img_screen_border_on_source = "Menu/Other/ScreenBorder/screen_border_on.png"
+img_screen_border_off_source = "Menu/Other/ScreenBorder/screen_border_off.png"
+img_selected_screen_border_on_source = "Menu/Other/ScreenBorder/selected_screen_border_on.png"
+img_selected_screen_border_off_source = "Menu/Other/ScreenBorder/selected_screen_border_off.png"
 
 
-img_scale_source = "pythfinder/Images/Menu/Robot/scale.png"
-img_width_source = "pythfinder/Images/Menu/Robot/width.png"
-img_height_source = "pythfinder/Images/Menu/Robot/height.png"
-img_robot_image_path_source = "pythfinder/Images/Menu/Robot/robot_path.png"
-img_selected_scale_source = "pythfinder/Images/Menu/Robot/selected_scale.png"
-img_selected_width_source = "pythfinder/Images/Menu/Robot/selected_width.png"
-img_selected_height_source = "pythfinder/Images/Menu/Robot/selected_height.png"
-img_path_quadrant_source = "pythfinder/Images/Menu/Robot/robot_path_quadrant.png"
-img_specs_quadrant_source = "pythfinder/Images/Menu/Robot/robot_specs_quadrant.png"
-img_selected_robot_image_path_source = "pythfinder/Images/Menu/Robot/selected_robot_path.png"
+img_scale_source = "Menu/Robot/scale.png"
+img_width_source = "Menu/Robot/width.png"
+img_height_source = "Menu/Robot/height.png"
+img_robot_image_path_source = "Menu/Robot/robot_path.png"
+img_selected_scale_source = "Menu/Robot/selected_scale.png"
+img_selected_width_source = "Menu/Robot/selected_width.png"
+img_selected_height_source = "Menu/Robot/selected_height.png"
+img_path_quadrant_source = "Menu/Robot/robot_path_quadrant.png"
+img_specs_quadrant_source = "Menu/Robot/robot_specs_quadrant.png"
+img_selected_robot_image_path_source = "Menu/Robot/selected_robot_path.png"
 
-img_robot_indicator_source = "pythfinder/Images/Menu/Robot/robot_indicator.png"
-img_other_indicator_source = "pythfinder/Images/Menu/Other/other_indicator.png"
-
-
-img_forwards = pygame.image.load(img_forwards_source)
-img_main_menu = pygame.image.load(img_main_menu_source)
-img_backwards = pygame.image.load(img_backwards_source)
-img_show_trail = pygame.image.load(img_show_trail_source)
-img_hide_trail = pygame.image.load(img_hide_trail_source)
-img_menu_button = pygame.image.load(img_menu_button_source)
-img_home_button = pygame.image.load(img_home_button_source)
-img_selecting_on = pygame.image.load(img_selecting_on_source)
-img_selecting_off = pygame.image.load(img_selecting_off_source)
-img_selected_menu_button = pygame.image.load(img_selected_menu_button_source)
-img_selected_home_button = pygame.image.load(img_selected_home_button_source)
+img_robot_indicator_source = "Menu/Robot/robot_indicator.png"
+img_other_indicator_source = "Menu/Other/other_indicator.png"
 
 
-img_other_button = pygame.image.load(img_other_button_source)
-img_robot_button = pygame.image.load(img_robot_button_source)
-img_trail_button = pygame.image.load(img_trail_button_source)
-img_pathing_button= pygame.image.load(img_pathing_button_source)
-img_selection_menu = pygame.image.load(img_selection_menu_source)
-img_interface_button = pygame.image.load(img_interface_button_source)
-img_selected_other_button= pygame.image.load(img_selected_other_button_source)
-img_selected_robot_button = pygame.image.load(img_selected_robot_button_source)
-img_selected_trail_button = pygame.image.load(img_selected_trail_button_source)
-img_selected_pathing_button = pygame.image.load(img_selected_pathing_button_source)
-img_selected_interface_button= pygame.image.load(img_selected_interface_button_source)
+img_forwards = pygame.image.load(os.path.join(script_dir, img_forwards_source))
+img_main_menu = pygame.image.load(os.path.join(script_dir, img_main_menu_source))
+img_backwards = pygame.image.load(os.path.join(script_dir, img_backwards_source))
+img_show_trail = pygame.image.load(os.path.join(script_dir, img_show_trail_source))
+img_hide_trail = pygame.image.load(os.path.join(script_dir, img_hide_trail_source))
+img_menu_button = pygame.image.load(os.path.join(script_dir, img_menu_button_source))
+img_home_button = pygame.image.load(os.path.join(script_dir, img_home_button_source))
+img_selecting_on = pygame.image.load(os.path.join(script_dir, img_selecting_on_source))
+img_selecting_off = pygame.image.load(os.path.join(script_dir, img_selecting_off_source))
+img_selected_menu_button = pygame.image.load(os.path.join(script_dir, img_selected_menu_button_source))
+img_selected_home_button = pygame.image.load(os.path.join(script_dir, img_selected_home_button_source))
 
 
-img_general_menu = pygame.image.load(img_general_menu_source)
-img_left_arrow = pygame.image.load(img_left_arrow_source)
-img_right_arrow = pygame.image.load(img_right_arrow_source)
-img_selected_left_arrow = pygame.image.load(img_selected_left_arrow_source)
-img_selected_right_arrow = pygame.image.load(img_selected_right_arrow_source)
+img_other_button = pygame.image.load(os.path.join(script_dir, img_other_button_source))
+img_robot_button = pygame.image.load(os.path.join(script_dir, img_robot_button_source))
+img_trail_button = pygame.image.load(os.path.join(script_dir, img_trail_button_source))
+img_pathing_button= pygame.image.load(os.path.join(script_dir, img_pathing_button_source))
+img_selection_menu = pygame.image.load(os.path.join(script_dir, img_selection_menu_source))
+img_interface_button = pygame.image.load(os.path.join(script_dir, img_interface_button_source))
+img_selected_other_button= pygame.image.load(os.path.join(script_dir, img_selected_other_button_source))
+img_selected_robot_button = pygame.image.load(os.path.join(script_dir, img_selected_robot_button_source))
+img_selected_trail_button = pygame.image.load(os.path.join(script_dir, img_selected_trail_button_source))
+img_selected_pathing_button = pygame.image.load(os.path.join(script_dir, img_selected_pathing_button_source))
+img_selected_interface_button= pygame.image.load(os.path.join(script_dir, img_selected_interface_button_source))
 
-img_other_quadrant = pygame.image.load(img_other_quadrant_source)
-img_selected_none = pygame.image.load(img_selected_none_source)
-img_none = pygame.image.load(img_none_source)
 
-img_field_centric_on = pygame.image.load(img_field_centric_on_source)
-img_field_centric_off = pygame.image.load(img_field_centric_off_source)
-img_selected_field_centric_on = pygame.image.load(img_selected_field_centric_on_source)
-img_selected_field_centric_off = pygame.image.load(img_selected_field_centric_off_source)
+img_general_menu = pygame.image.load(os.path.join(script_dir, img_general_menu_source))
+img_left_arrow = pygame.image.load(os.path.join(script_dir, img_left_arrow_source))
+img_right_arrow = pygame.image.load(os.path.join(script_dir, img_right_arrow_source))
+img_selected_left_arrow = pygame.image.load(os.path.join(script_dir, img_selected_left_arrow_source))
+img_selected_right_arrow = pygame.image.load(os.path.join(script_dir, img_selected_right_arrow_source))
 
-img_robot_border_on = pygame.image.load(img_robot_border_on_source)
-img_robot_border_off = pygame.image.load(img_robot_border_off_source)
-img_selected_robot_border_on = pygame.image.load(img_selected_robot_border_on_source)
-img_selected_robot_border_off = pygame.image.load(img_selected_robot_border_off_source)
+img_other_quadrant = pygame.image.load(os.path.join(script_dir, img_other_quadrant_source))
+img_selected_none = pygame.image.load(os.path.join(script_dir, img_selected_none_source))
+img_none = pygame.image.load(os.path.join(script_dir, img_none_source))
 
-img_screen_border_on = pygame.image.load(img_screen_border_on_source)
-img_screen_border_off = pygame.image.load(img_screen_border_off_source)
-img_selected_screen_border_on = pygame.image.load(img_selected_screen_border_on_source)
-img_selected_screen_border_off = pygame.image.load(img_selected_screen_border_off_source)
+img_field_centric_on = pygame.image.load(os.path.join(script_dir, img_field_centric_on_source))
+img_field_centric_off = pygame.image.load(os.path.join(script_dir, img_field_centric_off_source))
+img_selected_field_centric_on = pygame.image.load(os.path.join(script_dir, img_selected_field_centric_on_source))
+img_selected_field_centric_off = pygame.image.load(os.path.join(script_dir, img_selected_field_centric_off_source))
 
-img_scale = pygame.image.load(img_scale_source)
-img_width = pygame.image.load(img_width_source)
-img_height = pygame.image.load(img_height_source)
-img_path_quadrant = pygame.image.load(img_path_quadrant_source)
-img_specs_quadrant = pygame.image.load(img_specs_quadrant_source)
-img_selected_scale = pygame.image.load(img_selected_scale_source)
-img_selected_width = pygame.image.load(img_selected_width_source)
-img_selected_height = pygame.image.load(img_selected_height_source)
-img_robot_image_path = pygame.image.load(img_robot_image_path_source)
-img_selected_robot_image_path = pygame.image.load(img_selected_robot_image_path_source)
+img_robot_border_on = pygame.image.load(os.path.join(script_dir, img_robot_border_on_source))
+img_robot_border_off = pygame.image.load(os.path.join(script_dir, img_robot_border_off_source))
+img_selected_robot_border_on = pygame.image.load(os.path.join(script_dir, img_selected_robot_border_on_source))
+img_selected_robot_border_off = pygame.image.load(os.path.join(script_dir, img_selected_robot_border_off_source))
 
-img_robot_indicator = pygame.image.load(img_robot_indicator_source)
-img_other_indicator = pygame.image.load(img_other_indicator_source)
+img_screen_border_on = pygame.image.load(os.path.join(script_dir, img_screen_border_on_source))
+img_screen_border_off = pygame.image.load(os.path.join(script_dir, img_screen_border_off_source))
+img_selected_screen_border_on = pygame.image.load(os.path.join(script_dir, img_selected_screen_border_on_source))
+img_selected_screen_border_off = pygame.image.load(os.path.join(script_dir, img_selected_screen_border_off_source))
+
+img_scale = pygame.image.load(os.path.join(script_dir, img_scale_source))
+img_width = pygame.image.load(os.path.join(script_dir, img_width_source))
+img_height = pygame.image.load(os.path.join(script_dir, img_height_source))
+img_path_quadrant = pygame.image.load(os.path.join(script_dir, img_path_quadrant_source))
+img_specs_quadrant = pygame.image.load(os.path.join(script_dir, img_specs_quadrant_source))
+img_selected_scale = pygame.image.load(os.path.join(script_dir, img_selected_scale_source))
+img_selected_width = pygame.image.load(os.path.join(script_dir, img_selected_width_source))
+img_selected_height = pygame.image.load(os.path.join(script_dir, img_selected_height_source))
+img_robot_image_path = pygame.image.load(os.path.join(script_dir, img_robot_image_path_source))
+img_selected_robot_image_path = pygame.image.load(os.path.join(script_dir, img_selected_robot_image_path_source))
+
+img_robot_indicator = pygame.image.load(os.path.join(script_dir, img_robot_indicator_source))
+img_other_indicator = pygame.image.load(os.path.join(script_dir, img_other_indicator_source))
 
 
 
@@ -537,8 +540,8 @@ img_selected_scale = pygame.transform.scale(img_selected_scale, (170, 85))
 fll_table_width_cm = 227 # og - 93in
 fll_table_height_cm = 120 # og - 45in
 
-fll_table_source = 'pythfinder/Images/Table/FLL_table_MP.jpg'
-fll_table_image = pygame.image.load(fll_table_source)
+fll_table_source = 'Table/FLL_table_MP.jpg'
+fll_table_image = pygame.image.load(os.path.join(script_dir, fll_table_source))
 
 
 
