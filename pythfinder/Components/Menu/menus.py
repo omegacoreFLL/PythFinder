@@ -53,6 +53,10 @@ class AbsMenu(ABC):
         for button in self.buttons:
             button.update(selected, clicked, value)
             button.default(default)
+    
+    def check(self):
+        for button in self.buttons:
+            button.check()
 
     def updateSelections(self, direction: Dpad | None) -> Selected:
         FINAL = None

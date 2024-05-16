@@ -3,6 +3,8 @@
 ![version_badge](https://img.shields.io/badge/alpha-0.0.3-006400)
 ![license](https://img.shields.io/badge/license-MIT-62e39e)
 
+# Instalation
+
 
 ## Advanced Usage
 

@@ -112,8 +112,14 @@ class AbsButton(ABC):
 
 
 
+    #resets button to the default value
     @abstractmethod
     def default(self, default: bool):
+        ...
+
+    #checks if the current button display is matching the value it stores
+    @abstractmethod
+    def check(self):
         ...
 
     # gets the value stored by the button
@@ -244,6 +250,9 @@ class EmptyButton(AbsButton):
     def change(self):
         ...
     
+    def check(self):
+        return None
+    
     def update(self, selected, clicked: bool, value = None):
         super().update(selected, clicked, value)
 
@@ -284,7 +293,10 @@ class DynamicButton(AbsButton):
     
     def change(self):
         self.go_next = True
-        
+    
+    def check(self):
+        return None
+
     def update(self, selected: Selected, clicked: bool, value = None):
         super().update(selected, clicked, value)
 
@@ -345,6 +357,9 @@ class ToggleButton(AbsButton):
     def reset(self):
         self.ON.set(False)
     
+    def check(self):
+        ...
+
     def update(self, selected: Selected, clicked: bool, value=None):
         super().update(selected, clicked, value)
 
@@ -360,6 +375,7 @@ class ToggleButton(AbsButton):
             self.display_title = self.selected_title
         if self.SELECTED.falling:
             self.display_title = self.title
+
 
 class InputButton(AbsButton):
     def __init__(self, 
@@ -441,8 +457,6 @@ class InputButton(AbsButton):
         if self.input == '_':
             self.displayValue(self.raw_value)
             return 0
-        
-        before = self.raw_value
     
         match self.type:
             case InputType.DIMENSION:
@@ -466,11 +480,13 @@ class InputButton(AbsButton):
                     setattr(self.constants, self.name.name, self.raw_value)
                 except: pass
         
+        self.check()
+    
+    def check(self):
         if not self.original_value == getattr(self.constants, self.name.name):
-            print(self.original_value, getattr(self.constants, self.name.name))
-
             self.original_value = getattr(self.constants, self.name.name)
             self.constants.recalculate.set(True)
+            
         self.displayValue(self.raw_value)
 
     
@@ -587,17 +603,23 @@ class BoolButton(AbsButton):
     def change(self): 
         try:
             self.raw_value.negate()
-
+        except: self.raw_value = not self.raw_value
+        finally:
+            self.check()
+    
+    def check(self):
+        try:
             if self.raw_value.compare():
                 self.index = 1
             else: self.index = 0
         except:
-            self.raw_value = not self.raw_value
             if self.raw_value:
                 self.index = 1
             else: self.index = 0
         finally:
-            self.display_title = self.selected_title[self.index]
+            if self.SELECTED.rising or self.SELECTED.high:
+                self.display_title = self.selected_title[self.index]
+            else: self.display_title = self.title[self.index]
 
     def update(self, selected, clicked: bool, value = None):
         super().update(selected, clicked, value)

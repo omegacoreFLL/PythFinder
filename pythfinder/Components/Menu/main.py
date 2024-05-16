@@ -323,8 +323,12 @@ class Menu(AbsMenu):
         self.recalculateUpperBar()
         self.recalculateSelectionMenu()
 
+    def check(self):
+        for menu in self.menus:
+            menu.check()
+    
     def update(self):
-        ...
+        return None
 
 
 

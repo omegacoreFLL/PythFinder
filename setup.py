@@ -16,7 +16,7 @@ setup(
         'first-robotics',
         'fll'
     ],
-    install_requires=[''],
+    install_requires=['pygame>=2.0.0', 'matplotlib>=3.3.0'],
     include_package_data=True,
     
 )

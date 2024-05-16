@@ -415,6 +415,7 @@ class Trajectory():
 
         mplt.subplots_adjust(wspace = 0.15, hspace = 0.4) 
         mplt.tight_layout()
+
         mplt.show()
 
 

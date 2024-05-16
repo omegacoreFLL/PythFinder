@@ -88,7 +88,7 @@ class Simulator():
                 self.robot.trail.draw_trail.set(False)
                 self.constants.ERASE_TRAIL.set(True)
                 self.constants.USE_SCREEN_BORDER.set(True)
-                #self.constants.DRAW_TABLE.set(False)
+                
             case _:
                 pass
 
@@ -104,6 +104,7 @@ class Simulator():
         self.table.recalculate()
         self.background.recalculate()
 
+        self.menu.check()
         self.constants.recalculate.set(False)
 
 
