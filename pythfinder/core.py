@@ -306,7 +306,8 @@ class Simulator():
 
     def __updateScreenshoot(self):
         if exists(self.controls.joystick):
-            self.controls.update()
+            if self.manual_control.compare(False):
+                self.controls.update()
             
             if self.controls.joystick_detector[self.controls.keybinds.screenshot_button].rising:
                 #take a screenshot
