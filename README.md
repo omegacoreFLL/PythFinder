@@ -123,7 +123,7 @@ The controls used to manipulate the simulator are the following:
 * <span style="color: lightgreen">X / A</span> **--** show / hide trail ;
 * <span style="color: lightgreen">left bumper</span> **--** erase trail / sets values to default (when the menu is activated) ;
 * <span style="color: lightgreen">right bumper</span> **--** when held enters selection mode ;
-* <span style="color: lightgreen">D-pad</span> **--** select robot's orientation (when selection mode is on) ;
+* <span style="color: lightgreen">D-pad</span> **--** move through interface menu / select robot's orientation (when selection mode is on) ;
 * <span style="color: lightgreen">left joystick</span> **--** controls robot linear velocity + angular velocity (when field centric is on) ;
 * <span style="color: lightgreen">right joystick</span> -- controls angular velocity (**ONLY** when field centric is off) ;
 
