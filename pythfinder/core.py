@@ -7,7 +7,7 @@ from pythfinder.Components.robot import *
 from pythfinder.Components.table import *
 from pythfinder.Components.fade import *
 
-
+from datetime import datetime
 import pygame
 
 
@@ -94,6 +94,8 @@ class Simulator():
                 print("\n\ntele-op just started! ---- ding ding 🔔")            
             case _:
                 pass
+        
+        self.menu.check()
 
 
     def recalculate(self):
@@ -142,6 +144,7 @@ class Simulator():
             self.menu.addControls(self.controls)
             self.menu.onScreen(self.screen)
 
+        self.__updateScreenshoot()
         pygame.display.update()
         self.dt = self.clock.tick(self.constants.FPS) / 1000
     
@@ -301,6 +304,33 @@ class Simulator():
             
             self.robot.pose.head = self.robot.target_head = target
 
+    def __updateScreenshoot(self):
+        if exists(self.controls.joystick):
+            self.controls.update()
+            
+            if self.controls.joystick_detector[self.controls.keybinds.screenshot_button].rising:
+                #take a screenshot
+
+                screenshot = pygame.Surface(self.constants.screen_size.get())
+                screenshot.blit(self.screen, (0, 0))
+
+                date_and_time_info = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
+                image_name_with_time_format = "{0}.png".format(date_and_time_info)
+                individual_data = date_and_time_info.split("-")
+
+                device_screenshot_path = os.path.join(os.path.join(os.path.dirname(__file__), "Screenshots"), image_name_with_time_format)
+                pygame.image.save(screenshot, device_screenshot_path)
+
+                print("\n\nyou took a screenshot :o -- check it out:")
+
+                for each in individual_data: # easter egg? :0
+                    if each == '42' or each == '69':
+                        print("\n\nnice 😎")
+                        break
+
+                print(device_screenshot_path)
+                
+            
 
 
 

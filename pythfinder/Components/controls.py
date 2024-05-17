@@ -46,6 +46,7 @@ class Controls():
             self.head_selection_button = 0
             self.trail_button = 0
             self.erase_trail_button = 0
+            self.screenshot_button = 0
 
             self.turn_0 = 0
             self.turn_45 = 0
@@ -84,6 +85,7 @@ class Controls():
             self.head_selection_button = xbox_head_selection_button
             self.trail_button = xbox_trail_button
             self.erase_trail_button = xbox_erase_trail_button
+            self.screenshot_button = xbox_screenshot_button
 
             self.turn_0 = xbox_turn_0
             self.turn_45 = xbox_turn_45
@@ -114,6 +116,7 @@ class Controls():
             self.head_selection_button = ps4_head_selection_button
             self.trail_button = ps4_trail_button
             self.erase_trail_button = ps4_erase_trail_button
+            self.screenshot_button = ps4_screenshot_button
 
             self.turn_0 = ps4_turn_0
             self.turn_45 = ps4_turn_45
@@ -139,6 +142,7 @@ class Controls():
             self.head_selection_button = ps5_head_selection_button
             self.trail_button = ps5_trail_button
             self.erase_trail_button = ps5_erase_trail_button
+            self.screenshot_button = ps5_screenshot_button
 
             self.turn_0 = ps5_turn_0
             self.turn_45 = ps5_turn_45
@@ -231,7 +235,7 @@ class Controls():
         keyboard_detector = []
         key_states = pygame.key.get_pressed()
 
-        for key in key_states:
+        for _ in key_states:
             keyboard_detector.append(EdgeDetectorEx())
         
         self.keyboard_len = len(key_states)
@@ -242,7 +246,7 @@ class Controls():
         if exists(self.joystick):
             self.joystick_len = self.joystick.get_numbuttons()                                                                    
 
-            for button in range(self.joystick_len):
+            for _ in range(self.joystick_len):
                 joystick_detector.append(EdgeDetectorEx())
         
         return joystick_detector

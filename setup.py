@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pythfinder',
-    version='0.0.3.17',
+    version='0.0.3.18',
     license='MIT',
     author='Contraș Adrian',
     author_email='omegacoresincai@gmail.com',

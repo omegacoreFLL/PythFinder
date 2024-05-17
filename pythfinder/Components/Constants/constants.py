@@ -16,6 +16,8 @@ import os
 
 device_relative_path = os.path.join(os.path.dirname(__file__), '..', '..', 'Images')
 
+screenshot_path = os.path.join(device_relative_path, 'Screenshots\\')
+
 default_robot_image_name = 'bot_from_above'
 default_robot_image_path = 'Robot/'
 default_robot_image_extension = 'png'
@@ -305,6 +307,7 @@ xbox_zero_button = 1
 xbox_head_selection_button = 5
 xbox_trail_button = 0
 xbox_erase_trail_button = 4
+xbox_screenshot_button = 8
 
 xbox_turn_0 = (0, 1)
 xbox_turn_45 = (1, 1)
@@ -327,6 +330,7 @@ ps4_zero_button = 1
 ps4_head_selection_button = 10
 ps4_trail_button = 0
 ps4_erase_trail_button = 9
+ps4_screenshot_button = 8
 
 ps4_turn_0 = 11
 ps4_turn_45 = None
@@ -349,6 +353,7 @@ ps5_zero_button = 1
 ps5_head_selection_button = 10
 ps5_trail_button = 0
 ps5_erase_trail_button = 9
+ps5_screenshot_button = 11
 
 ps5_turn_0 = (0, 1)
 ps5_turn_45 = (1, 1)

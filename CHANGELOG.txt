@@ -29,8 +29,8 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
     * hardcoded > abstraction;
 
 
-0.0.3 (15.05.2024)
------------------
+0.0.3.17 (17.05.2024)
+---------------------
 - First easy-use version out of all.
 - Small unusable versions were needed for packaging all the data right.
 - Improvements:
@@ -45,4 +45,12 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
       actual robot 
     * PS4 and PS5 controllers are now supported, but not any Nintendo device
     * visualisaltion of the velocity and acceleration profiles using matlib
+
+
+0.0.3.18 (17.05.2024)
+---------------------
+- you can take screenshots now! (press on the left joystick button and find them
+  in the 'Screenshots' folder where the library is installed)
+- easter egg?
+- fixed more visual bugs 
     

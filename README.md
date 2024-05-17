@@ -125,7 +125,8 @@ The controls used to manipulate the simulator are the following:
 * <span style="color: lightgreen">right bumper</span> **--** when held enters selection mode ;
 * <span style="color: lightgreen">D-pad</span> **--** move through interface menu / select robot's orientation (when selection mode is on) ;
 * <span style="color: lightgreen">left joystick</span> **--** controls robot linear velocity + angular velocity (when field centric is on) ;
-* <span style="color: lightgreen">right joystick</span> -- controls angular velocity (**ONLY** when field centric is off) ;
+* <span style="color: lightgreen">right joystick</span> *--* controls angular velocity (**ONLY** when field centric is off) ;
+* <span style="color: lightgreen">left joystick button</span> **--** takes a screenshot (found in the 'Screenshots' folder inside the locally installed library location) ;
 
 ## Create a Trajectory
 
