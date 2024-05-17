@@ -29,13 +29,13 @@ class Auto(Enum):
 
 
 class Simulator():
-    def __init__(self):
+    def __init__(self, constants: Constants = Constants()):
         pygame.init()
         pygame.display.set_caption("FLL PythFinder simulator")
         self.running = BooleanEx(True)
         self.manual_control = BooleanEx(True)
 
-        self.constants = Constants()
+        self.constants = constants
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode(self.constants.screen_size.get())
 
@@ -76,6 +76,8 @@ class Simulator():
     def autonomus(self, do: Auto):
         match do:
             case Auto.ENTER:
+                print("\n\nentering autonomus... ready?")
+
                 self.robot.trail.draw_trail.set(True)
                 self.constants.ERASE_TRAIL.set(False)
                 self.manual_control.set(False)
@@ -88,7 +90,8 @@ class Simulator():
                 self.robot.trail.draw_trail.set(False)
                 self.constants.ERASE_TRAIL.set(True)
                 self.constants.USE_SCREEN_BORDER.set(True)
-                
+
+                print("\n\ntele-op just started! ---- ding ding 🔔")            
             case _:
                 pass
 

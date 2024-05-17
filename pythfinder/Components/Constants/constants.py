@@ -85,64 +85,88 @@ if default_system_font not in pygame.font.get_fonts():
 
 class Constants():
     def __init__(self, 
-                 screen_size: ScreenSize = None):
+                 pixels_to_dec: int = default_pixels_to_decimeters,
+                 fps: int = default_frame_rate,
+                 robot_img_source: str = default_robot_image_source,
+                 robot_scale: int = default_robot_scaling_factor,
+                 robot_width: int = default_robot_width_cm,
+                 robot_height: int = default_robot_height_cm,
+                 text_color = default_text_color,
+                 text_font: str = default_system_font,
+                 max_trail_len: int = default_max_trail_length,
+                 max_trail_segment_len: int = default_max_segment_length,
+                 draw_trail_threshold: int = default_drawing_trail_threshold,
+                 trail_color = default_trail_color,
+                 trail_loops: int = default_trail_loops,
+                 trail_width: int = default_trail_width,
+                 background_color = default_background_color,
+                 axis_color = default_coordinate_system_color,
+                 grid_color = default_grid_color,
+                 width_percent: int = default_width_percent,
+                 backing_distance: int = default_backing_distance,
+                 arrow_offset: int = default_positive_direction_arrow_offset,
+                 half_unit_measure_line: int = default_half_unit_measure_line,
+                 time_until_fade: int = default_time_until_fade,
+                 fade_percent: int = default_fade_percent,
+                 screen_size: ScreenSize = ScreenSize()):
         
         self.recalculate = BooleanEx(False)
 
-        self.PIXELS_2_DEC = 0
-        self.FPS = 0
+        self.PIXELS_2_DEC = pixels_to_dec
+        self.FPS = fps
 
-        self.ROBOT_IMG_NAME = 0
-        self.ROBOT_IMG_EX = 0
-        self.ROBOT_IMG_PATH = 0
-        self.ROBOT_IMG_SOURCE = 0
+        self.ROBOT_IMG_NAME = default_robot_image_name
+        self.ROBOT_IMG_EX = default_robot_image_extension
+        self.ROBOT_IMG_PATH = default_robot_image_path
+        self.ROBOT_IMG_SOURCE = robot_img_source
 
-        self.ROBOT_SCALE = 0
-        self.ROBOT_WIDTH = 0
-        self.ROBOT_HEIGHT = 0
+        self.ROBOT_SCALE = robot_scale
+        self.ROBOT_WIDTH = robot_width
+        self.ROBOT_HEIGHT = robot_height
 
-        self.TEXT_COLOR = 0
-        self.TEXT_FONT = 0
+        self.TEXT_COLOR = text_color
+        self.TEXT_FONT = text_font
 
-        self.MAX_TRAIL_LEN = 0
-        self.MAX_TRAIL_SEGMENT_LEN = 0
+        self.MAX_TRAIL_LEN = max_trail_len
+        self.MAX_TRAIL_SEGMENT_LEN = max_trail_segment_len
 
-        self.DRAW_TRAIL_THRESHOLD = 0
-        self.TRAIL_COLOR = 0
-        self.TRAIL_LOOPS = 0
-        self.TRAIL_WIDTH = 0
+        self.DRAW_TRAIL_THRESHOLD = draw_trail_threshold
+        self.TRAIL_COLOR = trail_color
+        self.TRAIL_LOOPS = trail_loops
+        self.TRAIL_WIDTH = trail_width
 
-        self.BACKGROUND_COLOR = 0
-        self.AXIS_COLOR = 0
-        self.GRID_COLOR = 0
+        self.BACKGROUND_COLOR = background_color
+        self.AXIS_COLOR = axis_color
+        self.GRID_COLOR = grid_color
 
-        self.WIDTH_PERCENT = 0
+        self.WIDTH_PERCENT = width_percent
 
-        self.BACKING_DISTANCE = 0
+        self.BACKING_DISTANCE = backing_distance
 
-        self.ARROW_OFFSET = 0
-        self.HALF_UNIT_MEASURE_LINE = 0
+        self.ARROW_OFFSET = arrow_offset
+        self.HALF_UNIT_MEASURE_LINE = half_unit_measure_line
 
-        self.TIME_UNTIL_FADE = 0
-        self.FADE_PERCENT = 0
+        self.TIME_UNTIL_FADE = time_until_fade
+        self.FADE_PERCENT = fade_percent
 
-        self.DRAW_ROBOT_BORDER = 0
-        self.FIELD_CENTRIC = 0
-        self.USE_SCREEN_BORDER = 0
-        self.MENU_ENTERED = 0
-        self.HEAD_SELECTION = 0
-        self.FORWARDS = 0
-        self.ERASE_TRAIL = 0
-        self.JOYSTICK_ENABLED = 0
-        self.FREEZE_TRAIL = 0
-        self.DRAW_TABLE = 0
+        self.screen_size = screen_size
 
-        self.COEFF_JOY_HEAD = 0
+        self.COEFF_JOY_HEAD = PIDCoefficients(kP = default_kP_joystick_head,
+                                              kI = default_kI_joystick_head,
+                                              kD = default_kD_joystick_head)
 
-        self.default()
+        self.DRAW_ROBOT_BORDER = BooleanEx(default_draw_robot_border)
+        self.FIELD_CENTRIC = BooleanEx(default_field_centric)
+        self.USE_SCREEN_BORDER = BooleanEx(default_use_screen_border)
+        self.MENU_ENTERED = BooleanEx(default_menu_entered)
+        self.HEAD_SELECTION = BooleanEx(default_head_selection)
+        self.FORWARDS = BooleanEx(default_forwards)
+        self.ERASE_TRAIL = BooleanEx(default_erase_trail)
+        self.JOYSTICK_ENABLED = BooleanEx(default_joystick_enabled)
+        self.FREEZE_TRAIL = BooleanEx(default_freeze_trail)
+        self.DRAW_TABLE = BooleanEx(default_draw_table)
 
-        if exists(screen_size):
-            self.screen_size = screen_size
+
 
     #resets all the values to default
     def default(self):
