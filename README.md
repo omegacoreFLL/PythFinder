@@ -306,7 +306,7 @@ Check out the full documentation. --- **TO BE ADDED**
 <br />
 
 
-*v. alpha-0.0.3*
+*v. 0.0.3.17-alpha*
 
 
 [1]: https://www.python.org/downloads/             "python download page"
