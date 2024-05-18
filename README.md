@@ -8,9 +8,9 @@
 
 # Instalation
 Before we dive into it, make sure you have:
-* a python version greater than 3.10 ([latest version][1] is recommended) ;
-* [pip][2] installed on your device (usually pip3 for 3.x versions, but pip works too) ;
-* our team's font '[graffitiyouthregular][5]' installed on your machine (used on the interface) ;
+* a ``python`` version greater than 3.10 ([latest version][1] is recommended) ;
+* [``pip``][2] installed on your device (usually pip3 for 3.x versions, but pip works too) ;
+* our team's ``font`` '[graffitiyouthregular][5]' installed on your machine (used on the interface) ;
 <br />
 
 Now the instalation it's as easy as writing a command in the command prompt or in Visual Studio's terminal:
@@ -28,22 +28,22 @@ pip3 install pythfinder
 
 
 # Description
-PythFinder was developed by team [Omega Core][6] in the scope of enhancing motion planning for the First Lego League competition. 
+``PythFinder`` was developed by team [Omega Core][6] in the scope of enhancing motion planning for the First Lego League competition. 
 
-Usually teams use blocks for coding their autonomus routines, because of the lack of micropython / python documentation online.
+Usually teams use blocks for coding their autonomus routines, because of the lack of ``micropython / python`` documentation online.
 This approach may be faster compiling, but it sacrifices reliability.
 
-With this in consideration, we chose micropython as the main language to run onto our EV3 brick. Throughout the 2023-2024 [Masterpiece][8] season we experimented on-the-go motion calculations and concluded that it was **way to slow** for competitive usage. As a result, our focus shifted more onto pre-calculated motion (also known as [feedforward control][9]).
+With this in consideration, we chose micropython as the main language to run onto our ``EV3`` brick. Throughout the 2023-2024 [Masterpiece][8] season we experimented on-the-go motion calculations and concluded that it was **way to slow** for competitive usage. As a result, our focus shifted more onto pre-calculated motion (also known as [feedforward control][9]).
 
-Because [LEGO®][10] allowed bricks' processors aren't capable of doing fast calculations, creating a script that would do just that seemed to be the way.
+Because [``LEGO®``][10] allowed bricks' processors aren't capable of doing fast calculations, creating a script that would do just that seemed to be the way.
 
 <br/>
 <br/>
 
-So we developed a **trajectory generator tool**, which runs localy on your machine and generates a .txt file with all the necessary information for the robot to mimic the desired movements. You just need to copy the generated text into the robot's code folder to be read on the initialization.
+So we developed a ``trajectory generator tool``, which runs localy on your machine and generates a .txt file with all the necessary information for the robot to mimic the desired movements. You just need to copy the generated text into the robot's code folder to be read on the initialization.
 
 On the robot side, there is a simplified version of just the following aspect of the library, along with methods to construct
-trajectories back from the .txt file decomposition. 
+trajectories back from the ``.txt`` file decomposition. 
 
 Because of this operation, after starting the program, for an average max-points scoring code, there will be a time window of 2 - 5 minutes, when the robot loads all the data (assuming 7-8 different launches). In this time, the code won't be accessible.
 Obviously, the time needed for reading data depents on the data amount, which can be manipulated by the user in multiple ways we'll describe later.
@@ -56,13 +56,13 @@ It's a small price to have one of the most reliable autonomus programs in the FL
 <br/>
 <br/>
 
-To clarify, this library is **NOT EV3 depentent**, even though we developed it on this type of brick. Because the hardware is separated from this library, SPIKE PRIME or NXT robots can still benefit from the .txt file.
+To clarify, this library is **NOT EV3 depentent**, even though we developed it on this type of brick. Because the hardware is separated from this library, ``SPIKE PRIME`` or ``NXT`` robots can still benefit from the .txt file.
 
 For now, we have a plug-and-play implementation **ONLY** for EV3 robots [pythfinder-quick-start][11], other bricks would need custom implementation of the reading and using of the data. We also recommend running the code for all launches in one program, to not deal with loading waiting in the match.
 
 If you need help in this implementation, contact us on our instagram ([@omega.core][12]), we would love to help! 
 
-We would like to create a quick-start for every FLL-legal brick, but we don't have any besides EV3 at the moment, to be able to do tests. If you want to **colaborate with us** in this project by any means, don't hesitate to contact us. 💚🤍
+We would like to create a ``quick-start`` for every FLL-legal brick, but we don't have any besides EV3 at the moment, to be able to do tests. If you want to **colaborate with us** in this project by any means, don't hesitate to contact us. 💚🤍
 
 <br/>
 <br/>
@@ -118,16 +118,16 @@ All of the Nintento controllers are currently not supported and will raise an er
 The controls used to manipulate the simulator are the following:
 <br />
 <span style="font-size:0.8em;">*(the order of buttons is: **ps4 / xbox**)*</span>
-* <span style="color: lightgreen">△ / Y</span> **--** go forwards / backwards (when field centric is on) ;
-* <span style="color: lightgreen">□ / X</span> **--** enter / exit interface setting menu ;
-* <span style="color: lightgreen">○ / B</span> **--** reset robot pose to origin / selects buttons (when the menu is activated) ;
-* <span style="color: lightgreen">X / A</span> **--** show / hide trail ;
-* <span style="color: lightgreen">left bumper</span> **--** erase trail / sets values to default (when the menu is activated) ;
-* <span style="color: lightgreen">right bumper</span> **--** when held enters selection mode ;
-* <span style="color: lightgreen">D-pad</span> **--** move through interface menu / select robot's orientation (when selection mode is on) ;
-* <span style="color: lightgreen">left joystick</span> **--** controls robot linear velocity + angular velocity (when field centric is on) ;
-* <span style="color: lightgreen">right joystick</span> *--* controls angular velocity (**ONLY** when field centric is off) ;
-* <span style="color: lightgreen">left joystick button</span> **--** takes a screenshot (found in the 'Screenshots' folder inside the locally installed library location) ;
+* ``△ / Y`` **--** go forwards / backwards (when field centric is on) ;
+* ``□ / X`` **--** enter / exit interface setting menu ;
+* ``○ / B`` **--** reset robot pose to origin / selects buttons (when the menu is activated) ;
+* ``X / A`` **--** show / hide trail ;
+* ``left bumper`` **--** erase trail / sets values to default (when the menu is activated) ;
+* ``right bumper`` **--** when held enters selection mode ;
+* ``D-pad`` **--** move through interface menu / select robot's orientation (when selection mode is on) ;
+* ``left joystick`` **--** controls robot linear velocity + angular velocity (when field centric is on) ;
+* ``right joystick`` *--* controls angular velocity (**ONLY** when field centric is off) ;
+* ``left joystick button`` **--** takes a screenshot (found in the 'Screenshots' folder inside the locally installed library location) ;
 
 ## Create a Trajectory
 
@@ -139,28 +139,28 @@ Firstly, we define a particular set of robot information (like the pose, velocit
 Trajectories are constructed using the '**TrajectoryBuilder**' class. This takes, as optional parameters, a *start_pose* and a *constants*. By default, the starting pose is at the origin of the cartesian system.
 
 The builder has intuitive methods for accomplishing a desired, simple trajectory. This includes **motion** functions:
-* *inLineCM()* ;
-* *wait()* ;
-* *toPoint()* ;
-* *toPose()* ;
+* *``inLineCM()``* ;
+* *``toPoint()``* ;
+* *``toPose()``* ;
+* *``wait()``* ;
 
 These can be combined with **markers**, allowing
 parallel task managing, utilising multithreading.
 Markers can be set by *time* or *distance*, **relative** to the last motion function, or **absolute**, relative to the start of the trajectory.
 
 The library also includes special types of markers:
-* **interruptors**: breaks the continuity of the trajectory at the specified point in time / distance. Imagine interruptors as sudden brakes made by a car.
-* **dynamic constrains**: allow you to modify portions of the trajectory to run at different speeds, without sacrificing continuity.
+* **``interruptors``**: breaks the continuity of the trajectory at the specified point in time / distance. Imagine interruptors as sudden brakes made by a car.
+* **``dynamic constrains``**: allow you to modify portions of the trajectory to run at different speeds, without sacrificing continuity.
 
 A list of all the markers:
-* *interruptTemporal()* <span style="font-size:0.8em; color: lightgreen">*or*</span> *interruptDisplacement()* ;
-* *addConstrainsTemporal()* <span style="font-size:0.8em; color: lightgreen">*or*</span> *addConstrainsDisplacement()* ;
-* *addTemporalMarker()* <span style="font-size:0.8em; color: lightgreen">*or*</span> *addDisplacementMarker()* ;
-* *addRelativeTemporalMarker()* <span style="font-size:0.8em; color: lightgreen">*or*</span> *addRelativeDisplacementMarker()* ;
+* *``interruptTemporal()``* <span style="font-size:0.8em; color: lightgreen">*or*</span> *``interruptDisplacement()``* ;
+* *``addConstrainsTemporal()``* <span style="font-size:0.8em; color: lightgreen">*or*</span> *``addConstrainsDisplacement()``* ;
+* *``addTemporalMarker()``* <span style="font-size:0.8em; color: lightgreen">*or*</span> *``addDisplacementMarker()``* ;
+* *``addRelativeTemporalMarker()``* <span style="font-size:0.8em; color: lightgreen">*or*</span> *``addRelativeDisplacementMarker()``* ;
 
 And other uncategorized methods:
-* *setPoseEstimate()* ;
-* *turnDeg()* ;
+* *``setPoseEstimate()``* ;
+* *``turnDeg()``* ;
 
 which are neither motion functions or markers.
 
@@ -202,8 +202,8 @@ trajectory = (TrajectoryBuilder(START_POSE, START_CONSTRAINS)
 After creating your trajectory, call the '*.follow()*' method and pass the '**Simulator**' object to see your code in action!
 
 This method takes as an optional parameter the following type as a boolean:
-* <span style="color: lightgreen">*perfect*</span> **=** simulator iterates through each motion state and displays the robot at the pre-calculated position. For this mode, you can also change the step size in which the list is iterated. Bigger step size = faster robot on screen.
-* <span style="color: lightgreen">*real*</span> **=** simulator gives the calculated powers to the robot object, which looks exactly like it would run in real time. This mode is **recommended** for better visualisation.
+* <span style="color: lightgreen">*``perfect``*</span> **=** simulator iterates through each motion state and displays the robot at the pre-calculated position. For this mode, you can also change the step size in which the list is iterated. Bigger step size = faster robot on screen.
+* <span style="color: lightgreen">*``real``*</span> **=** simulator gives the calculated powers to the robot object, which looks exactly like it would run in real time. This mode is **recommended** for better visualisation.
 
 The last optional parameter is '*wait*'. When this boolean is set to True, it waits until the simulator is fully rendered on the users' screen before proceeding with the trajectory. This is useful when perfect following and a big step number are set, it makes you be able to even the start.
 
