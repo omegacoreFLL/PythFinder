@@ -8,9 +8,10 @@
 
 # Instalation
 Before we dive into it, make sure you have:
-* a python version greater than 3.10 ([latest version][1] is recommended).
-* [pip][2] installed on your device (usually pip3 for 3.x versions, but pip works too).
+* a python version greater than 3.10 ([latest version][1] is recommended) ;
+* [pip][2] installed on your device (usually pip3 for 3.x versions, but pip works too) ;
 <br />
+* our team's font '[graffitiyouthregular][5]' installed on your machine (used on the interface) ;
 
 Now the instalation it's as easy as writing a command in the command prompt or in Visual Studio's terminal:
 

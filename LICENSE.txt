@@ -21,4 +21,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 This software is specifically designed for autonomously planning paths for First LEGO League robots. 
-You are free to use and modify this software to enhance its functionality for this purpose.
+If you want to modify this software to enhance it's functionality for this purpose, contact us. 
+We'll collaborate on further expanding this tool.
