@@ -25,7 +25,7 @@ import pygame
 # after a time threshold of not moving, the trail can start erase itself. This can be stopped with a setting
 
 
-class Segment():
+class TrailSegment():
     def __init__(self, constants: Constants, points = None):
         if exists(points):
             self.points = points
@@ -44,7 +44,7 @@ class Segment():
 
 class Trail():
     def __init__(self, constants: Constants):
-        self.segments = [Segment(constants)]
+        self.segments = [TrailSegment(constants)]
         self.draw_trail = BooleanEx(False)
         self.hide_trail = BooleanEx(False)
 
@@ -59,12 +59,12 @@ class Trail():
     
 
 
-    def eraseSegment(self, number: int):
+    def eraseTrailSegment(self, number: int):
         self.segments.pop(number - 1)
         self.current_segment -= 1
     
     def eraseTrail(self):
-        self.segments = [Segment(self.constants)]
+        self.segments = [TrailSegment(self.constants)]
         self.current_segment = 0
 
 
@@ -103,18 +103,18 @@ class Trail():
         if segment_length == 0:
             self.segments[self.current_segment].points.append((int(pose.x), int(pose.y)))
 
-        elif self.segments[self.current_segment].points[segment_length - 1] != (int(pose.x), int(pose.y)):
-            last_point = self.segments[self.current_segment].points[segment_length - 1]
+        elif self.segments[self.current_segment].points[-1] != (int(pose.x), int(pose.y)):
+            last_point = self.segments[self.current_segment].points[-1]
 
             if distance(last_point, (int(pose.x), int(pose.y))) > self.constants.DRAW_TRAIL_THRESHOLD:
-                self.segments.append(Segment(self.constants))
+                self.segments.append(TrailSegment(self.constants))
                 self.current_segment += 1
 
             self.segments[self.current_segment].points.append((int(pose.x), int(pose.y)))
         
         self.past_trail_length = trail_length
 
-    def shouldErasePoint(self, length: int):
+    def shouldErasePoint(self, length: int) -> bool:
         if self.constants.ERASE_TRAIL.compare(False):
             return False
         

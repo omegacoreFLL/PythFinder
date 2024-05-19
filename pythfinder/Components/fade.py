@@ -46,17 +46,17 @@ class Fade():
         self.obj_rectangle.center = self.center
     
     def onScreen(self, screen: pygame.Surface):
-        if self.opacity >= 0:
-            current_time = pygame.time.get_ticks()
+        if self.opacity < 0:
+            return None
+        current_time = pygame.time.get_ticks()
 
-            if msToS(current_time - self.reset_time) > self.constants.TIME_UNTIL_FADE:
-                self.opacity -= self.constants.FADE_PERCENT
-            
-            if self.opacity < 0:
-                self.opacity = 0
+        if msToS(current_time - self.reset_time) > self.constants.TIME_UNTIL_FADE:
+            self.opacity -= self.constants.FADE_PERCENT
 
+            self.opacity = max(0, self.opacity)
             self.obj.set_alpha(percent2Alpha(self.opacity))
-            screen.blit(self.obj, self.obj_rectangle)
+            
+        screen.blit(self.obj, self.obj_rectangle)
 
 
     def recalculate(self):

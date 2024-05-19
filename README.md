@@ -327,4 +327,4 @@ Check out the full [**documentation**][17].
 [14]: https://www.bricklink.com/v3/studio/download.page "lego cad software"
 [15]: https://www.reddit.com/r/FLL/comments/168hh95/hires_image_of_the_masterpiece_table_3208px_x/ "fll table image"
 [16]: https://www.adobe.com/ro/products/illustrator.html "adobe illustrator"
-[17]: https://github.com/omegacoreFLL/PythFinder/wiki/Introduction "pythfinder's extended documentation"
+[17]: https://github.com/omegacoreFLL/PythFinder/wiki "pythfinder's extended documentation"
