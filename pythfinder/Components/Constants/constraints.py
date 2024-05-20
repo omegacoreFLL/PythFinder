@@ -1,11 +1,11 @@
 from enum import Enum, auto
 import math
 
-# file containting constrains data
+# file containting constraints data
 #
-# constrains are motion limitations at a given state of time
+# constraints are motion limitations at a given state of time
 #
-# constrains may change along a trajectory, so this data should not be
+# constraints may change along a trajectory, so this data should not be
 #   used to as the robot's REAL max velocity, which is determined
 #   by it's mechanical systems' limitations 
 
@@ -20,12 +20,12 @@ default_max_robot_ang_dec = math.radians(-30)
 default_track_width = 9.97
 
 
-class ConstrainsType(Enum):
+class ConstraintsType(Enum):
     TEMPORAL = auto()
     DISPLACEMENT = auto()
 
 
-class Constrains():
+class Constraints():
     def __init__(self, 
                  vel: float | int = default_max_robot_vel, 
                  acc: float | int = default_max_robot_acc, 
@@ -75,7 +75,7 @@ class Constrains():
 
     # creates a different instance to avoid unwanted modifications
     def copy(self):
-        return Constrains(self.MAX_VEL, self.ACC, self.DEC,  
+        return Constraints(self.MAX_VEL, self.ACC, self.DEC,  
                           self.MAX_ANG_VEL, self.ANG_ACC, self.ANG_DEC,
                           self.TRACK_WIDTH)
 
@@ -83,9 +83,9 @@ class Constrains():
 # used in constrain markers.
 # A cleaner way to store the data
 
-class VolatileConstrains():
-    def __init__(self, start: float, constrains: Constrains, type: ConstrainsType):
+class VolatileConstraints():
+    def __init__(self, start: float, constraints: Constraints, type: ConstraintsType):
         self.start = start
-        self.constrains = constrains
+        self.constraints = constraints
 
         self.type = type

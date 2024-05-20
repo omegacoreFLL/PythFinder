@@ -62,7 +62,7 @@ class QubicSpline():
 
         self.profile = MotionProfile(start = 0, 
                                     end = self.integral[len(self.integral) - 1],
-                                    constrains = Constrains())
+                                    constraints = Constraints())
         self.spline_time = int(sToMs(self.profile.t_total)) + 1
     
 

@@ -35,7 +35,7 @@ def turnDeg(deg, simulator: Simulator,
         head_error = findShortestPath(deg, pose.head)
 
         turn = head_controller.calculate(head_error)
-        turn = turn / (max_turn + EPSILON) * simulator.constants.cmToPixels(0.3 * simulator.robot.constrains.MAX_ANG_VEL / 2 
+        turn = turn / (max_turn + EPSILON) * simulator.constants.cmToPixels(0.3 * simulator.robot.constraints.MAX_ANG_VEL / 2 
                                                                 * simulator.robot.constants.TRAIL_WIDTH) * 1.4
 
         if abs(head_error) <= threshold:

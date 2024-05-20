@@ -1,6 +1,6 @@
 from pythfinder.Components.Controllers.PIDController import *
 from pythfinder.Components.BetterClasses.booleanEx import *
-from pythfinder.Components.Constants.constrains import *
+from pythfinder.Components.Constants.constraints import *
 from pythfinder.Components.Constants.constants import *
 from pythfinder.Trajectory.kinematics import *
 from pythfinder.Components.trail import *
@@ -55,7 +55,7 @@ class Robot():
         self.head_controller = PIDController(constants.COEFF_JOY_HEAD)
 
         self.constants = constants
-        self.constrains = Constrains()
+        self.constraints = Constraints()
 
         self.recalculate()
 

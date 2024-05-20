@@ -37,7 +37,7 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
     * adding feedforward approach through complex trajectory building techniques,
       with velocity-constrained motion profiles, assuring continuity, for more 
       precise applications;
-    * markers, interruptors and volatile constrains, which are more or less
+    * markers, interrupters and volatile constraints, which are more or less
       modifiers for the trajectory's behaviour. Markers enable you to perform
       multithreading-related tasks inside the trajectory;
     * in-game menu for easier manipulation of constants (NOT FULLY IMPLEMENTED)
@@ -54,4 +54,5 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - easter egg?
 - fixed more visual bugs 
 - fixed 0.0.3.18 (buttons weren't accessible)
+- fixed typos
     

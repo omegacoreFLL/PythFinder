@@ -1,7 +1,7 @@
 from pythfinder.Components.Controllers.PIDCoefficients import *
 from pythfinder.Components.Controllers.PIDController import *
 from pythfinder.Components.BetterClasses.mathEx import *
-from pythfinder.Components.Constants.constrains import *
+from pythfinder.Components.Constants.constraints import *
 from pythfinder.Trajectory.feedforward import *
 from pythfinder.Trajectory.kinematics import *
 from pythfinder.Trajectory.feedback import *
@@ -23,7 +23,7 @@ class MotionAction(Enum):
 
     REL_MARKER = auto()
     INT_MARKER = auto()
-    REL_CONSTRAINS = auto()
+    REL_CONSTRAINTS = auto()
 
 
 class MarkerType(Enum):
@@ -44,7 +44,7 @@ class Marker():
         except: print("\n\nexcuse me, what? \nprovide a method in the 'Marker' object with the value '{0}' and type '{1}'"
                       .format(self.value, self.type.name))
 
-    class Interruptor():
+    class Interrupter():
         def __init__(self, val: float, type: MarkerType):
             self.value = val
             self.type = type
@@ -75,9 +75,9 @@ class MotionState():
 
 class MotionSegment():
     def __init__(self, action: MotionAction, value: float, 
-                 constrains: Constrains = None):
+                 constraints: Constraints = None):
         self.action = action 
-        self.constrains = constrains
+        self.constraints = constraints
         self.value = value
         self.states = {}
 
@@ -522,18 +522,18 @@ class Trajectory():
 
 
 class TrajectoryBuilder():
-    def __init__(self, start_pose: Pose = Pose(), constrains: Constrains = None):
+    def __init__(self, start_pose: Pose = Pose(), constraints: Constraints = None):
         self.splines = []
         self.segments = []
 
         self.linear_profiles = []
         self.angular_profiles = []
 
-        self.disp_volatile_constrains = []
-        self.temp_volatile_constrains = []
+        self.disp_volatile_constraints = []
+        self.temp_volatile_constraints = []
 
         self.distance = 0
-        self.constrains = Constrains() if constrains is None else constrains
+        self.constraints = Constraints() if constraints is None else constraints
 
         self.start_pose = start_pose
         self.current_pose = start_pose.copy()
@@ -551,7 +551,7 @@ class TrajectoryBuilder():
         if not boolean:
             return 0
 
-        self.linear_profiles.append(MotionProfile(self.distance, self.constrains))
+        self.linear_profiles.append(MotionProfile(self.distance, self.constraints))
 
         self.distance = 0
 
@@ -608,14 +608,14 @@ class TrajectoryBuilder():
     def interruptTemporal(self, ms: int): #interrupts last linear move
         self.__createProfile(boolean = (abs(self.distance) > 0))
         self.segments.append(MotionSegment(MotionAction.INT_MARKER, 
-                                           value = Marker.Interruptor(int(ms), MarkerType.TEMPORAL)))
+                                           value = Marker.Interrupter(int(ms), MarkerType.TEMPORAL)))
 
         return self
 
     def interruptDisplacement(self, dis: float):
         self.__createProfile(boolean = (abs(self.distance) > 0))
         self.segments.append(MotionSegment(MotionAction.INT_MARKER, 
-                                           value = Marker.Interruptor(dis, MarkerType.DISPLACEMENT)))
+                                           value = Marker.Interrupter(dis, MarkerType.DISPLACEMENT)))
 
         return self
 
@@ -647,43 +647,43 @@ class TrajectoryBuilder():
 
 
 
-    def addConstrainsTemporal(self, start: float, constrains: Constrains, end: float | None = None):
-        self.temp_volatile_constrains.append(VolatileConstrains(abs(start), constrains,
-                                                                ConstrainsType.TEMPORAL))
+    def addConstraintsTemporal(self, start: float, constraints: Constraints, end: float | None = None):
+        self.temp_volatile_constraints.append(VolatileConstraints(abs(start), constraints,
+                                                                ConstraintsType.TEMPORAL))
         if end is not None:
-            self.temp_volatile_constrains.append(VolatileConstrains(abs(end), self.constrains.copy(),
-                                                                    ConstrainsType.TEMPORAL))
+            self.temp_volatile_constraints.append(VolatileConstraints(abs(end), self.constraints.copy(),
+                                                                    ConstraintsType.TEMPORAL))
 
         return self
 
-    def addConstrainsDisplacement(self, start: float, constrains: Constrains, end: float | None = None):
-        self.disp_volatile_constrains.append(VolatileConstrains(abs(start), constrains,
-                                                                ConstrainsType.DISPLACEMENT))
+    def addConstraintsDisplacement(self, start: float, constraints: Constraints, end: float | None = None):
+        self.disp_volatile_constraints.append(VolatileConstraints(abs(start), constraints,
+                                                                ConstraintsType.DISPLACEMENT))
         if end is not None:
-            self.disp_volatile_constrains.append(VolatileConstrains(abs(end), self.constrains.copy(),
-                                                                    ConstrainsType.DISPLACEMENT))
+            self.disp_volatile_constraints.append(VolatileConstraints(abs(end), self.constraints.copy(),
+                                                                    ConstraintsType.DISPLACEMENT))
         
         return self
 
-    def addConstrainsRelativeTemporal(self, start: float, constrains: Constrains, end: float | None = None):
-        self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINS, 
-                                           value = VolatileConstrains(start, constrains, 
-                                                                      ConstrainsType.TEMPORAL)))
+    def addConstraintsRelativeTemporal(self, start: float, constraints: Constraints, end: float | None = None):
+        self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINTS, 
+                                           value = VolatileConstraints(start, constraints, 
+                                                                      ConstraintsType.TEMPORAL)))
         if end is not None:
-            self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINS, 
-                                           value = VolatileConstrains(end, self.constrains.copy(), 
-                                                                      ConstrainsType.TEMPORAL)))
+            self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINTS, 
+                                           value = VolatileConstraints(end, self.constraints.copy(), 
+                                                                      ConstraintsType.TEMPORAL)))
             
         return self
 
-    def addConstrainsRelativeDisplacement(self, start: float, constrains: Constrains, end: float | None = None):
-        self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINS, 
-                                           value = VolatileConstrains(start, constrains, 
-                                                                      ConstrainsType.DISPLACEMENT)))
+    def addConstraintsRelativeDisplacement(self, start: float, constraints: Constraints, end: float | None = None):
+        self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINTS, 
+                                           value = VolatileConstraints(start, constraints, 
+                                                                      ConstraintsType.DISPLACEMENT)))
         if end is not None:
-            self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINS, 
-                                           value = VolatileConstrains(end, self.constrains.copy(), 
-                                                                      ConstrainsType.DISPLACEMENT)))
+            self.segments.append(MotionSegment(MotionAction.REL_CONSTRAINTS, 
+                                           value = VolatileConstraints(end, self.constraints.copy(), 
+                                                                      ConstraintsType.DISPLACEMENT)))
         
         return self
     
@@ -691,7 +691,7 @@ class TrajectoryBuilder():
 
     def build(self) -> Trajectory: 
         self.__createProfile(boolean = (abs(self.distance) > 0))
-        self.__sortConstrains()
+        self.__sortConstraints()
 
         self.segment_number = len(self.segments)
 
@@ -709,15 +709,15 @@ class TrajectoryBuilder():
         self.START_TIME = 0
         self.START_DIST = 0
 
-        self.last_constrains_start = 0
+        self.last_constraints_start = 0
         self.last_stop_distance = 0
         self.last_stop_time = 0
 
-        try: self.disp_next_constrains: VolatileConstrains = self.disp_volatile_constrains.pop(0)
-        except: self.disp_next_constrains = None
+        try: self.disp_next_constraints: VolatileConstraints = self.disp_volatile_constraints.pop(0)
+        except: self.disp_next_constraints = None
 
-        try: self.temp_next_constrains: VolatileConstrains = self.temp_volatile_constrains.pop(0)
-        except: self.temp_next_constrains = None
+        try: self.temp_next_constraints: VolatileConstraints = self.temp_volatile_constraints.pop(0)
+        except: self.temp_next_constraints = None
 
         while self.iterator < self.segment_number:
             segment: MotionSegment = self.segments[self.iterator]
@@ -744,10 +744,10 @@ class TrajectoryBuilder():
                 self.__buildMarker(segment)
             
             elif segment.action is MotionAction.INT_MARKER:
-                self.__buildInterruptor(segment)
+                self.__buildInterrupter(segment)
             
-            elif segment.action is MotionAction.REL_CONSTRAINS:
-                self.__buildConstrains(segment)
+            elif segment.action is MotionAction.REL_CONSTRAINTS:
+                self.__buildConstraints(segment)
 
             elif segment.action is MotionAction.SET_POSE:
                 self.__buildSetPose(segment)
@@ -802,9 +802,9 @@ class TrajectoryBuilder():
     def __buildLine(self, segment: MotionSegment):
         self.__erase_all_linear_segments_after()
 
-        #recalculate (could have new constrains)
+        #recalculate (could have new constraints)
         profile: MotionProfile = self.linear_profiles.pop(0)
-        profile = MotionProfile(profile.distance * profile.sign, self.constrains, profile.start_vel)
+        profile = MotionProfile(profile.distance * profile.sign, self.constraints, profile.start_vel)
 
         segment_distance = segment.value
 
@@ -854,61 +854,61 @@ class TrajectoryBuilder():
             self.EVALUATE = False
 
 
-            if self.temp_next_constrains is not None:
+            if self.temp_next_constraints is not None:
                 
-                #treat temporal constrains as displacement ones
+                #treat temporal constraints as displacement ones
                 #too lazy to overthink conversions, just convert on the go
 
-                if self.TRAJ_TIME[-1] == self.temp_next_constrains.start:
-                    print("\n\nafferent displacement for the constrains set at {0}ms: {1}cm"
-                          .format(self.temp_next_constrains.start,
+                if self.TRAJ_TIME[-1] == self.temp_next_constraints.start:
+                    print("\n\nafferent displacement for the constraints set at {0}ms: {1}cm"
+                          .format(self.temp_next_constraints.start,
                                 round(self.TRAJ_DISTANCE[-1], 2)))
                     self.evaluating_displacement = self.TRAJ_DISTANCE[-1]
-                    self.evaluating_constrains = self.temp_next_constrains.constrains
+                    self.evaluating_constraints = self.temp_next_constraints.constraints
                     self.EVALUATE = True
 
-                    try: self.temp_next_constrains = self.temp_volatile_constrains.pop(0)
-                    except: self.temp_next_constrains = None
+                    try: self.temp_next_constraints = self.temp_volatile_constraints.pop(0)
+                    except: self.temp_next_constraints = None
 
 
 
-            if self.disp_next_constrains is not None:
+            if self.disp_next_constraints is not None:
 
-                if self.TRAJ_DISTANCE[-1] >= self.disp_next_constrains.start:
-                    print("\n\nafferent time for the constrains set at {0}cm: {1}ms"
-                          .format(self.disp_next_constrains.start,
+                if self.TRAJ_DISTANCE[-1] >= self.disp_next_constraints.start:
+                    print("\n\nafferent time for the constraints set at {0}cm: {1}ms"
+                          .format(self.disp_next_constraints.start,
                                 self.TRAJ_TIME[-2]))
-                    self.evaluating_displacement = self.disp_next_constrains.start
-                    self.evaluating_constrains = self.disp_next_constrains.constrains
+                    self.evaluating_displacement = self.disp_next_constraints.start
+                    self.evaluating_constraints = self.disp_next_constraints.constraints
                     self.EVALUATE = True
 
-                    try: self.disp_next_constrains = self.disp_volatile_constrains.pop(0)
-                    except: self.disp_next_constrains = None
+                    try: self.disp_next_constraints = self.disp_volatile_constraints.pop(0)
+                    except: self.disp_next_constraints = None
 
 
 
             if self.EVALUATE:
                 new_profile = MotionProfile(distance = profile.sign * profile.distance - self.evaluating_displacement
-                                                                        + self.last_constrains_start,
-                                        constrains = self.evaluating_constrains,
+                                                                        + self.last_constraints_start,
+                                        constraints = self.evaluating_constraints,
                                         start_velocity = abs(velocity))
 
                 if new_profile.recommended_distance is None:
                     self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE,
                                         value = profile.sign * profile.distance - self.evaluating_displacement +
-                                                                    self.last_constrains_start))
+                                                                    self.last_constraints_start))
                     self.segment_number += 1
                         
                     self.linear_profiles.insert(0, new_profile)
-                    self.last_constrains_start = self.evaluating_displacement
-                    self.constrains = self.evaluating_constrains
+                    self.last_constraints_start = self.evaluating_displacement
+                    self.constraints = self.evaluating_constraints
 
                     break
                 else:
-                    print("\n\nthe constrains set at {0}cm displacement can't compute a continuous trajectory"
+                    print("\n\nthe constraints set at {0}cm displacement can't compute a continuous trajectory"
                             .format(self.evaluating_displacement))
                     if self.START_DIST > profile.sign * profile.distance + new_profile.recommended_distance:
-                        print("you're out of luck, there's no way your constrains fit in this trajectory configuration")
+                        print("you're out of luck, there's no way your constraints fit in this trajectory configuration")
                     else: print("supported interval: [{0}, {1}] cm"
                                 .format(round(self.START_DIST, 2),
                                         round(profile.sign * profile.distance + new_profile.recommended_distance, 2)))
@@ -971,7 +971,7 @@ class TrajectoryBuilder():
 
         self.segments[self.iterator] = MotionSegment(MotionAction.TURN, head)
         self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE, displacement))
-        self.linear_profiles.insert(0, MotionProfile(displacement, self.constrains))
+        self.linear_profiles.insert(0, MotionProfile(displacement, self.constraints))
 
         self.segment_number += 1
         self.iterator -= 1
@@ -991,7 +991,7 @@ class TrajectoryBuilder():
         self.segments[self.iterator] = MotionSegment(MotionAction.TURN, head)
         self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE, displacement))
         self.segments.insert(self.iterator + 2, MotionSegment(MotionAction.TURN, segment.value[0].head))
-        self.linear_profiles.insert(0, MotionProfile(0, displacement, self.constrains))
+        self.linear_profiles.insert(0, MotionProfile(0, displacement, self.constraints))
 
         self.segment_number += 2
         self.iterator -= 1
@@ -1068,8 +1068,8 @@ class TrajectoryBuilder():
             case _:
                 pass
 
-    def __buildInterruptor(self, segment: MotionSegment, telemetry = True, sort = True):
-        inter : Marker.Interruptor = segment.value
+    def __buildInterrupter(self, segment: MotionSegment, telemetry = True, sort = True):
+        inter : Marker.Interrupter = segment.value
 
         index = self.__organize()
 
@@ -1121,7 +1121,7 @@ class TrajectoryBuilder():
 
                 if abs(inter.value) >= self.segments[index].total_time:
                     if telemetry:
-                        print('\n\nyour temporal interruptor with value {0} is out of bounds: {1}ms - {2}ms'
+                        print('\n\nyour temporal interrupter with value {0} is out of bounds: {1}ms - {2}ms'
                             .format(inter.value, keys[0], keys[-1]))
                     self.iterator -= 1
                     return None, None, None, None
@@ -1132,7 +1132,7 @@ class TrajectoryBuilder():
                               keys[-1] + inter.value)
                 
                 if telemetry:
-                    print('\n\nafferent interruptor distance (if you care):')
+                    print('\n\nafferent interrupter distance (if you care):')
                     print(round(self.segments[index].get(erase_time).displacement - start_distance, 2),'cm')
                     
                 
@@ -1140,7 +1140,7 @@ class TrajectoryBuilder():
 
                 if abs(inter.value) > total_distance:
                     if telemetry:
-                        print('\n\nyour displacement interruptor with value {0} is out of bounds: {1}cm - {2}cm'
+                        print('\n\nyour displacement interrupter with value {0} is out of bounds: {1}cm - {2}cm'
                             .format(inter.value, start_distance, end_distance))   
                             
                     self.iterator -= 1
@@ -1154,7 +1154,7 @@ class TrajectoryBuilder():
                                              left = keys[0], right = keys[-1])
                 
                 if telemetry:
-                    print('\n\nafferent interruptor time (if you care):')
+                    print('\n\nafferent interrupter time (if you care):')
                     print(erase_time - keys[0],'ms')
                     
             case _:
@@ -1178,52 +1178,52 @@ class TrajectoryBuilder():
                 erase_time,
                 self.segments[index].get(erase_time).velocities)
 
-    def __buildConstrains(self, segment: MotionSegment):
-        constr: VolatileConstrains = self.segments[self.iterator].value
+    def __buildConstraints(self, segment: MotionSegment):
+        constr: VolatileConstraints = self.segments[self.iterator].value
 
         index = self.__organize()
 
         if index == -1: 
-            print('\n\nFound no segment to set constrains')
+            print('\n\nFound no segment to set constraints')
             return None
 
         self.__orderConsecutiveMarkers(index)
 
 
-        #if you had inserted markers, they went on the top, so no more constrains setting rn
+        #if you had inserted markers, they went on the top, so no more constraints setting rn
         #   if this happens, abort the building and return to building the marker
 
-        if self.segments[self.iterator].action is not MotionAction.REL_CONSTRAINS:
+        if self.segments[self.iterator].action is not MotionAction.REL_CONSTRAINTS:
             self.iterator -= 1
             return None
 
 
-        #strategy: let the interruptor do the heavy lifting for you
+        #strategy: let the interrupter do the heavy lifting for you
         #   NASA approved 👍
 
         type = None
         match constr.type:
-            case ConstrainsType.TEMPORAL:
+            case ConstraintsType.TEMPORAL:
                 type = MarkerType.TEMPORAL
-            case ConstrainsType.DISPLACEMENT:
+            case ConstraintsType.DISPLACEMENT:
                 type = MarkerType.DISPLACEMENT
 
-        afferent_interruptor = Marker.Interruptor(constr.start, type)
+        afferent_interrupter = Marker.Interrupter(constr.start, type)
         self.segments[self.iterator] = MotionSegment(action = MotionAction.INT_MARKER,
-                                                     value = afferent_interruptor)
+                                                     value = afferent_interrupter)
         
-        #don't show the telemetry, because you didn't call an interruptor lol
-        total_distance, stop_distance, stop_time, start_vel = self.__buildInterruptor(self.segments[self.iterator], 
+        #don't show the telemetry, because you didn't call an interrupter lol
+        total_distance, stop_distance, stop_time, start_vel = self.__buildInterrupter(self.segments[self.iterator], 
                                                                                       telemetry = False,
                                                                                       sort = False)
         if total_distance is not None:
             distance = total_distance - stop_distance
-            new_profile = MotionProfile(distance, constr.constrains, abs(start_vel[0]))
+            new_profile = MotionProfile(distance, constr.constraints, abs(start_vel[0]))
     
             if new_profile.recommended_distance is None:
                 self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE, value = distance))
                 self.linear_profiles.insert(0, new_profile)
-                self.constrains = constr.constrains
+                self.constraints = constr.constraints
 
                 self.segment_number += 1
 
@@ -1234,11 +1234,11 @@ class TrajectoryBuilder():
                 while i < self.segment_number:
                     segment: MotionSegment = self.segments[i]
 
-                    if segment.action is MotionAction.REL_CONSTRAINS:
+                    if segment.action is MotionAction.REL_CONSTRAINTS:
                         match segment.value.type:
-                            case ConstrainsType.TEMPORAL:
+                            case ConstraintsType.TEMPORAL:
                                 self.segments[i].value.start -= (stop_time - self.last_stop_time)
-                            case ConstrainsType.DISPLACEMENT:
+                            case ConstraintsType.DISPLACEMENT:
                                 self.segments[i].value.start -= (stop_distance - self.last_stop_distance)
                     
                     elif segment.action is MotionAction.INT_MARKER:
@@ -1280,7 +1280,7 @@ class TrajectoryBuilder():
         print('\n\nnooooooooooooooooooooooo')
         print("well, your {0} relative constrain at {1}{2} can't exist ):"
                 .format(constr.type.name.lower(), constr.start,
-                        'ms' if constr.type is ConstrainsType.TEMPORAL else 'cm'))
+                        'ms' if constr.type is ConstraintsType.TEMPORAL else 'cm'))
         print('next one!')
 
 
@@ -1326,20 +1326,20 @@ class TrajectoryBuilder():
         self.__disp_2_temp_marker()
         self.temp_markers = selection_sort(self.temp_markers, 'value')
 
-    def __sortConstrains(self):
-        self.constrains_number = len(self.disp_volatile_constrains)
+    def __sortConstraints(self):
+        self.constraints_number = len(self.disp_volatile_constraints)
 
-        self.disp_volatile_constrains = selection_sort(self.disp_volatile_constrains, 'start')
-        self.temp_volatile_constrains = selection_sort(self.temp_volatile_constrains, 'start')
+        self.disp_volatile_constraints = selection_sort(self.disp_volatile_constraints, 'start')
+        self.temp_volatile_constraints = selection_sort(self.temp_volatile_constraints, 'start')
 
     def __orderConsecutiveMarkers(self, start_index):
         # markers should be above constrain settings
-        # constrains values should be monotonically increasing
+        # constraints values should be monotonically increasing
 
         #takes care of the relative hierarchy (order of compiling):
         #       1) RELATIVE MARKERS
-        #       2) RELATIVE CONSTRAINS
-        #       3) INTERRUPTORS
+        #       2) RELATIVE CONSTRAINTS
+        #       3) INTERRUPTERS
         #
         # absolute ones don't really matter
 
@@ -1354,11 +1354,11 @@ class TrajectoryBuilder():
             while j < self.segment_number:
                 current_marker: MotionSegment = self.segments[j]
 
-                if (current_marker.action is MotionAction.REL_CONSTRAINS or
+                if (current_marker.action is MotionAction.REL_CONSTRAINTS or
                     current_marker.action is MotionAction.INT_MARKER or
                     current_marker.action is MotionAction.REL_MARKER):
                     
-                    try: #when it's a REL_CONSTRAINS object
+                    try: #when it's a REL_CONSTRAINTS object
                         if current_marker.value.start < 0:
                             current_marker.value.start = line_segment.value + current_marker.value.start
                     except: pass
@@ -1378,7 +1378,7 @@ class TrajectoryBuilder():
                                 self.segments[k] = aux
 
 
-                        elif (comparing_marker.action is MotionAction.REL_CONSTRAINS
+                        elif (comparing_marker.action is MotionAction.REL_CONSTRAINTS
                               and current_marker.action is not MotionAction.REL_MARKER):
 
                             try:
@@ -1411,8 +1411,8 @@ class TrajectoryBuilder():
             match segment.action:
                 case MotionAction.REL_MARKER:
                     print('REL_MARKER: {0}'.format(segment.value.value))
-                case MotionAction.REL_CONSTRAINS:
-                    print('REL_CONSTRAINS: {0}'.format(segment.value.start))
+                case MotionAction.REL_CONSTRAINTS:
+                    print('REL_CONSTRAINTS: {0}'.format(segment.value.start))
                 case MotionAction.INT_MARKER:
                     print('INT_MARKER: {0}'.format(segment.value.value))
                 case MotionAction.LINE:
@@ -1450,7 +1450,7 @@ class TrajectoryBuilder():
                 self.segments[index].action is MotionAction.WAIT):
                 break
 
-            elif (self.segments[index].action is not MotionAction.REL_CONSTRAINS and
+            elif (self.segments[index].action is not MotionAction.REL_CONSTRAINTS and
                   self.segments[index].action is not MotionAction.REL_MARKER and
                   self.segments[index].action is not MotionAction.INT_MARKER):
                 #switch
@@ -1480,7 +1480,7 @@ class TrajectoryBuilder():
 
                 return True
             
-            elif (self.segments[i].action is MotionAction.REL_CONSTRAINS or
+            elif (self.segments[i].action is MotionAction.REL_CONSTRAINTS or
                   self.segments[i].action is MotionAction.REL_MARKER or
                   self.segments[i].action is MotionAction.INT_MARKER):
                 

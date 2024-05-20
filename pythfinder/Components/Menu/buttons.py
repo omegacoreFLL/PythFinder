@@ -376,7 +376,6 @@ class ToggleButton(AbsButton):
         if self.SELECTED.falling:
             self.display_title = self.title
 
-
 class InputButton(AbsButton):
     def __init__(self, 
                  name: Selected, 
@@ -533,12 +532,14 @@ class InputButton(AbsButton):
                         match self.type:
                             case InputType.DIMENSION:
                                 try: 
-                                    if self.inRange(int(key_val)):
-                                        self.input = key_val
+                                    if self.isDigit(key_val):
+                                        if self.inRange(int(key_val)):
+                                            self.input = key_val
                                 except: pass
                             case InputType.PERCENT:
-                                if self.inRange(int(key_val)):
-                                    self.input = key_val
+                                if self.isDigit(key_val):
+                                    if self.inRange(int(key_val)):
+                                        self.input = key_val
                             case InputType.FONT:
                                 ...
                             case InputType.COLOR:
@@ -549,12 +550,14 @@ class InputButton(AbsButton):
                         match self.type:
                             case InputType.DIMENSION:
                                 try:
-                                    if self.inRange(int(self.input + key_val)):
-                                        self.input += key_val
+                                    if self.isDigit(key_val):
+                                        if self.inRange(int(self.input + key_val)):
+                                            self.input += key_val
                                 except: pass
                             case InputType.PERCENT:
-                                if self.inRange(int(self.input + key_val)):
-                                    self.input += key_val
+                                if self.isDigit(key_val):
+                                    if self.inRange(int(self.input + key_val)):
+                                        self.input += key_val
                             case InputType.FONT:
                                 ...
                             case InputType.COLOR:

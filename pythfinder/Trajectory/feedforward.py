@@ -1,19 +1,19 @@
 from pythfinder.Components.BetterClasses.mathEx import *
-from pythfinder.Components.Constants.constrains import *
+from pythfinder.Components.Constants.constraints import *
 
 # file containing all the feedforward control calculation.
 #
 # we use a trapezoidal motion profile (meaning velocity and acceleration constrained). It supports
 #   advanced manipulation. Specifying the start velocity enables to connect multiple motion
-#   profiles into one smooth profile, thus implementing dynamic constrains. 
+#   profiles into one smooth profile, thus implementing dynamic constraints. 
 #
 # in some cases, this much freedom doesn't give the profile acc / dec to complete the distance,
 #   so it estimates the distance it can reach with the given constraines, alerting the user of
 #   the impossible case.
 
 class MotionProfile():
-    def __init__(self, distance: float, constrains: Constrains, start_velocity: float = 0):
-        self.constrains = constrains
+    def __init__(self, distance: float, constraints: Constraints, start_velocity: float = 0):
+        self.constraints = constraints
 
         if distance < 0:
             self.reversed = True
@@ -25,9 +25,9 @@ class MotionProfile():
         self.distance = abs(distance)
 
         self.start_vel = start_velocity
-        self.max_vel = constrains.MAX_VEL
-        self.acc = constrains.ACC
-        self.dec = constrains.DEC
+        self.max_vel = constraints.MAX_VEL
+        self.acc = constraints.ACC
+        self.dec = constraints.DEC
 
         self.x1 = self.x2 = self.x3 = 0
         self.t1 = self.t2 = self.t3 = 0

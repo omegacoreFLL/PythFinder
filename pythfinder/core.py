@@ -188,8 +188,8 @@ class Simulator():
             joy_x, joy_y = self.__updateJoystickFieldCentric((left_x, left_y))
         else: joy_x, joy_y = self.__updateJoystickRobotCentric((right_x, left_y))
 
-        joy_vel = joy_y * self.robot.constrains.MAX_VEL
-        joy_ang_vel = joy_x * self.robot.constrains.MAX_ANG_VEL
+        joy_vel = joy_y * self.robot.constraints.MAX_VEL
+        joy_ang_vel = joy_x * self.robot.constraints.MAX_ANG_VEL
 
         self.robot.setVelocities(joy_vel, joy_ang_vel)
 
