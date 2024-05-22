@@ -532,12 +532,12 @@ class InputButton(AbsButton):
                         match self.type:
                             case InputType.DIMENSION:
                                 try: 
-                                    if self.isDigit(key_val):
+                                    if self.isDigit(value.key):
                                         if self.inRange(int(key_val)):
                                             self.input = key_val
                                 except: pass
                             case InputType.PERCENT:
-                                if self.isDigit(key_val):
+                                if self.isDigit(value.key):
                                     if self.inRange(int(key_val)):
                                         self.input = key_val
                             case InputType.FONT:
@@ -550,12 +550,12 @@ class InputButton(AbsButton):
                         match self.type:
                             case InputType.DIMENSION:
                                 try:
-                                    if self.isDigit(key_val):
+                                    if self.isDigit(value.key):
                                         if self.inRange(int(self.input + key_val)):
                                             self.input += key_val
                                 except: pass
                             case InputType.PERCENT:
-                                if self.isDigit(key_val):
+                                if self.isDigit(value.key):
                                     if self.inRange(int(self.input + key_val)):
                                         self.input += key_val
                             case InputType.FONT:

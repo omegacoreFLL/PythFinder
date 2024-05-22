@@ -1,8 +1,8 @@
 {
     "python.analysis.extraPaths": [
         "./ev3sim/Components"
-    ]
+        
+    ],
+    "plantuml.java": "C:\\Program Files\\Common Files\\Oracle\\Java\\javapath\\java.exe",
     
 }
-
-

@@ -4,7 +4,7 @@ Change Log
 
 0.0.1 (30/03/2024)
 ------------------
-- First 'official' release of the EV3 enhanced hardware code (current 'pythfinder-quickstart').
+- First 'official' release of the EV3 enhanced hardware code (current 'pythfinder-quick-start').
 - It includes: 
     * on-brick button managing;
     * a robot run handler;
@@ -54,5 +54,10 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - easter egg?
 - fixed more visual bugs 
 - fixed 0.0.3.18 (buttons weren't accessible)
+
+0.0.3.20 (21.05.2024)
+---------------------
 - fixed typos
+- updated README.md 
+
     
