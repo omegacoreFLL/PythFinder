@@ -991,7 +991,7 @@ class TrajectoryBuilder():
         self.segments[self.iterator] = MotionSegment(MotionAction.TURN, head)
         self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE, displacement))
         self.segments.insert(self.iterator + 2, MotionSegment(MotionAction.TURN, segment.value[0].head))
-        self.linear_profiles.insert(0, MotionProfile(0, displacement, self.constraints))
+        self.linear_profiles.insert(0, MotionProfile(displacement, self.constraints))
 
         self.segment_number += 2
         self.iterator -= 1

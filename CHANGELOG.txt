@@ -55,9 +55,9 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - fixed more visual bugs 
 - fixed 0.0.3.18 (buttons weren't accessible)
 
-0.0.3.20 (21.05.2024)
+0.0.3.31 (23.05.2024)
 ---------------------
 - fixed typos
 - updated README.md 
-
+- fixed little errors
     
