@@ -1,4 +1,4 @@
-![pyth_finder_logo](https://github.com/omegacoreFLL/PythFinder/assets/159171107/1dc439b2-0ac0-40f8-95fd-4883b0507603)
+![pyth_finder_logo](https://i.ibb.co/vvrDmbF/pyth-finder-logo-mk4.png)
 
 ![version_badge](https://img.shields.io/badge/alpha-0.0.3-006400)
 ![license](https://img.shields.io/badge/license-MIT-62e39e)
