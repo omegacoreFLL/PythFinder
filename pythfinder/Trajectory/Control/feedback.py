@@ -1,6 +1,6 @@
-from pythfinder.Components.Controllers.PIDController import *
+from pythfinder.Trajectory.Control.Controllers.PIDController import *
 from pythfinder.Components.BetterClasses.mathEx import *
-from pythfinder.Components.Constants.constants import *
+from pythfinder.Trajectory.Kinematics.generic import *
 from pythfinder.core import *
 
 # file simulating feedback movements.

@@ -1,5 +1,4 @@
-from pythfinder.Components.Controllers.PIDCoefficients import *
-from pythfinder.Components.Constants.constants import *
+from pythfinder.Trajectory.Control.Controllers.PIDCoefficients import *
 import pygame
 
 # generic PID controller

@@ -1,4 +1,4 @@
-from pythfinder.Components.Controllers.PIDCoefficients import *
+from pythfinder.Trajectory.Control.Controllers.PIDCoefficients import *
 from pythfinder.Components.BetterClasses.booleanEx import *
 from pythfinder.Components.Constants.screenSize import *
 from pythfinder.Components.Constants.constraints import *

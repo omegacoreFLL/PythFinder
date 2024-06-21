@@ -1,6 +1,6 @@
 
 from pythfinder.Components.BetterClasses.mathEx import *
-from pythfinder.Trajectory.feedforward import *
+from pythfinder.Trajectory.Control.feedforward import *
 
 from typing import List
 from abc import ABC

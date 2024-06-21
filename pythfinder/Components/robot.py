@@ -1,9 +1,15 @@
-from pythfinder.Components.Controllers.PIDController import *
 from pythfinder.Components.BetterClasses.booleanEx import *
 from pythfinder.Components.Constants.constraints import *
 from pythfinder.Components.Constants.constants import *
-from pythfinder.Trajectory.kinematics import *
 from pythfinder.Components.trail import *
+
+from pythfinder.Trajectory.Control.Controllers.PIDController import *
+from pythfinder.Trajectory.Kinematics.MecanumKinematics import *
+from pythfinder.Trajectory.Kinematics.SwerveKinematics import *
+from pythfinder.Trajectory.Kinematics.xDriveKinematics import *
+from pythfinder.Trajectory.Kinematics.KiwiKinematics import *
+from pythfinder.Trajectory.Kinematics.TankKinematics import *
+from pythfinder.Trajectory.Kinematics.generic import *
 
 import pygame
 import math
