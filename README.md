@@ -1,4 +1,6 @@
-![pyth_finder_logo](https://i.ibb.co/vvrDmbF/pyth-finder-logo-mk4.png)
+<p align="center" style="margin-bottom: 10px;">
+      <img src="https://i.ibb.co/vvrDmbF/pyth-finder-logo-mk4.png" alt="pyth-finder-logo">
+</p>
 
 ![version_badge](https://img.shields.io/badge/alpha-0.0.3-006400)
 ![license](https://img.shields.io/badge/license-MIT-62e39e)
