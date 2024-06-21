@@ -25,7 +25,8 @@ import math
 
 
 class Robot():
-    def __init__(self, constants: Constants):
+    def __init__(self, constants: Constants, constraints: None | Constraints3D = None, 
+                 kinematics: Kinematics = None):
 
         self.rotating_instance = None
         self.rectangle = None
@@ -40,29 +41,25 @@ class Robot():
         self.past_pose = Pose(0, 0, 90)
         self.target_head = 90
 
-        self.left_speed = 0
-        self.right_speed = 0
-
-        self.velocity = 0
-        self.angular_velocity = 0
-        self.past_velocity = 0
-        self.past_angular_velocity = 0
+        self.chassis_state = ChassisState()
+        self.past_chassis_state = ChassisState()
 
         self.distance = 0
         self.start_time = 0
+        self.last_rotation = Point()
 
         self.is_stopped = BooleanEx(True)
         self.head_controller = PIDController(constants.COEFF_JOY_HEAD)
 
         self.constants = constants
-        self.constraints = Constraints()
-
-        self.recalculate()
 
         self.window_pose = self.toWindowCoords(self.pose)
         
         self.trail = Trail(self.constants)
-        self.kinematics = TankKinematics()
+        self.constraints = Constraints3D() if constraints is None else constraints
+        self.kinematics = TankKinematics(center_offset = Point(-2, 0)) if kinematics is None else kinematics
+
+        self.recalculate()
 
 
     def recalculate(self):
@@ -81,18 +78,18 @@ class Robot():
         self.rectangle = self.rotating_instance.get_rect()
         self.mask = pygame.mask.from_surface(self.rotating_instance)
 
+        self.trail.recalculate()
+
 
     def getRobotSizeInPixels(self):
         self.width_in_pixels = self.constants.ROBOT_SCALE * self.constants.cmToPixels(self.constants.ROBOT_WIDTH)
         self.height_in_pixels =  self.constants.ROBOT_SCALE * self.constants.cmToPixels(self.constants.ROBOT_HEIGHT)
 
     def getWheelSpeeds(self):
-        forward = self.kinematics.inverseKinematics(self.velocity, self.angular_velocity)
+        return self.kinematics.inverse(self.chassis_state)
 
-        self.left_speed = forward[0]
-        self.right_speed = forward[1]
-
-
+    def toMotorPower(self, value):
+        return round(value * self.constants.MAX_POWER / self.constants.REAL_MAX_VEL, 2)
 
     def toFieldCoords(self, pose: Pose):
         return Pose((self.constants.screen_size.half_h - pose.y) * 10 / self.constants.PIXELS_2_DEC, 
@@ -105,28 +102,28 @@ class Robot():
                     normalizeDegrees(pose.head + 90))
     
     def toFieldPoint(self, point: Point):
-        return ((self.constants.screen_size.half_h - point.y) * 10 / self.constants.PIXELS_2_DEC, 
+        return Point((self.constants.screen_size.half_h - point.y) * 10 / self.constants.PIXELS_2_DEC, 
                 (point.x - self.constants.screen_size.half_w) * 10 / self.constants.PIXELS_2_DEC)
 
     def toWindowPoint(self, point: Point):
-        return (self.constants.screen_size.half_w + point.y * self.constants.PIXELS_2_DEC / 10, 
+        return Point(self.constants.screen_size.half_w + point.y * self.constants.PIXELS_2_DEC / 10, 
                 self.constants.screen_size.half_h - point.x * self.constants.PIXELS_2_DEC / 10)
 
  
- 
-    def setVelocities(self, 
-                      vel: float | int, 
-                      ang_vel: float | int):
+    # @autonomus - FALSE (field centric velocities) / TRUE (robot centric velocities)
+    def setVelocities(self, chassis_state: ChassisState, robot_centric: bool = False):
         
-        if abs(vel) < 0.01 and abs(ang_vel) < 0.01:
+        if abs(chassis_state.getVelocityMagnitude()) < 0.01 and abs(chassis_state.ANG_VEL) < 0.01:
             self.is_stopped.set(True)
         else: self.is_stopped.set(False)
 
-        self.past_velocity = self.velocity
-        self.past_angular_velocity = self.angular_velocity
+        self.past_chassis_state = chassis_state
+        self.chassis_state = chassis_state
 
-        self.velocity = self.constants.cmToPixels(vel) * 10 / self.constants.PIXELS_2_DEC
-        self.angular_velocity = ang_vel
+        if robot_centric:
+            self.chassis_state.VEL = self.chassis_state.VEL.rotateMatrix(math.radians(self.pose.head))
+
+
 
     def setPoseEstimate(self, pose: Pose):
         self.pose = self.past_pose = Pose(pose.x, pose.y, normalizeDegrees(pose.head))
@@ -139,14 +136,15 @@ class Robot():
     def zeroDistance(self):
         self.distance = 0
 
-    def update(self, time: int):
-        self.getWheelSpeeds()
 
+
+    def update(self, time: int):
         x, y, head = self.pose.x, self.pose.y, self.pose.head
 
-        delta_x = self.velocity * math.cos(math.radians(head)) * time
-        delta_y = self.velocity * math.sin(math.radians(head)) * time
-        delta_head = math.degrees(self.angular_velocity) * time
+        delta_x = self.chassis_state.VEL.x * time
+        delta_y = self.chassis_state.VEL.y * time
+
+        delta_head = math.degrees(self.chassis_state.ANG_VEL) * time
         delta_distance = self.pose.distanceTo(self.past_pose) / 10 #dec
 
         if self.constants.USE_SCREEN_BORDER.compare():
@@ -176,31 +174,50 @@ class Robot():
                 print("\n\n✨ achievement unlocked: where am I? ✨")
                 x, y, head, delta_x, delta_y, delta_head = 0, 0, 0, 0, 0, 0
                 
-
         x += delta_x
         y += delta_y
         head += delta_head
         self.distance += delta_distance
 
+        if not delta_head == 0:
+            relative_center_of_rotation: Point = self.kinematics.center_offset
+            absolute_center_of_rotation: Point = rotateByPoint(Point(x, y), relative_center_of_rotation + self.pose, math.radians(head))
+
+            new_point = rotateByPoint(absolute_center_of_rotation, Point(x, y), math.radians(delta_head))
+            new_pose = Pose(new_point.x, new_point.y, normalizeDegrees(head))
+
+        else: new_pose = Pose(x, y, normalizeDegrees(head))
+
 
         self.past_pose = self.pose
-        self.pose = Pose(x, y, normalizeDegrees(head))
+        self.pose = new_pose
         self.window_pose = self.toWindowCoords(self.pose)
 
 
 
     def onScreen(self, screen: pygame.Surface):
         self.__drawPose(screen)
-        self.trail.drawTrail(screen, self.window_pose)
+        self.trail.drawTrail(screen, self.pose)
         self.__drawRobot(screen)
+        self.__drawCursor(screen)
         if self.constants.DRAW_ROBOT_BORDER.compare():
             self.__drawBorder(screen)
-        if self.constants.DRAW_TABLE.compare():
-            self.__drawCursor(screen)
+        if self.constants.VELOCITY_VECTOR.compare():
+            self.__drawVelocityVector(screen)
+        
+
+
 
     def elapsed_time(self):
         return pygame.time.get_ticks() - self.start_time
-   
+
+    def cursorOver(self):
+        x, y = pygame.mouse.get_pos()
+
+        cursor_point: Point = Point(x, y)
+        rectangle_corners = pygame_vector_to_point(self.__findBorder(self.window_pose))
+
+        return point_in_rectangle(cursor_point, rectangle_corners)
 
 
 
@@ -230,7 +247,7 @@ class Robot():
     
     def __drawCursor(self, screen: pygame.Surface):
         x, y = pygame.mouse.get_pos()
-        to_field = self.toFieldPoint(Point(x, y))
+        to_field = self.toFieldPoint(Point(x, y)).tuple()
         coords = self.pose_font.render("x: {:.2f}  y: {:.2f}".format(to_field[0], to_field[1]), 
                                 True, self.constants.TEXT_COLOR)
         
@@ -238,6 +255,25 @@ class Robot():
         coords_rectangle.center = (1 / 6 * self.constants.screen_size.width, self.constants.screen_size.height - 30)
 
         screen.blit(coords, coords_rectangle)
+
+    def __drawVelocityVector(self, screen: pygame.Surface):
+        x_vel, y_vel = self.chassis_state.VEL.tuple()
+        
+        x_point = self.pose.point() + Point(x = x_vel, y = 0)
+        y_point = self.pose.point() + Point(x = 0, y = y_vel)
+        vel = self.pose.point() + Point(x_vel, y_vel)
+        
+        x_window = self.toWindowPoint(x_point)
+        y_window = self.toWindowPoint(y_point)
+        vel_window = self.toWindowPoint(vel)
+
+        pygame.draw.line(screen, "green", 
+                        self.window_pose.point().tuple(), x_window.tuple(), width = 8)
+        pygame.draw.line(screen, "purple",
+                       self.window_pose.point().tuple(), y_window.tuple(), width = 8)
+        pygame.draw.line(screen, "orange",
+                         self.window_pose.point().tuple(), vel_window.tuple(), width = 8)
+
 
     def __findBorder(self, pose: Pose):
         border = self.image.get_rect(center = (pose.x, pose.y))

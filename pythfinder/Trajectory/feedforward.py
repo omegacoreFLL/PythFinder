@@ -36,6 +36,9 @@ class MotionProfile():
         self.time = 0
         self.recommended_distance = None
 
+        if self.max_vel == 0 or self.acc == 0 or self.dec == 0:
+            #no profile exists
+            return None
 
         #decelerating from start_vel to 0
         t_dec_to_0 = self.start_vel / -self.dec
@@ -98,8 +101,9 @@ class MotionProfile():
             return self.sign * (self.acc * (t ** 2) / 2 + t * self.start_vel)
         if t <= self.t1 + self.t2:
             return self.sign * (self.x1 + self.max_vel * (t - self.t1))
-            
-        return self.sign * (self.x1 + self.x2 + (self.max_vel + self.dec * (t - (self.t1 + self.t2)) / 2) * (t - (self.t1 + self.t2)))
+        if t <= self.t_total:
+            return self.sign * (self.x1 + self.x2 + (self.max_vel + self.dec * (t - (self.t1 + self.t2)) / 2) * (t - (self.t1 + self.t2)))
+        return 0
 
     def get_vel(self, t: float):
         
@@ -107,8 +111,9 @@ class MotionProfile():
             return self.sign * (self.start_vel + self.acc * t)
         if t <= self.t1 + self.t2:
             return self.sign * (self.max_vel)
-            
-        return self.sign * (self.max_vel + self.dec * (t - (self.t1 + self.t2)))     
+        if t <= self.t_total:
+            return self.sign * (self.max_vel + self.dec * (t - (self.t1 + self.t2)))  
+        return 0   
     
     def get_acc(self, t: float):
 
@@ -116,12 +121,15 @@ class MotionProfile():
             return self.sign * (self.acc)
         if t <= self.t1 + self.t2:
             return 0
-
-        return self.sign * (self.dec)
+        if t <= self.t_total:
+            return self.sign * (self.dec)
+        return 0
     
     def get(self, t: float, n: int):
         match n:
-            case 0: return self.get_dis(t)
-            case 1: return self.get_vel(t)
-            case 2: return self.get_vel(t)
+            case 0: return round(self.get_dis(t), 15)
+            case 1: return round(self.get_vel(t), 15)
+            case 2: return round(self.get_vel(t), 15)
             case _: raise Exception('not a valid differentiation grade')
+
+

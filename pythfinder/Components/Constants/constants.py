@@ -19,14 +19,15 @@ device_relative_path = os.path.join(os.path.dirname(__file__), '..', '..', 'Imag
 screenshot_path = os.path.join(device_relative_path, 'Screenshots\\')
 
 default_robot_image_name = 'bot_from_above'
-default_robot_image_path = 'Robot/'
+default_robot_image_path = 'Robot\\'
 default_robot_image_extension = 'png'
-default_robot_image_source = os.path.join(device_relative_path, 'Robot/bot_from_above.png')
+default_robot_image_source = os.path.join(device_relative_path, 'Robot\\bot_from_above.png')
 
 default_robot_scaling_factor = 1
 default_robot_height_cm = 20
 default_robot_width_cm = 15 
 default_robot_real_max_velocity = 27.7 # cm/s
+default_max_power = 100 # motor dc input
 
 default_coordinate_system_color = "white"
 default_grid_color = (63, 63, 63) #rgb
@@ -50,7 +51,7 @@ default_forwards = True
 default_erase_trail = True
 default_joystick_enabled = True
 default_freeze_trail = False
-default_draw_table = False
+default_velocity_vector = False
 
 default_kP_joystick_head = 6
 default_kI_joystick_head = 0
@@ -70,7 +71,7 @@ default_trail_width = 2
 default_pixels_to_decimeters = 100
 
 default_positive_direction_arrow_offset = 25
-default_half_unit_measure_line = 10
+default_unit_size = 3
 
 default_backing_distance = 1
 
@@ -107,9 +108,11 @@ class Constants():
                  width_percent: int = default_width_percent,
                  backing_distance: int = default_backing_distance,
                  arrow_offset: int = default_positive_direction_arrow_offset,
-                 half_unit_measure_line: int = default_half_unit_measure_line,
+                 unit_size: int = default_unit_size,
                  time_until_fade: int = default_time_until_fade,
                  fade_percent: int = default_fade_percent,
+                 real_max_velocity: float = default_robot_real_max_velocity,
+                 max_power: int | float = default_max_power,
                  screen_size: ScreenSize = ScreenSize()):
         
         self.recalculate = BooleanEx(False)
@@ -146,10 +149,13 @@ class Constants():
         self.BACKING_DISTANCE = backing_distance
 
         self.ARROW_OFFSET = arrow_offset
-        self.HALF_UNIT_MEASURE_LINE = half_unit_measure_line
+        self.UNIT_SIZE = unit_size
 
         self.TIME_UNTIL_FADE = time_until_fade
         self.FADE_PERCENT = fade_percent
+
+        self.REAL_MAX_VEL = real_max_velocity
+        self.MAX_POWER = max_power
 
         self.screen_size = screen_size
 
@@ -166,7 +172,7 @@ class Constants():
         self.ERASE_TRAIL = BooleanEx(default_erase_trail)
         self.JOYSTICK_ENABLED = BooleanEx(default_joystick_enabled)
         self.FREEZE_TRAIL = BooleanEx(default_freeze_trail)
-        self.DRAW_TABLE = BooleanEx(default_draw_table)
+        self.VELOCITY_VECTOR = BooleanEx(default_velocity_vector)
 
 
 
@@ -204,10 +210,13 @@ class Constants():
         self.BACKING_DISTANCE = default_backing_distance
 
         self.ARROW_OFFSET = default_positive_direction_arrow_offset
-        self.HALF_UNIT_MEASURE_LINE = default_half_unit_measure_line
+        self.UNIT_SIZE = default_unit_size
 
         self.TIME_UNTIL_FADE = default_time_until_fade
         self.FADE_PERCENT = default_fade_percent
+
+        self.REAL_MAX_VEL = default_robot_real_max_velocity
+        self.MAX_POWER = default_max_power
 
         self.COEFF_JOY_HEAD = PIDCoefficients(kP = default_kP_joystick_head,
                                               kI = default_kI_joystick_head,
@@ -222,7 +231,7 @@ class Constants():
         self.ERASE_TRAIL = BooleanEx(default_erase_trail)
         self.JOYSTICK_ENABLED = BooleanEx(default_joystick_enabled)
         self.FREEZE_TRAIL = BooleanEx(default_freeze_trail)
-        self.DRAW_TABLE = BooleanEx(default_draw_table)
+        self.VELOCITY_VECTOR = BooleanEx(default_velocity_vector)
 
         self.screen_size = ScreenSize()
     
@@ -256,7 +265,135 @@ class Constants():
                         point: Point):
         
         return Point(self.pixelsToCm(point.x), self.pixelsToCm(point.y))
-        
+    
+    def copy(self):
+
+        new = Constants(
+            self.PIXELS_2_DEC,
+            self.FPS,
+            self.ROBOT_IMG_SOURCE,
+            self.ROBOT_SCALE,
+            self.ROBOT_WIDTH,
+            self.ROBOT_HEIGHT,
+            self.TEXT_COLOR,
+            self.TEXT_FONT,
+            self.MAX_TRAIL_LEN,
+            self.MAX_TRAIL_SEGMENT_LEN,
+            self.DRAW_TRAIL_THRESHOLD,
+            self.TRAIL_COLOR,
+            self.TRAIL_LOOPS,
+            self.TRAIL_WIDTH,
+            self.BACKGROUND_COLOR,
+            self.AXIS_COLOR,
+            self.GRID_COLOR,
+            self.WIDTH_PERCENT,
+            self.BACKING_DISTANCE,
+            self.ARROW_OFFSET,
+            self.UNIT_SIZE,
+            self.TIME_UNTIL_FADE,
+            self.FADE_PERCENT,
+            self.REAL_MAX_VEL,
+            self.MAX_POWER,
+            self.screen_size
+        )
+
+        new.DRAW_ROBOT_BORDER.set(self.DRAW_ROBOT_BORDER.get())
+        new.FIELD_CENTRIC.set(self.FIELD_CENTRIC.get())
+        new.USE_SCREEN_BORDER.set(self.USE_SCREEN_BORDER.get())
+        new.MENU_ENTERED.set(self.MENU_ENTERED.get())
+        new.HEAD_SELECTION.set(self.HEAD_SELECTION.get())
+        new.FORWARDS.set(self.FORWARDS.get())
+        new.ERASE_TRAIL.set(self.ERASE_TRAIL.get())
+        new.JOYSTICK_ENABLED.set(self.ERASE_TRAIL.get())
+        new.FREEZE_TRAIL.set(self.ERASE_TRAIL.get())
+        new.VELOCITY_VECTOR.set(self.VELOCITY_VECTOR.get())
+
+        return new
+    
+    def check(self, other):
+        if isinstance(other, Constants):
+            dif = 0
+            if not self.PIXELS_2_DEC == other.PIXELS_2_DEC:
+                self.PIXELS_2_DEC = other.PIXELS_2_DEC
+                dif += 1
+            if not self.FPS == other.FPS:
+                self.FPS = other.FPS
+                dif += 1
+            if not self.ROBOT_IMG_SOURCE == other.ROBOT_IMG_SOURCE:
+                self.ROBOT_IMG_SOURCE = other.ROBOT_IMG_SOURCE
+                dif += 1
+            if not self.ROBOT_SCALE == other.ROBOT_SCALE:
+                self.ROBOT_SCALE = other.ROBOT_SCALE
+                dif += 1
+            if not self.ROBOT_WIDTH == other.ROBOT_WIDTH:
+                self.ROBOT_WIDTH = other.ROBOT_WIDTH
+                dif += 1
+            if not self.ROBOT_HEIGHT == other.ROBOT_HEIGHT:
+                self.ROBOT_HEIGHT = other.ROBOT_HEIGHT
+                dif += 1
+            if not self.TEXT_COLOR == other.TEXT_COLOR:
+                self.TEXT_COLOR = other.TEXT_COLOR
+                dif += 1
+            if not self.TEXT_FONT == other.TEXT_FONT:
+                self.TEXT_FONT = other.TEXT_FONT
+                dif += 1
+            if not self.MAX_TRAIL_LEN == other.MAX_TRAIL_LEN:
+                self.MAX_TRAIL_LEN = other.MAX_TRAIL_LEN
+                dif += 1
+            if not self.MAX_TRAIL_SEGMENT_LEN == other.MAX_TRAIL_SEGMENT_LEN:
+                self.MAX_TRAIL_SEGMENT_LEN = other.MAX_TRAIL_SEGMENT_LEN
+                dif += 1
+            if not self.DRAW_TRAIL_THRESHOLD == other.DRAW_TRAIL_THRESHOLD:
+                self.DRAW_TRAIL_THRESHOLD = other.DRAW_TRAIL_THRESHOLD
+                dif += 1
+            if not self.TRAIL_COLOR == other.TRAIL_COLOR:
+                self.TRAIL_COLOR = other.TRAIL_COLOR
+                dif += 1
+            if not self.TRAIL_LOOPS == other.TRAIL_LOOPS:
+                self.TRAIL_LOOPS = other.TRAIL_LOOPS
+                dif += 1
+            if not self.TRAIL_WIDTH == other.TRAIL_WIDTH:
+                self.TRAIL_WIDTH = other.TRAIL_WIDTH
+                dif += 1
+            if not self.BACKGROUND_COLOR == other.BACKGROUND_COLOR:
+                self.BACKGROUND_COLOR = other.BACKGROUND_COLOR
+                dif += 1
+            if not self.AXIS_COLOR == other.AXIS_COLOR:
+                self.AXIS_COLOR = other.AXIS_COLOR
+                dif += 1
+            if not self.GRID_COLOR == other.GRID_COLOR:
+                self.GRID_COLOR = other.GRID_COLOR
+                dif += 1
+            if not self.WIDTH_PERCENT == other.WIDTH_PERCENT:
+                self.WIDTH_PERCENT = other.WIDTH_PERCENT
+                dif += 1
+            if not self.BACKING_DISTANCE == other.BACKING_DISTANCE:
+                self.BACKING_DISTANCE = other.BACKING_DISTANCE
+                dif += 1
+            if not self.ARROW_OFFSET == other.ARROW_OFFSET:
+                self.ARROW_OFFSET = other.ARROW_OFFSET
+                dif += 1
+            if not self.UNIT_SIZE == other.UNIT_SIZE:
+                self.UNIT_SIZE = other.UNIT_SIZE
+                dif += 1
+            if not self.TIME_UNTIL_FADE == other.TIME_UNTIL_FADE:
+                self.TIME_UNTIL_FADE = other.TIME_UNTIL_FADE
+                dif += 1
+            if not self.FADE_PERCENT == other.FADE_PERCENT:
+                self.FADE_PERCENT = other.FADE_PERCENT
+                dif += 1
+            if not self.REAL_MAX_VEL == other.REAL_MAX_VEL:
+                self.REAL_MAX_VEL = other.REAL_MAX_VEL
+                dif += 1
+            if not self.MAX_POWER == other.MAX_POWER:
+                self.MAX_POWER = other.MAX_POWER
+                dif += 1
+            if not self.screen_size == other.screen_size:
+                self.screen_size = other.screen_size
+                dif += 1
+            
+            if not dif == 0:
+                self.recalculate.set(True)
     
 
 
@@ -603,7 +740,6 @@ kP_head = 30
 kD_head = 1
 kS_head = 0.6
 
-REAL_MAX_VEL = 27.7
 kS_fwd = 20 
 
 

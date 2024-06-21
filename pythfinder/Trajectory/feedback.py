@@ -13,7 +13,7 @@ from pythfinder.core import *
 # this uses a PID controller to turn the robot separately from the trajectory
 #   generated with feedback calculations.
 
-def turnDeg(deg, simulator: Simulator, 
+def turnDeg(deg, simulator: Simulator,
             threshold = 0.1, 
             sensitivity = 1):
     
@@ -35,11 +35,11 @@ def turnDeg(deg, simulator: Simulator,
         head_error = findShortestPath(deg, pose.head)
 
         turn = head_controller.calculate(head_error)
-        turn = turn / (max_turn + EPSILON) * simulator.constants.cmToPixels(0.3 * simulator.robot.constraints.MAX_ANG_VEL / 2 
-                                                                * simulator.robot.constants.TRAIL_WIDTH) * 1.4
+        turn = turn / (max_turn + EPSILON) * simulator.constants.cmToPixels(0.3 * simulator.robot.constraints.head.MAX_VEL / 2 
+                                                                * simulator.robot.constraints.TRACK_WIDTH) * 1.4
 
         if abs(head_error) <= threshold:
             isBusy = False
-        else: simulator.robot.setVelocities(0, turn)
+        else: simulator.robot.setVelocities(ChassisState(Point(), turn))
     
-    simulator.robot.setVelocities(0, 0)
+    simulator.robot.setVelocities(ChassisState())

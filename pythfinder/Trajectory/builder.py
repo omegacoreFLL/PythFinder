@@ -13,8 +13,13 @@ import threading
 
 class MotionAction(Enum):
     LINE = auto()
+
     TO_POINT = auto()
     TO_POSE = auto()
+    TO_POINT_CONSTANT_HEAD = auto()
+    TO_POSE_CONSTANT_HEAD = auto()
+    TO_POSE_LINEAR_HEAD = auto()
+
     SPLINE = auto()
 
     TURN = auto()
@@ -52,11 +57,13 @@ class Marker():
 
 
 class MotionState():
-    def __init__(self, time: int, velocities: tuple, 
+    def __init__(self, time: int, 
+                 velocities: ChassisState, 
                  displacement: float,
-                 pose: Pose, turn: bool = False):
+                 pose: Pose, 
+                 turn: bool = False):
 
-        self.velocities = velocities # (VEL, ANG_VEL) cm / s
+        self.velocities = velocities # cm / s
 
         self.time = time # ms
         self.displacement = displacement
@@ -67,9 +74,7 @@ class MotionState():
     def isLike(self, other): 
         return (self.turn == other.turn
                         and
-                self.velocities[0] == other.velocities[0]
-                        and
-                self.velocities[1] == other.velocities[1]
+                self.velocities.isLike(other.velocities)
                         and 
                 self.pose.head == other.pose.head)
 
@@ -175,7 +180,7 @@ class Trajectory():
             sim.robot.setPoseEstimate(self.end_pose)
         else: 
             sim.robot.target_head = self.__realFollow(sim)
-            sim.robot.setVelocities(0, 0)
+            sim.robot.setVelocities(ChassisState(), True)
         
         #markers from last miliseconds or beyond the time limit
         while self.marker_iterator < len(self.markers):
@@ -192,7 +197,7 @@ class Trajectory():
         sim.autonomus(Auto.EXIT)
         print('\n\nTRAJECTORY COMPLETED! ;)')
 
-    def generate(self, file_name: str, steps: int = 1):
+    def generate(self, sim: Simulator, file_name: str, steps: int = 1):
         if self.trajectoryTime == 0:
             print("\n\ncan't generate data from an empty trajectory")
             return 0
@@ -229,7 +234,6 @@ class Trajectory():
             self.segment_number = len(self.segments)
             segment: MotionSegment = self.segments[self.iterator]
             segment_time = segment.total_time
-            k = TankKinematics()
             
             last_state: MotionState = self.segments[0].states[0]
             appearance = 0
@@ -239,14 +243,16 @@ class Trajectory():
                 while time >= segment_time:
                     self.iterator += 1
                     if self.iterator == self.segment_number:
-                        left, right = k.inverseKinematics(last_state.velocities[0], last_state.velocities[1])
+                        speeds = sim.robot.kinematics.inverse(last_state.velocities)
+                    
+                        # write velocities for each wheel, acording to the kinematics
+                        line = ''.join(str(sim.robot.toMotorPower(value.VELOCITY)) + ' ' for value in speeds)
+                        line = line + '{0} {1}'.format(
+                            round(last_state.pose.head, 2),
+                            appearance * 10 + int(last_state.turn))
+                        
+                        f.write(line)
 
-                        f.write('{0} {1} {2} {3} '.format(
-                                    round(left * 100 / REAL_MAX_VEL, 2),
-                                    round(right * 100 / REAL_MAX_VEL, 2),
-                                    round(last_state.pose.head, 2),
-                                    appearance * 10 + int(last_state.turn)
-                                ))
                         print('\n\ndone writing in * {0}.txt * file :o'.format(file_name))
                         return 0
                 
@@ -258,23 +264,32 @@ class Trajectory():
                 if last_state.isLike(state):
                     appearance += 1
                 else:
-                    left, right = k.inverseKinematics(last_state.velocities[0], last_state.velocities[1])
+                    speeds = sim.robot.kinematics.inverse(last_state.velocities)
+                    
+                    line = ''.join(str(sim.robot.toMotorPower(value.VELOCITY)) + ' ' for value in speeds)
 
-                    f.write('{0} {1} {2} {3} '.format(
-                        round(left * 100 / REAL_MAX_VEL, 2),
-                        round(right * 100 / REAL_MAX_VEL, 2),
+                    # for swerve modules, get the angles
+                    if isinstance(sim.robot.kinematics, SwerveKinematics):
+                        for value in speeds:
+                            line = line + str(sim.robot.toMotorPower(value.ANGLE))
+
+                    line = line + '{0} {1}'.format(
                         round(last_state.pose.head, 2),
-                        appearance * 10 + int(last_state.turn)
-                    ))
+                        appearance * 10 + int(last_state.turn))
+                    
+                    f.write(line)
 
                     last_state = state
                     appearance = 1
 
                 time += steps
 
-    def graph(self, connect: bool = True,
+    def graph(self, 
+              sim: Simulator,
+              connect: bool = True,
               velocity: bool = True,
-              acceleration: bool = True):
+              acceleration: bool = True,
+              each_wheel: bool = True):
         
         if self.trajectoryTime == 0: 
             print("\n\ncan't graph an empty trajectory")
@@ -290,17 +305,16 @@ class Trajectory():
         print(' ')
         print('computing graph...')
 
-        self.TIME: list = []
         time: int = 0
+        
+        self.TIME: list = []
+        self.VELOCITY: list = []
+        self.ANGULAR_VELOCITY: list = []
 
-        self.VEL_LEFT: list = []
-        self.ACC_LEFT: list = []
-
-        self.VEL_RIGHT: list = []
-        self.ACC_RIGHT: list = []
+        self.VEL: List[list] = []
+        self.ACC: List[list] = []
 
         iterator = 0
-        k = TankKinematics()
         segment: MotionSegment = self.segments[0]
         segment_time = segment.end_time
 
@@ -314,39 +328,41 @@ class Trajectory():
                 else:
                     break
 
-            state = segment.get(time)
+            state: MotionState = segment.get(time)
 
-            VEL, ANG_VEL = state.velocities
-            left, right = k.inverseKinematics(VEL, ANG_VEL)
-                
-            self.VEL_LEFT.append(left)
-            self.VEL_RIGHT.append(right)
+            speeds = sim.robot.kinematics.inverse(state.velocities)
+            
             self.TIME.append(time)
+            self.VELOCITY.append(state.velocities.getVelocityMagnitude())
+            self.ANGULAR_VELOCITY.append(state.velocities.ANG_VEL)
 
-            if segment.action is not MotionAction.LINE:
-                self.ACC_LEFT.append(0)
-                self.ACC_RIGHT.append(0)
-            else:
-                self.ACC_LEFT.append(self.__getDerivative(self.TIME, self.VEL_LEFT))
-                self.ACC_RIGHT.append(self.__getDerivative(self.TIME, self.VEL_RIGHT))
+            for i in range(len(speeds)):
+                try: self.VEL[i]
+                except: self.VEL.append([])
+                try: self.ACC[i]
+                except: self.ACC.append([])
+
+                self.VEL[i].append(speeds[i].VELOCITY)
+
+                if segment.action is not MotionAction.LINE:
+                    self.ACC[i].append(0)
+                else: self.ACC[i].append(self.__getDerivative(self.TIME, self.VEL[i]))
 
             time += 1
 
         #be sure that accel line ends on the x axis
-        self.VEL_LEFT.append(0)
-        self.VEL_RIGHT.append(0)
-        self.ACC_LEFT.append(0)
-        self.ACC_RIGHT.append(0)
+        for i in range(len(self.VEL)):
+                self.VEL[i].append(0)
+                self.ACC[i].append(0)
 
         self.TIME.append(self.TIME[-1] + 1)
+        self.ANGULAR_VELOCITY.append(0)
+        self.VELOCITY.append(0)
 
         print('done!')
 
         print(' ')
         print('plotting...')
-
-        mplt.figure(figsize=(13, 7), facecolor = 'black')
-        mplt.style.use('dark_background')
 
         quadrants = 0
         q_index = 1
@@ -356,67 +372,80 @@ class Trajectory():
         if acceleration:
             quadrants += 1
         
-        #plot velocities
-        if velocity:
+        if not each_wheel:
+            # plot robot velocity
 
-            mplt.subplot(quadrants, 2, q_index)
-            mplt.title('{0} wheel VELOCITY'.format('left'), fontsize = 22)
+            mplt.figure(figsize=(7, 7), facecolor = 'black')
+            mplt.style.use('dark_background')
+
+            mplt.gcf().canvas.manager.set_window_title("Linear / Angular velocities")
+
+            mplt.subplot(quadrants, 1, 1)
+            mplt.title('robot VELOCITY', fontsize = 22)
             mplt.xlabel('time (ms)', fontsize = 14)
             mplt.ylabel('velocity (cm / s)', fontsize = 14)
 
             if connect:
-                mplt.plot(self.TIME, self.VEL_LEFT, color = 'green', linewidth = 3)
-            else: mplt.scatter(self.TIME, self.VEL_LEFT, color = 'green', s = 1)
+                mplt.plot(self.TIME, self.VELOCITY, color = 'green', linewidth = 3)
+            else: mplt.scatter(self.TIME, self.VELOCITY, color = 'green', s = 1)
 
             mplt.axhline(0, color = 'white', linewidth = 0.5)
-            q_index += 1
 
-
-            mplt.subplot(quadrants, 2, q_index)
-            mplt.title('{0} wheel VELOCITY'.format('right'), fontsize = 22)
+            # plot robot acceleration
+            mplt.subplot(quadrants, 1, 2)
+            mplt.title('robot VELOCITY', fontsize = 22)
             mplt.xlabel('time (ms)', fontsize = 14)
             mplt.ylabel('velocity (cm / s)', fontsize = 14)
 
             if connect:
-                mplt.plot(self.TIME, self.VEL_RIGHT, color = 'green', linewidth = 3)
-            else: mplt.scatter(self.TIME, self.VEL_RIGHT, color = 'green', s = 1)
+                mplt.plot(self.TIME, self.ANGULAR_VELOCITY, color = 'red', linewidth = 3)
+            else: mplt.scatter(self.TIME, self.ANGULAR_VELOCITY, color = 'red', s = 1)
 
             mplt.axhline(0, color = 'white', linewidth = 0.5)
-            q_index += 1
 
+        else:
+            # plot velocities / accelerations for each wheel
+            
+            mplt.figure(figsize=(13, 7), facecolor = 'black')
+            mplt.style.use('dark_background')
 
-        if acceleration:
+            mplt.gcf().canvas.manager.set_window_title("Wheel Speeds")
 
-            mplt.subplot(quadrants, 2, q_index)
-            mplt.title('{0} wheel ACCELERATION'.format('left'), fontsize = 22)
-            mplt.xlabel('time (ms)', fontsize = 14)
-            mplt.ylabel('acceleration (cm / s^2)', fontsize = 14)
+            if velocity:
+    
+                for i in range(len(self.VEL)):
+                    mplt.subplot(quadrants, len(self.VEL), q_index)
+                    mplt.title('nr. {0} wheel VELOCITY'.format(i + 1), fontsize = 22)
+                    mplt.xlabel('time (ms)', fontsize = 14)
+                    mplt.ylabel('velocity (cm / s)', fontsize = 14)
 
-            if connect:
-                mplt.plot(self.TIME, self.ACC_LEFT, color = 'red', linewidth = 3)
-            else: mplt.scatter(self.TIME, self.ACC_LEFT, color = 'red', s = 1)
+                    if connect:
+                        mplt.plot(self.TIME, self.VEL[i], color = 'green', linewidth = 3)
+                    else: mplt.scatter(self.TIME, self.VEL[i], color = 'green', s = 1)
 
-            mplt.axhline(0, color = 'white', linewidth = 0.5)
-            q_index += 1
+                    mplt.axhline(0, color = 'white', linewidth = 0.5)
+                    q_index += 1
 
+            if acceleration:
+                
+                for i in range(len(self.VEL)):
+                    mplt.subplot(quadrants, len(self.ACC), q_index)
+                    mplt.title('nr. {0} wheel ACCELERATION'.format(i + 1), fontsize = 22)
+                    mplt.xlabel('time (ms)', fontsize = 14)
+                    mplt.ylabel('acceleration (cm / s^2)', fontsize = 14)
 
-            mplt.subplot(quadrants, 2, q_index)
-            mplt.title('{0} wheel ACCELERATION'.format('right'), fontsize = 22)
-            mplt.xlabel('time (ms)', fontsize = 14)
-            mplt.ylabel('acceleration (cm / s^2)', fontsize = 14)
+                    if connect:
+                        mplt.plot(self.TIME, self.ACC[i], color = 'red', linewidth = 3)
+                    else: mplt.scatter(self.TIME, self.ACC[i], color = 'red', s = 1)
 
-            if connect:
-                mplt.plot(self.TIME, self.ACC_RIGHT, color = 'red', linewidth = 3)
-            else: mplt.scatter(self.TIME, self.ACC_RIGHT, color = 'red', s = 1)
-
-            mplt.axhline(0, color = 'white', linewidth = 0.5)
-            q_index += 1
-
+                    mplt.axhline(0, color = 'white', linewidth = 0.5)
+                    q_index += 1
 
         mplt.subplots_adjust(wspace = 0.15, hspace = 0.4) 
         mplt.tight_layout()
 
         mplt.show()
+
 
 
     def __getDerivative(self, t: List[int], vel: List[float]):
@@ -504,8 +533,6 @@ class Trajectory():
                 
             state: MotionState = segment.get(time)
 
-            VEL, ANG_VEL = state.velocities
-
             if not past_angle is None:
                 if abs(state.pose.head - sim.robot.pose.head) > 1 and state.turn:
                     beforeTurn = getTimeMs()
@@ -516,13 +543,13 @@ class Trajectory():
                     start_time += getTimeMs() - beforeTurn + 1
             else: past_angle = state.pose.head
 
-            sim.robot.setVelocities(VEL, ANG_VEL)
+            sim.robot.setVelocities(state.velocities, True)
 
 
 
 
 class TrajectoryBuilder():
-    def __init__(self, start_pose: Pose = Pose(), constraints: Constraints = None):
+    def __init__(self, sim: Simulator, start_pose: Pose = None, constraints: Constraints = None):
         self.splines = []
         self.segments = []
 
@@ -535,7 +562,7 @@ class TrajectoryBuilder():
         self.distance = 0
         self.constraints = Constraints() if constraints is None else constraints
 
-        self.start_pose = start_pose
+        self.start_pose = Pose() if start_pose is None else start_pose
         self.current_pose = start_pose.copy()
 
         self.temp_markers: List[Marker] = []
@@ -546,6 +573,7 @@ class TrajectoryBuilder():
         self.iterator = 0
 
         self.hasPrintThis = False
+        self.simulator = sim
 
     def __createProfile(self, boolean: bool):
         if not boolean:
@@ -574,21 +602,39 @@ class TrajectoryBuilder():
 
         return self
 
+    def toPointConstantHeading(self, point: Point):
+        self.__createProfile(boolean = (abs(self.distance) > 0))
+        self.segments.append(MotionSegment(MotionAction.TO_POINT_CONSTANT_HEAD, point))
+        
+        return self
+
     def toPose(self, pose: Pose, forwards: bool = True):
         self.__createProfile(boolean = (abs(self.distance) > 0))
         self.segments.append(MotionSegment(MotionAction.TO_POSE, (pose, forwards)))
 
         return self
- 
+    
+    def toPoseConstantsHeading(self, pose: Pose):
+        self.__createProfile(boolean = (abs(self.distance) > 0))
+        self.segments.append(MotionSegment(MotionAction.TO_POSE_CONSTANT_HEAD, pose))
+        
+        return self
+
+    def toPoseLinearHeading(self, pose: Pose):
+        self.__createProfile(boolean = (abs(self.distance) > 0))
+        self.segments.append(MotionSegment(MotionAction.TO_POSE_LINEAR_HEAD, pose))
+        
+        return self
+
     def turnDeg(self, deg: float):
         self.__createProfile(boolean = (abs(self.distance) > 0))
         self.segments.append(MotionSegment(MotionAction.TURN, deg))
 
         return self
 
-    # TODO: figure out how to get ang vel from spline
-    def inSpline(self, start: Point, end: Point,
-                    start_tangent: Point, end_tangent: Point):
+    def inSpline(self, spline: Spline):
+        self.splines.append(spline)
+
         return self
 
 
@@ -732,10 +778,19 @@ class TrajectoryBuilder():
                 self.__buildWait(segment)
             
             elif segment.action is MotionAction.TO_POINT:
-                self.__buildToPoint(segment)
+                self.__buildToPoint(segment, constant = False)
+            
+            elif segment.action is MotionAction.TO_POINT_CONSTANT_HEAD:
+                self.__buildToPoint(segment, constant = True)
             
             elif segment.action is MotionAction.TO_POSE:
                 self.__buildToPose(segment)
+            
+            elif segment.action is MotionAction.TO_POSE_CONSTANT_HEAD:
+                self.__buildToPose(segment, constant = True)
+            
+            elif segment.action is MotionAction.TO_POSE_LINEAR_HEAD:
+                self.__buildToPose(segment, linear = True)
             
             elif segment.action is MotionAction.SPLINE:
                 self.__buildSpline(segment)
@@ -785,10 +840,10 @@ class TrajectoryBuilder():
 
         for _ in range(60):
             segment.add(MotionState(time = self.TRAJ_TIME[-1],
-                                         displacement = self.TRAJ_DISTANCE[-1],
-                                         pose = self.current_pose.copy(),
-                                         velocities = (0, 0),
-                                         turn = self.TURN)
+                                    velocities = ChassisState(),
+                                    displacement = self.TRAJ_DISTANCE[-1],
+                                    pose = self.current_pose.copy(),
+                                    turn = self.TURN)
             )
 
             self.TRAJ_DISTANCE.append(self.TRAJ_DISTANCE[-1])
@@ -838,14 +893,14 @@ class TrajectoryBuilder():
             VELOCITY, ANGULAR_VELOCITY = velocity, 0
 
             delta_distance = distance - past_distance
-            self.current_pose.sum(Pose(x = math.cos(self.current_pose.rad()) * delta_distance,
-                                       y = math.sin(self.current_pose.rad()) * delta_distance))
+            self.current_pose = self.current_pose + Pose(x = math.cos(self.current_pose.rad()) * delta_distance,
+                                       y = math.sin(self.current_pose.rad()) * delta_distance)
 
 
             segment.add(MotionState(time = self.TRAJ_TIME[-1],
+                                    velocities = ChassisState(Point(VELOCITY, 0), ANGULAR_VELOCITY),
                                     displacement = self.TRAJ_DISTANCE[-1],
                                     pose = self.current_pose.copy(),
-                                    velocities = (VELOCITY, ANGULAR_VELOCITY),
                                     turn = self.TURN)
             )
 
@@ -945,9 +1000,9 @@ class TrajectoryBuilder():
 
         for _ in range(waiting_time):
             segment.add(MotionState(time = self.TRAJ_TIME[-1],
+                                    velocities = ChassisState(),
                                     displacement = self.TRAJ_DISTANCE[-1],
                                     pose = self.current_pose.copy(),
-                                    velocities = (0, 0),
                                     turn = self.TURN)
             )
 
@@ -957,23 +1012,27 @@ class TrajectoryBuilder():
 
         segment.build()
     
-    def __buildToPoint(self, segment: MotionSegment):
+    def __buildToPoint(self, segment: MotionSegment, constant = False):
         current = self.current_pose.point()
         target: Point = segment.value[0]
         forwards: bool = segment.value[1]
 
-        head = normalizeDegrees(toDegrees(target.subtract(current).atan2()))
-        displacement = target.subtract(current).hypot()
+        head = normalizeDegrees(toDegrees((target - current).atan2()))
+        displacement = (target - current).hypot()
 
         if not forwards:
             head = normalizeDegrees(180 + head)
             displacement = -displacement
 
-        self.segments[self.iterator] = MotionSegment(MotionAction.TURN, head)
-        self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE, displacement))
+        if self.simulator.robot.kinematics.getType() is ChassisType.NON_HOLONOMIC:
+            self.segments[self.iterator] = MotionSegment(MotionAction.TURN, head)
+            self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE, displacement))
+            self.segment_number += 1
+        else:
+            self.segments[self.iterator] = MotionSegment(MotionAction.LINE, displacement)
+
         self.linear_profiles.insert(0, MotionProfile(displacement, self.constraints))
 
-        self.segment_number += 1
         self.iterator -= 1
     
     def __buildToPose(self, segment: MotionSegment):
@@ -981,8 +1040,8 @@ class TrajectoryBuilder():
         target: Point = segment.value[0].point()
         forwards: bool = segment.value[1]
 
-        head = normalizeDegrees(toDegrees(target.subtract(current).atan2()))
-        displacement = target.subtract(current).hypot()
+        head = normalizeDegrees(toDegrees((target - current).atan2()))
+        displacement = (target - current).hypot()
 
         if not forwards:
             head = normalizeDegrees(180 + head)
@@ -1218,7 +1277,7 @@ class TrajectoryBuilder():
                                                                                       sort = False)
         if total_distance is not None:
             distance = total_distance - stop_distance
-            new_profile = MotionProfile(distance, constr.constraints, abs(start_vel[0]))
+            new_profile = MotionProfile(distance, constr.constraints, abs(start_vel.VEL.x))
     
             if new_profile.recommended_distance is None:
                 self.segments.insert(self.iterator + 1, MotionSegment(MotionAction.LINE, value = distance))
@@ -1430,7 +1489,10 @@ class TrajectoryBuilder():
 
             if (action is MotionAction.LINE or
                 action is MotionAction.TO_POINT or
-                action is MotionAction.TO_POSE):
+                action is MotionAction.TO_POSE or
+                action is MotionAction.TO_POINT_CONSTANT_HEAD or
+                action is MotionAction.TO_POSE_CONSTANT_HEAD or
+                action is MotionAction.TO_POSE_LINEAR_HEAD):
 
                 return i - 1
         
@@ -1476,6 +1538,9 @@ class TrajectoryBuilder():
             if (self.segments[i].action is MotionAction.LINE or
                 self.segments[i].action is MotionAction.TO_POINT or
                 self.segments[i].action is MotionAction.TO_POSE or
+                self.segments[i].action is MotionAction.TO_POINT_CONSTANT_HEAD or
+                self.segments[i].action is MotionAction.TO_POSE_CONSTANT_HEAD or
+                self.segments[i].action is MotionAction.TO_POSE_LINEAR_HEAD or
                 self.segments[i].action is MotionAction.WAIT):
 
                 return True

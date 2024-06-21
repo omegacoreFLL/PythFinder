@@ -55,9 +55,16 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - fixed more visual bugs 
 - fixed 0.0.3.18 (buttons weren't accessible)
 
-0.0.3.31 (23.05.2024)
+0.0.3.21 (23.05.2024)
 ---------------------
 - fixed typos
 - updated README.md 
 - fixed little errors
+
+0.0.4.0 (xx.06.2024)
+---------------------
+- added more kinematics (Tank, H-Drive, Mecanum, Kiwi, X-Drive, Swerve)
+- added the option to change the turning of the center of the robot
+- now you can move the robot on the field with the mouse
+- customizable velocity graph
     

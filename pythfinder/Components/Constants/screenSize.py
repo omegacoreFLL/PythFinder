@@ -8,6 +8,7 @@
 #       - class to store and manage screen dimensions to satisfy the limits
 
 
+
 default_screen_height = 1000
 default_screen_width = 1500
 
@@ -19,6 +20,27 @@ max_screen_width = 1700
 min_screen_height = 700
 min_screen_width = 900
 
+class Size():
+    def __init__(self, width: int = 0, height: int = 0):
+        self.width = width
+        self.height = height
+    
+    def set(self, 
+            width: None | int = None,
+            height: None | int = None):
+        
+        if width is not None:
+            self.width = width
+        if height is not None:
+            self.height = height
+    
+    def get(self):
+        return (self.width, self.height)
+
+    def getHalf(self):
+        return (self.width // 2, self.height // 2)
+
+    
 
 class ScreenSize():
     def __init__(self, 
@@ -81,6 +103,8 @@ class ScreenSize():
 
     def setTable(self):
         self.set(table_screen_width, table_screen_height)
+
+        return self
     
     def get(self):
         return (self.width, self.height)

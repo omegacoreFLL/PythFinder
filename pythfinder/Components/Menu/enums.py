@@ -28,7 +28,7 @@ class Selected(Enum):
     FIELD_CENTRIC = auto()
     ROBOT_BORDER = auto()
     SCREEN_BORDER = auto()
-    DRAW_TABLE  = auto()
+    OTHER_NONE4  = auto()
 
     OTHER_NONE5 = auto()
     OTHER_NONE6 = auto()
@@ -42,7 +42,7 @@ class MenuType(Enum):
     SELECTION_MENU = [Selected.ROBOT, Selected.INTERFACE, 
                       Selected.TRAIL, Selected.PATHING, Selected.OTHER]
     ROBOT_MENU = [Selected.ROBOT_IMG_SOURCE, Selected.ROBOT_WIDTH, Selected.ROBOT_HEIGHT, Selected.ROBOT_SCALE]
-    OTHER_MENU = [Selected.FIELD_CENTRIC, Selected.ROBOT_BORDER, Selected.SCREEN_BORDER, Selected.DRAW_TABLE,
+    OTHER_MENU = [Selected.FIELD_CENTRIC, Selected.ROBOT_BORDER, Selected.SCREEN_BORDER, Selected.OTHER_NONE4,
                   Selected.OTHER_NONE5, Selected.OTHER_NONE6, Selected.OTHER_NONE7, Selected.OTHER_NONE8]
 
     UNDEFINED = auto()

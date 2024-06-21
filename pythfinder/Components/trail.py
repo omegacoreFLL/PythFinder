@@ -24,9 +24,13 @@ import pygame
 #
 # after a time threshold of not moving, the trail can start erase itself. This can be stopped with a setting
 
+class TrailPoint():
+    def __init__(self, point_in_cm: Point, point_in_pixels: tuple) -> None:
+        self.CM = point_in_cm
+        self.point = point_in_pixels
 
 class TrailSegment():
-    def __init__(self, constants: Constants, points = None):
+    def __init__(self, constants: Constants, points: List[TrailPoint] = None):
         if exists(points):
             self.points = points
         else: self.points = []
@@ -39,7 +43,16 @@ class TrailSegment():
         if self.hide.compare(False):
             for point in range(1, len(self.points)):     
                 pygame.draw.line(screen, self.constants.TRAIL_COLOR, 
-                self.points[point - 1], self.points[point], width = self.constants.TRAIL_WIDTH)
+                    self.points[point - 1].point, self.points[point].point, 
+                width = self.constants.TRAIL_WIDTH)
+    
+    def recalculate(self):
+        for each in self.points:
+            each.point = self.toWindowPoint(each.CM).tuple()
+    
+    def toWindowPoint(self, point: Pose):
+        return Point(self.constants.screen_size.half_w + point.y * self.constants.PIXELS_2_DEC / 10, 
+                self.constants.screen_size.half_h - point.x * self.constants.PIXELS_2_DEC / 10)
 
 
 class Trail():
@@ -101,16 +114,21 @@ class Trail():
         segment_length = len(self.segments[self.current_segment].points)
 
         if segment_length == 0:
-            self.segments[self.current_segment].points.append((int(pose.x), int(pose.y)))
+            self.segments[self.current_segment].points.append(
+                    TrailPoint(point_in_cm = pose,
+                               point_in_pixels = self.toWindowPoint(pose).tuple()))
 
-        elif self.segments[self.current_segment].points[-1] != (int(pose.x), int(pose.y)):
-            last_point = self.segments[self.current_segment].points[-1]
+        elif self.segments[self.current_segment].points[-1].point != self.toWindowPoint(pose).tuple():
+            last_point = self.segments[self.current_segment].points[-1].point
+            current_point = self.toWindowPoint(pose).tuple()
 
-            if distance(last_point, (int(pose.x), int(pose.y))) > self.constants.DRAW_TRAIL_THRESHOLD:
+            if distance(last_point, current_point) > self.constants.DRAW_TRAIL_THRESHOLD:
                 self.segments.append(TrailSegment(self.constants))
                 self.current_segment += 1
 
-            self.segments[self.current_segment].points.append((int(pose.x), int(pose.y)))
+            self.segments[self.current_segment].points.append(
+                    TrailPoint(point_in_cm = pose,
+                               point_in_pixels = self.toWindowPoint(pose).tuple()))
         
         self.past_trail_length = trail_length
 
@@ -128,5 +146,13 @@ class Trail():
             return True
     
         return False
+    
+    def toWindowPoint(self, pose: Pose):
+        return Point(self.constants.screen_size.half_w + pose.y * self.constants.PIXELS_2_DEC / 10, 
+                self.constants.screen_size.half_h - pose.x * self.constants.PIXELS_2_DEC / 10)
+    
+    def recalculate(self):
+        for each in self.segments:
+            each.recalculate()
 
       

@@ -86,7 +86,7 @@ class Background():
         #draw 'x'
         for line in range(self.units_on_screen_x + 1):
             #mirror one point to all quadrants
-            point = Point(self.constants.screen_size.half_w + self.constants.HALF_UNIT_MEASURE_LINE, 
+            point = Point(self.constants.screen_size.half_w + self.constants.UNIT_SIZE, 
                           self.constants.screen_size.half_h + line * self.constants.PIXELS_2_DEC)
             negative_point = self.symmetrical(point, Axis.Y)
 
@@ -98,7 +98,7 @@ class Background():
         #draw 'y'
         for line in range(self.units_on_screen_y + 1):
             point = Point(self.constants.screen_size.half_w + line * self.constants.PIXELS_2_DEC, 
-                          self.constants.screen_size.half_h + self.constants.HALF_UNIT_MEASURE_LINE)
+                          self.constants.screen_size.half_h + self.constants.UNIT_SIZE)
             negative_point = self.symmetrical(point, Axis.X)
 
             pygame.draw.line(screen, self.constants.GRID_COLOR, 
