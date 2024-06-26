@@ -64,7 +64,8 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 0.0.4.0 (xx.06.2024)
 ---------------------
 - added more kinematics (Tank, H-Drive, Mecanum, Kiwi, X-Drive, Swerve)
-- added the option to change the turning of the center of the robot
+- added the option to change the turning center of the robot
 - now you can move the robot on the field with the mouse
 - customizable velocity graph
+- now the trail does resize with the window
     

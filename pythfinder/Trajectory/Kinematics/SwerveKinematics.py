@@ -21,6 +21,7 @@ class SwerveKinematics(Kinematics):
                  center_to_module: None | float = None,
                  center_offset: None | Point = None,
                  module_number: SwerveModules = SwerveModules.FOUR):
+        super().__init__()
         
         self.center_offset = Pose(0,0) if center_offset is None else center_offset
         self.modules = module_number

@@ -1,7 +1,7 @@
 from pythfinder.Trajectory.Control.Controllers.PIDCoefficients import *
 from pythfinder.Components.BetterClasses.booleanEx import *
 from pythfinder.Components.Constants.screenSize import *
-from pythfinder.Components.Constants.constraints import *
+from pythfinder.Trajectory.constraints import *
 from pythfinder.Components.BetterClasses.mathEx import *
 
 import pygame

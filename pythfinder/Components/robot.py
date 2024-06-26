@@ -1,5 +1,5 @@
 from pythfinder.Components.BetterClasses.booleanEx import *
-from pythfinder.Components.Constants.constraints import *
+from pythfinder.Trajectory.constraints import *
 from pythfinder.Components.Constants.constants import *
 from pythfinder.Components.trail import *
 
@@ -31,7 +31,7 @@ import math
 
 
 class Robot():
-    def __init__(self, constants: Constants, constraints: None | Constraints3D = None, 
+    def __init__(self, constants: Constants, constraints: None | Constraints2D = None, 
                  kinematics: Kinematics = None):
 
         self.rotating_instance = None
@@ -62,7 +62,7 @@ class Robot():
         self.window_pose = self.toWindowCoords(self.pose)
         
         self.trail = Trail(self.constants)
-        self.constraints = Constraints3D() if constraints is None else constraints
+        self.constraints = Constraints2D() if constraints is None else constraints
         self.kinematics = TankKinematics(center_offset = Point(-2, 0)) if kinematics is None else kinematics
 
         self.recalculate()
@@ -127,9 +127,7 @@ class Robot():
         self.chassis_state = chassis_state
 
         if robot_centric:
-            self.chassis_state.VEL = self.chassis_state.VEL.rotateMatrix(math.radians(self.pose.head))
-
-
+            self.chassis_state.robotToField(self.pose)
 
     def setPoseEstimate(self, pose: Pose):
         self.pose = self.past_pose = Pose(pose.x, pose.y, normalizeDegrees(pose.head))

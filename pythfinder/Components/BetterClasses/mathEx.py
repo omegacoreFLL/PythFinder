@@ -291,6 +291,9 @@ class Point():
         self.y = -self.y
 
         return self
+    
+    def print(self):
+        print("x: {0} y: {1}".format(self.x, self.y))
 
 class PointDual():
     def __init__(self, x: DualNumber = DualNumber.constant(), 
@@ -354,6 +357,12 @@ class Pose(Point):
         if isinstance(other, Pose):
             return Pose(self.x / other.x, self.y / other.y, normalizeDegrees(self.head / other.head))
         return Pose(self.x / other, self.y / other, normalizeDegrees(self.head / other))
+    
+    def str(self):
+        return ("x: {0} y: {1} head: {2}"
+                   .format(self.x, self.y, self.head))
+    def write(self):
+        return self.round(2).str()
     
     
     def copy(self):
@@ -556,3 +565,8 @@ def rotateByPoint(origin: Point, point: Point, angle: int) -> Point:
     
     return Point(qx, qy)
 
+def inClosedInterval(val: float, left: float, right: float) -> bool:
+    return val >= left and val <= right
+
+def inOpenInterval(val: float, left: float, right: float) -> bool:
+    return val > left and val < right

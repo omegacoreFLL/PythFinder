@@ -8,6 +8,7 @@ class TankKinematics(Kinematics):
                  center_offset: None | Point = None,
                  parallel_wheels: int = 2,
                  perpendicular_wheels: int = 0):
+        super().__init__()
         
         self.center_offset = Pose(0,0) if center_offset is None else center_offset
         self.track_width = abs(track_width)
@@ -24,6 +25,7 @@ class TankKinematics(Kinematics):
 
         left_speed = velocity.x + self.track_width * 0.5 * angular_velocity
         right_speed = velocity.x - self.track_width * 0.5 * angular_velocity
+
         perpendicular_speed = velocity.y
 
         return (

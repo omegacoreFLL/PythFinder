@@ -75,20 +75,40 @@ class PresetManager():
     def __init__(self, presets: None | List[Preset] = None):
         if presets is not None:
             self.presets = presets
-        else: self.presets = []
+        else: self.presets = [None for _ in range(10)]
+
+        while len(self.presets) < 10:
+            self.presets.append(None)
 
         self.value = None
         self.WRITING = EdgeDetectorEx()
     
     def add(self, preset: Preset, key: None | int = None):
         if key is None:
-            if len(self.presets) == 9:
+            hasSpace = False
+
+            for i in range(len(self.presets)):
+                if self.presets[i] is None:
+
+                    self.presets[i] = preset
+                    hasSpace = True
+            
+            if not hasSpace:
                 print("\n\n you've reached the presets limit")
-            else: self.presets.append(preset)
-        else:
-            if key > 0 and key < 10 and isinstance(key, int):
+            
+            return self
+            
+        if isinstance(key, int):
+            if key > 0 and key < 10:
+
+                if self.presets[key - 1] is not None:
+                    print("\n\nyou already had a preset on key {0}".format(key))
+                    print("I deleted it for you, no worries, but maybe you wanted that preset 🤷🏻‍♂️")
+
                 self.presets[key - 1] = preset
-            else: print("\n\nnot a valid key")
+                return self
+                
+        print("\n\nnot a valid key")
 
         return self
     
@@ -100,7 +120,8 @@ class PresetManager():
         self.value = key
     
     def on(self, number: int):
-        self.presets[number-1].ON.set(True)
+        try: self.presets[number-1].ON.set(True)
+        except: print("no preset for key {0}".format(number))
 
     def onScreen(self, screen: pygame.Surface):
         self.WRITING.update()
@@ -142,8 +163,11 @@ class PresetManager():
         
         index = 0
         for preset in self.presets:
+            if preset is None: continue
+
             if index + 1 == on:
                 preset.ON.set(True)
             else: preset.ON.set(False)
+            
             index += 1
 

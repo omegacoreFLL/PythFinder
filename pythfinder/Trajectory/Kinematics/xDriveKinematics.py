@@ -5,7 +5,8 @@ class X_DriveKinematics(Kinematics):
     def __init__(self, 
                  center_to_wheel: float,
                  center_offset: None | Point = None):
-
+        super().__init__()
+        
         self.center_offset = Pose(0,0) if center_offset is None else center_offset
         self.R = abs(center_to_wheel)
 

@@ -31,7 +31,7 @@ class Auto(Enum):
 class Simulator():
     def __init__(self, 
                  constants: Constants = Constants(),
-                 constraints: Constraints3D = Constraints3D(),
+                 constraints: Constraints2D = Constraints2D(),
                  kinematics: Kinematics = None):
         
         pygame.init()
@@ -88,6 +88,9 @@ class Simulator():
         self.constants.JOYSTICK_ENABLED.choose(fun, bool)
 
 
+    def addPreset(self, preset: Preset, key: None | int = None):
+        self.presets.add(preset, key)
+
     def autonomus(self, do: Auto):
         match do:
             case Auto.ENTER:
@@ -98,7 +101,7 @@ class Simulator():
                 self.manual_control.set(False)
                 self.constants.USE_SCREEN_BORDER.set(False)
                 self.presets.WRITING.set(False)
-                self.presets.on(1)
+                #self.presets.on(1)
 
                 self.robot.zeroDistance()
             case Auto.EXIT:
@@ -236,9 +239,9 @@ class Simulator():
 
                 angular_multiplier = right_x
 
-        joy_vel_x = linear_x_multiplier * self.robot.constraints.x.MAX_VEL
-        joy_vel_y = linear_y_multiplier * self.robot.constraints.y.MAX_VEL
-        joy_ang_vel = angular_multiplier * self.robot.constraints.head.MAX_VEL
+        joy_vel_x = linear_x_multiplier * self.robot.constraints.linear.MAX_VEL
+        joy_vel_y = linear_y_multiplier * self.robot.constraints.linear.MAX_VEL
+        joy_ang_vel = angular_multiplier * self.robot.constraints.angular.MAX_VEL
 
         self.robot.setVelocities(ChassisState(
             velocity = Point(x = joy_vel_x, y = joy_vel_y),

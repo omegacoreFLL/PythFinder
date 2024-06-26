@@ -5,6 +5,7 @@ class MecanumKinematics(Kinematics):
     def __init__(self,
                  track_width: float,
                  center_offset: None | Point = None):
+        super().__init__()
         
         self.center_offset = Pose(0,0) if center_offset is None else center_offset
         self.track_width = abs(track_width)

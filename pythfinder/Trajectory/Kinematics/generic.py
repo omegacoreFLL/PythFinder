@@ -53,7 +53,38 @@ class ChassisState():
             self.ANG_VEL == other.ANG_VEL
         )
 
+    def __add__(self, other):
+        return ChassisState(
+            velocity = self.VEL + other.VEL,
+            angular_velocity = self.ANG_VEL + other.ANG_VEL
+        )
 
+    def fieldToRobot(self, robot_pose: Pose):
+        alpha = normalizeRadians(self.VEL.atan2())
+        beta = normalizeRadians(alpha + robot_pose.rad())
+
+        magnitude = self.getVelocityMagnitude()
+        
+        x = math.sin(beta) * magnitude
+        y = math.cos(beta) * magnitude
+
+        if x < 10e-5: x = 0
+        if y < 10e-5: y = 0
+
+        return ChassisState(Point(x, y), self.ANG_VEL)
+
+    def robotToField(self, robot_pose: Pose):
+        beta = normalizeRadians(self.VEL.atan2())
+        alpha = normalizeRadians(beta - robot_pose.rad())
+        magnitude = self.getVelocityMagnitude()
+
+        x = math.sin(alpha) * magnitude
+        y = math.cos(alpha) * magnitude
+
+        if x < 10e-5: x = 0
+        if y < 10e-5: y = 0
+
+        return ChassisState(Point(x, y), self.ANG_VEL)
 
 class KinematicsType(Enum):
     # non-holonomic configurations
@@ -73,6 +104,8 @@ class ChassisType(Enum):
 
 
 class Kinematics(ABC):
+    def __init__(self) -> None:
+        self.center_offset: Point = Point()
 
     @abstractmethod
     def inverse(self, chassis_state: ChassisState) -> tuple[WheelState]:
