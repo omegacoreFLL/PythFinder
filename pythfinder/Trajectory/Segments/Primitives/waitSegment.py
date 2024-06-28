@@ -1,4 +1,6 @@
+from pythfinder.Trajectory.Control.feedforward import ProfileState
 from pythfinder.Trajectory.Segments.Primitives.generic import *
+from pythfinder.Trajectory.Segments.Primitives.generic import MotionState
 
 class WaitSegment(MotionSegment):
     def __init__(self, 
@@ -7,6 +9,7 @@ class WaitSegment(MotionSegment):
         
         self.last_state = last_state
         self.ms = ms
+        self.built = False
 
         # early exit when empty segment
         if last_state is None:
@@ -22,6 +25,11 @@ class WaitSegment(MotionSegment):
         # what did you expect? Sure, speed constraints when staying in one place, sure
         # go to sleep man
         pass
+
+    def motionFromProfileState(self, t: int, profile_state: ProfileState) -> MotionState:
+        pass # no profile heh
+
+
 
     def generate(self):
         for i in range(self.ms):
@@ -42,6 +50,10 @@ class WaitSegment(MotionSegment):
     def getAction(self) -> MotionAction:
         return MotionAction.WAIT
 
-    def copy(self, last_state: MotionState):
+    def copy(self, last_state: MotionState, constraints2d: Constraints2D):
         return WaitSegment(last_state,
                            self.ms)
+    
+    def addMS(self, ms: int):
+        return WaitSegment(self.last_state,
+                           self.ms + ms)

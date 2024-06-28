@@ -4,7 +4,7 @@ from pythfinder.Trajectory.Kinematics.generic import *
 # assumes a standard n-wheel tank chassis
 class TankKinematics(Kinematics):
     def __init__(self, 
-                 track_width: float = default_track_width,
+                 track_width,
                  center_offset: None | Point = None,
                  parallel_wheels: int = 2,
                  perpendicular_wheels: int = 0):
@@ -60,3 +60,9 @@ class TankKinematics(Kinematics):
 
     def angular2LinearVel(self, angular_velocity):
         return self.track_width * 0.5 * angular_velocity
+    
+    def copy(self):
+        return TankKinematics(self.track_width,
+                              self.center_offset,
+                              self.parallel_wheels,
+                              self.perpendicular_wheels)

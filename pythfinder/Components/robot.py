@@ -31,8 +31,7 @@ import math
 
 
 class Robot():
-    def __init__(self, constants: Constants, constraints: None | Constraints2D = None, 
-                 kinematics: Kinematics = None):
+    def __init__(self, constants: Constants):
 
         self.rotating_instance = None
         self.rectangle = None
@@ -62,8 +61,8 @@ class Robot():
         self.window_pose = self.toWindowCoords(self.pose)
         
         self.trail = Trail(self.constants)
-        self.constraints = Constraints2D() if constraints is None else constraints
-        self.kinematics = TankKinematics(center_offset = Point(-2, 0)) if kinematics is None else kinematics
+        self.constraints = self.constants.constraints.copy()
+        self.kinematics = self.constants.kinematics
 
         self.recalculate()
 
@@ -83,6 +82,8 @@ class Robot():
 
         self.rectangle = self.rotating_instance.get_rect()
         self.mask = pygame.mask.from_surface(self.rotating_instance)
+
+        self.constraints = self.constants.constraints
 
         self.trail.recalculate()
 
@@ -143,6 +144,8 @@ class Robot():
 
 
     def update(self, time: int):
+        self.kinematics = self.constants.kinematics
+
         x, y, head = self.pose.x, self.pose.y, self.pose.head
 
         delta_x = self.chassis_state.VEL.x * time
@@ -151,7 +154,7 @@ class Robot():
         delta_head = math.degrees(self.chassis_state.ANG_VEL) * time
         delta_distance = self.pose.distanceTo(self.past_pose) / 10 #dec
 
-        if self.constants.USE_SCREEN_BORDER.compare():
+        if self.constants.SCREEN_BORDER.compare():
             next_pose = self.toWindowCoords(Pose(x + delta_x, y + delta_y, head + delta_head))
             border_points = self.__findBorder(next_pose)
             
@@ -204,7 +207,7 @@ class Robot():
         self.trail.drawTrail(screen, self.pose)
         self.__drawRobot(screen)
         self.__drawCursor(screen)
-        if self.constants.DRAW_ROBOT_BORDER.compare():
+        if self.constants.ROBOT_BORDER.compare():
             self.__drawBorder(screen)
         if self.constants.VELOCITY_VECTOR.compare():
             self.__drawVelocityVector(screen)

@@ -172,8 +172,8 @@ class Menu(AbsMenu):
         
 
         self.ROBOT_IMG_SOURCE.setInputType(InputType.IMAGE_PATH, dimension = 70)
-        self.ROBOT_WIDTH.setInputType(InputType.DIMENSION, dimension = (0, 51))
-        self.ROBOT_HEIGHT.setInputType(InputType.DIMENSION, dimension = (0, 51))
+        self.ROBOT_WIDTH.setInputType(InputType.DIMENSION, dimension = (0, 100))
+        self.ROBOT_HEIGHT.setInputType(InputType.DIMENSION, dimension = (0, 100))
         self.ROBOT_SCALE.setInputType(InputType.PERCENT, dimension = (0, 201))
 
 
@@ -211,19 +211,22 @@ class Menu(AbsMenu):
 
     def createOtherMenu(self):
         self.FIELD_CENTRIC = BoolButton(name = Selected.FIELD_CENTRIC,
+                                    constants = self.constants,
                                     value = self.constants.FIELD_CENTRIC,
                                     quadrant_surface = img_other_quadrant,
                                     title_surface = [img_field_centric_off, img_field_centric_on],
                                     selected_title_surface = [img_selected_field_centric_off, img_selected_field_centric_on])
 
         self.ROBOT_BORDER = BoolButton(name = Selected.ROBOT_BORDER,
-                                    value = self.constants.DRAW_ROBOT_BORDER,
-                                   quadrant_surface = img_other_quadrant,
+                                    constants = self.constants,  
+                                    value = self.constants.ROBOT_BORDER,
+                                    quadrant_surface = img_other_quadrant,
                                     title_surface = [img_robot_border_off, img_robot_border_on],
                                     selected_title_surface = [img_selected_robot_border_off, img_selected_robot_border_on])
         
         self.SCREEN_BORDER = BoolButton(name = Selected.SCREEN_BORDER,
-                                    value = self.constants.USE_SCREEN_BORDER,
+                                    constants = self.constants,
+                                    value = self.constants.SCREEN_BORDER,
                                     quadrant_surface = img_other_quadrant,
                                     title_surface = [img_screen_border_off, img_screen_border_on],
                                     selected_title_surface = [img_selected_screen_border_off, img_selected_screen_border_on])
@@ -322,6 +325,15 @@ class Menu(AbsMenu):
         self.recalculateUpperBar()
         self.recalculateSelectionMenu()
 
+    def __resetButtonsDefault(self):
+        if not self.constants.reset_buttons_default:
+            return None
+        
+        for menu in self.menus:
+            menu.resetButtonsDefault()
+        
+        self.constants.reset_buttons_default = False
+
     def check(self):
         for menu in self.menus:
             menu.check()
@@ -352,6 +364,8 @@ class Menu(AbsMenu):
         self.value = key
 
     def onScreen(self, screen: pygame.Surface):
+        self.__resetButtonsDefault()
+
         self.clicked = self.controls.joystick_detector[self.controls.keybinds.zero_button].rising
         self.default = self.controls.joystick_detector[self.controls.keybinds.erase_trail_button].rising
 

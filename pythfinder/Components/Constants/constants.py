@@ -1,8 +1,14 @@
 from pythfinder.Trajectory.Control.Controllers.PIDCoefficients import *
 from pythfinder.Components.BetterClasses.booleanEx import *
 from pythfinder.Components.Constants.screenSize import *
-from pythfinder.Trajectory.constraints import *
 from pythfinder.Components.BetterClasses.mathEx import *
+from pythfinder.Trajectory.constraints import *
+
+from pythfinder.Trajectory.Kinematics.TankKinematics import *
+from pythfinder.Trajectory.Kinematics.KiwiKinematics import *
+from pythfinder.Trajectory.Kinematics.SwerveKinematics import *
+from pythfinder.Trajectory.Kinematics.xDriveKinematics import *
+from pythfinder.Trajectory.Kinematics.MecanumKinematics import *
 
 import pygame
 import math
@@ -18,10 +24,10 @@ device_relative_path = os.path.join(os.path.dirname(__file__), '..', '..', 'Imag
 
 screenshot_path = os.path.join(device_relative_path, 'Screenshots\\')
 
-default_robot_image_name = 'bot_from_above'
+default_robot_image_name = 'fll_robot'
 default_robot_image_path = 'Robot\\'
 default_robot_image_extension = 'png'
-default_robot_image_source = os.path.join(device_relative_path, 'Robot\\bot_from_above.png')
+default_robot_image_source = os.path.join(device_relative_path, 'Robot\\fll_robot.png')
 
 default_robot_scaling_factor = 1
 default_robot_height_cm = 20
@@ -108,14 +114,41 @@ class Constants():
                  width_percent: int = default_width_percent,
                  backing_distance: int = default_backing_distance,
                  arrow_offset: int = default_positive_direction_arrow_offset,
-                 unit_size: int = default_unit_size,
                  time_until_fade: int = default_time_until_fade,
                  fade_percent: int = default_fade_percent,
                  real_max_velocity: float = default_robot_real_max_velocity,
                  max_power: int | float = default_max_power,
-                 screen_size: ScreenSize = ScreenSize()):
+
+                 draw_robot_border: bool = default_draw_robot_border,
+                 field_centric: bool = default_field_centric,
+                 use_screen_border: bool = default_use_screen_border,
+                 menu_entered: bool = default_menu_entered,
+                 head_selection: bool = default_head_selection,
+                 forwards: bool = default_forwards,
+                 erase_trail: bool = default_erase_trail,
+                 joystick_enabled: bool = default_joystick_enabled,
+                 freeze_trail: bool = default_freeze_trail,
+                 velocity_vector: bool = default_velocity_vector,
+
+                 screen_size: ScreenSize = ScreenSize(),
+                 constraints2d: Constraints2D = Constraints2D(),
+                 kinematics: Kinematics = None,
+                 
+                 __reset_buttons_default: bool = False):
         
         self.recalculate = BooleanEx(False)
+        self.reset_buttons_default = __reset_buttons_default
+
+        self.rb = draw_robot_border
+        self.fc = field_centric
+        self.sb = use_screen_border
+        self.me = menu_entered
+        self.hs = head_selection
+        self.f = forwards
+        self.et = erase_trail
+        self.je = joystick_enabled
+        self.ft = freeze_trail
+        self.vv = velocity_vector
 
         self.PIXELS_2_DEC = pixels_to_dec
         self.FPS = fps
@@ -149,7 +182,7 @@ class Constants():
         self.BACKING_DISTANCE = backing_distance
 
         self.ARROW_OFFSET = arrow_offset
-        self.UNIT_SIZE = unit_size
+        self.UNIT_SIZE = default_unit_size # don't touch this
 
         self.TIME_UNTIL_FADE = time_until_fade
         self.FADE_PERCENT = fade_percent
@@ -158,26 +191,31 @@ class Constants():
         self.MAX_POWER = max_power
 
         self.screen_size = screen_size
+        self.constraints = constraints2d
+        self.kinematics = (TankKinematics(default_track_width, center_offset = Point(-2, 0))
+                                        if kinematics is None else kinematics)
 
         self.COEFF_JOY_HEAD = PIDCoefficients(kP = default_kP_joystick_head,
                                               kI = default_kI_joystick_head,
                                               kD = default_kD_joystick_head)
 
-        self.DRAW_ROBOT_BORDER = BooleanEx(default_draw_robot_border)
-        self.FIELD_CENTRIC = BooleanEx(default_field_centric)
-        self.USE_SCREEN_BORDER = BooleanEx(default_use_screen_border)
-        self.MENU_ENTERED = BooleanEx(default_menu_entered)
-        self.HEAD_SELECTION = BooleanEx(default_head_selection)
-        self.FORWARDS = BooleanEx(default_forwards)
-        self.ERASE_TRAIL = BooleanEx(default_erase_trail)
-        self.JOYSTICK_ENABLED = BooleanEx(default_joystick_enabled)
-        self.FREEZE_TRAIL = BooleanEx(default_freeze_trail)
-        self.VELOCITY_VECTOR = BooleanEx(default_velocity_vector)
+        self.ROBOT_BORDER = BooleanEx(draw_robot_border)
+        self.FIELD_CENTRIC = BooleanEx(field_centric)
+        self.SCREEN_BORDER = BooleanEx(use_screen_border)
+        self.MENU_ENTERED = BooleanEx(menu_entered)
+        self.HEAD_SELECTION = BooleanEx(head_selection)
+        self.FORWARDS = BooleanEx(forwards)
+        self.ERASE_TRAIL = BooleanEx(erase_trail)
+        self.JOYSTICK_ENABLED = BooleanEx(joystick_enabled)
+        self.FREEZE_TRAIL = BooleanEx(freeze_trail)
+        self.VELOCITY_VECTOR = BooleanEx(velocity_vector)
 
 
 
     #resets all the values to default
     def default(self):
+        self.reset_buttons_default = False
+
         self.PIXELS_2_DEC = default_pixels_to_decimeters
         self.FPS = default_frame_rate
 
@@ -222,9 +260,9 @@ class Constants():
                                               kI = default_kI_joystick_head,
                                               kD = default_kD_joystick_head)
 
-        self.DRAW_ROBOT_BORDER = BooleanEx(default_draw_robot_border)
+        self.ROBOT_BORDER = BooleanEx(default_draw_robot_border)
         self.FIELD_CENTRIC = BooleanEx(default_field_centric)
-        self.USE_SCREEN_BORDER = BooleanEx(default_use_screen_border)
+        self.SCREEN_BORDER = BooleanEx(default_use_screen_border)
         self.MENU_ENTERED = BooleanEx(default_menu_entered)
         self.HEAD_SELECTION = BooleanEx(default_head_selection)
         self.FORWARDS = BooleanEx(default_forwards)
@@ -234,6 +272,8 @@ class Constants():
         self.VELOCITY_VECTOR = BooleanEx(default_velocity_vector)
 
         self.screen_size = ScreenSize()
+        self.constraints = Constraints2D()
+        self.kinematics = TankKinematics(default_track_width, center_offset = Point(-2, 0))
     
     def updateRobotImgSource(self, 
                              path = None, 
@@ -289,17 +329,32 @@ class Constants():
             self.WIDTH_PERCENT,
             self.BACKING_DISTANCE,
             self.ARROW_OFFSET,
-            self.UNIT_SIZE,
             self.TIME_UNTIL_FADE,
             self.FADE_PERCENT,
             self.REAL_MAX_VEL,
             self.MAX_POWER,
-            self.screen_size
+
+            self.rb,
+            self.fc,
+            self.sb,
+            self.me,
+            self.hs,
+            self.f,
+            self.et,
+            self.je,
+            self.ft,
+            self.vv,
+
+            self.screen_size,
+            self.constraints,
+            self.kinematics,
+
+            self.reset_buttons_default
         )
 
-        new.DRAW_ROBOT_BORDER.set(self.DRAW_ROBOT_BORDER.get())
+        new.ROBOT_BORDER.set(self.ROBOT_BORDER.get())
         new.FIELD_CENTRIC.set(self.FIELD_CENTRIC.get())
-        new.USE_SCREEN_BORDER.set(self.USE_SCREEN_BORDER.get())
+        new.SCREEN_BORDER.set(self.SCREEN_BORDER.get())
         new.MENU_ENTERED.set(self.MENU_ENTERED.get())
         new.HEAD_SELECTION.set(self.HEAD_SELECTION.get())
         new.FORWARDS.set(self.FORWARDS.get())
@@ -373,9 +428,6 @@ class Constants():
             if not self.ARROW_OFFSET == other.ARROW_OFFSET:
                 self.ARROW_OFFSET = other.ARROW_OFFSET
                 dif += 1
-            if not self.UNIT_SIZE == other.UNIT_SIZE:
-                self.UNIT_SIZE = other.UNIT_SIZE
-                dif += 1
             if not self.TIME_UNTIL_FADE == other.TIME_UNTIL_FADE:
                 self.TIME_UNTIL_FADE = other.TIME_UNTIL_FADE
                 dif += 1
@@ -388,11 +440,50 @@ class Constants():
             if not self.MAX_POWER == other.MAX_POWER:
                 self.MAX_POWER = other.MAX_POWER
                 dif += 1
-            if not self.screen_size == other.screen_size:
-                self.screen_size = other.screen_size
+            if not self.screen_size.isLike(other.screen_size):
+                self.screen_size = other.screen_size.copy()
                 dif += 1
-            
+            if not self.constraints.isLike(other.constraints):
+                self.constraints = other.constraints.copy()
+                dif += 1
+
+
+            if not self.ROBOT_BORDER.get() == other.ROBOT_BORDER.get():
+                self.ROBOT_BORDER.set(other.ROBOT_BORDER.get())
+                dif +=1
+            if not self.FIELD_CENTRIC.get() == other.FIELD_CENTRIC.get():
+                self.FIELD_CENTRIC.set(other.FIELD_CENTRIC.get())
+                dif += 1
+            if not self.SCREEN_BORDER.get() == other.SCREEN_BORDER.get():
+                self.SCREEN_BORDER.set(other.SCREEN_BORDER.get())
+                dif += 1
+            if not self.MENU_ENTERED.get() == other.MENU_ENTERED.get():
+                self.MENU_ENTERED.set(other.MENU_ENTERED.get())
+                dif += 1
+            if not self.HEAD_SELECTION.get() == other.HEAD_SELECTION.get():
+                self.HEAD_SELECTION.set(other.HEAD_SELECTION.get())
+                dif += 1
+            if not self.FORWARDS.get() == other.FORWARDS.get():
+                self.FORWARDS.set(other.FORWARDS.get())
+                dif += 1
+            if not self.ERASE_TRAIL.get() == other.ERASE_TRAIL.get():
+                self.ERASE_TRAIL.set(other.ERASE_TRAIL.get())
+                dif += 1
+            if not self.JOYSTICK_ENABLED.get() == other.JOYSTICK_ENABLED.get():
+                self.JOYSTICK_ENABLED.set(other.JOYSTICK_ENABLED.get())
+                dif += 1
+            if not self.FREEZE_TRAIL.get() == other.FREEZE_TRAIL.get():
+                self.FREEZE_TRAIL.set(other.FREEZE_TRAIL.get())
+                dif += 1
+            if not self.VELOCITY_VECTOR.get() == other.VELOCITY_VECTOR.get():
+                self.VELOCITY_VECTOR.set(other.VELOCITY_VECTOR.get())
+                dif += 1
+
+
+            self.kinematics = other.kinematics.copy()
+
             if not dif == 0:
+                self.reset_buttons_default = other.reset_buttons_default
                 self.recalculate.set(True)
     
 
@@ -411,6 +502,9 @@ def distance(p1: tuple, p2: tuple):
 
 def exists(value):
     return value is not None
+
+def getRelativeFromAbsolutePath(path: str) -> str:
+    return os.path.join(device_relative_path, path)
 
 
 #KEY BINDS
@@ -726,14 +820,57 @@ img_selected_scale = pygame.transform.scale(img_selected_scale, (170, 85))
 
 
 
-fll_table_width_cm = 227 # og - 93in
+# FLL
+fll_table_width_cm = 227  # og - 93in
 fll_table_height_cm = 120 # og - 45in
 
-fll_table_source = 'Table/FLL_table_MP.jpg'
-fll_table_image = pygame.image.load(os.path.join(device_relative_path, fll_table_source))
+fll_master_piece_table_source = 'Field/FLL_table_MP.jpg'
+fll_master_piece_table_image = pygame.image.load(os.path.join(device_relative_path, fll_master_piece_table_source))
 
 
 
+# FTC
+ftc_robot_image_absolute_source = 'Robot/ftc_robot.png'
+ftc_robot_image_relative_source = os.path.join(device_relative_path, ftc_robot_image_absolute_source)
+ftc_robot_image_width_cm = 34
+ftc_robot_image_height_cm = 53
+
+ftc_field_width_cm = 366  # og - 12ft
+ftc_field_height_cm = 366 # og - 12ft
+
+ftc_center_stage_field_source = 'Field\\FTC_CT_dark.png'
+ftc_center_stage_field_image = pygame.image.load(os.path.join(device_relative_path, ftc_center_stage_field_source))
+
+
+
+default_presets = [["FLL Table", 
+                    Constants(screen_size = ScreenSize(fll_table_screen_width, fll_table_screen_height),
+                                                pixels_to_dec = 60,
+                                                trail_width = 7,
+                                                field_centric = True,
+                                                trail_color = "black"),
+                    fll_master_piece_table_image,
+                    Size(fll_table_width_cm, fll_table_height_cm)],
+
+                    ["FTC Field",
+                     Constants(screen_size = ScreenSize(ftc_field_screen_width, ftc_field_screen_height),
+                                                pixels_to_dec = 27,
+                                                trail_width = 5,
+                                                robot_img_source = ftc_robot_image_relative_source,
+                                                robot_width = ftc_robot_image_width_cm,
+                                                robot_height = ftc_robot_image_height_cm,
+                                                trail_color = "white",
+                                                field_centric = False,
+                                                constraints2d = Constraints2D(linear = Constraints(80, 40, 40),
+                                                                              angular = Constraints(toRadians(100),
+                                                                                                    toRadians(120),
+                                                                                                    toRadians(120)),
+                                                                              track_width = ftc_field_width_cm - 2),
+                                                                              kinematics = MecanumKinematics(ftc_field_width_cm - 2,
+                                                                                                             center_offset = Point(5, 0))),
+                    ftc_center_stage_field_image,
+                    Size(ftc_field_width_cm, ftc_field_height_cm)]
+]
 
 #pathing constants
 kP_head = 30

@@ -34,4 +34,7 @@ class X_DriveKinematics(Kinematics):
 
     def getType(self) -> ChassisType:
         return ChassisType.HOLONOMIC
+    
+    def copy(self):
+        return X_DriveKinematics(self.R, self.center_offset)
 

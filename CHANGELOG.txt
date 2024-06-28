@@ -68,4 +68,7 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - now you can move the robot on the field with the mouse
 - customizable velocity graph
 - now the trail does resize with the window
+- compleate rework of the trajectory system
+- added presets (default presets include FTC and FLL fields), customizable by the user
+- fixed display bugs in the menu
     

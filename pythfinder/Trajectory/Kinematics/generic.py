@@ -1,6 +1,5 @@
-from abc import ABC, abstractmethod
 from pythfinder.Components.BetterClasses.mathEx import *
-from pythfinder.Components.Constants.constants import *
+from abc import ABC, abstractmethod
 
 from enum import Enum, auto
 from typing import Tuple
@@ -117,4 +116,8 @@ class Kinematics(ABC):
 
     @abstractmethod
     def getType(self) -> ChassisType:
+        pass
+
+    @abstractmethod
+    def copy(self):
         pass

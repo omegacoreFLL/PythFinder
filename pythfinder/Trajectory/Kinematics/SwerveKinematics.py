@@ -26,6 +26,9 @@ class SwerveKinematics(Kinematics):
         self.center_offset = Pose(0,0) if center_offset is None else center_offset
         self.modules = module_number
 
+        self.center_to_module = center_to_module
+        self.module_number = module_number
+
         if self.modules is not SwerveModules.THREE:
             self.track_width = abs(track_width)
         else: self.track_width = 0 # you can't define the width of a triangle lol
@@ -140,3 +143,10 @@ class SwerveKinematics(Kinematics):
 
     def getType(self) -> ChassisType:
         return ChassisType.HOLONOMIC
+
+    def copy(self):
+        return SwerveKinematics(self.track_width,
+                                self.track_length,
+                                self.center_to_module,
+                                self.center_offset,
+                                self.module_number)

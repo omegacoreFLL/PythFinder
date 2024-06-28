@@ -12,8 +12,12 @@
 default_screen_height = 1000
 default_screen_width = 1500
 
-table_screen_height = 880
-table_screen_width = 1400
+fll_table_screen_height = 880
+fll_table_screen_width = 1400
+
+ftc_field_screen_height = 1000
+ftc_field_screen_width = 1200
+
 
 max_screen_height = 1000
 max_screen_width = 1700
@@ -100,14 +104,16 @@ class ScreenSize():
         
         self.half_h = self.height / 2
         self.half_w = self.width / 2
-
-    def setTable(self):
-        self.set(table_screen_width, table_screen_height)
-
-        return self
     
     def get(self):
         return (self.width, self.height)
     
     def getHalf(self):
         return (self.half_w, self.half_h)
+
+    def copy(self):
+        return ScreenSize(self.width,
+                          self.height)
+    
+    def isLike(self, other):
+        return (self.width == other.width and self.height == other.height)

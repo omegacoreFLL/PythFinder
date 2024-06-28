@@ -10,12 +10,15 @@ class AngularSegment(MotionSegment):
                  last_state: MotionState,
                  constraints: Constraints,
                  kinematics: Kinematics,
-                 angle_deg: float):
+                 angle_deg: float,
+                 reversed: bool = False):
     
         self.last_state = last_state
         self.constraints = constraints
         self.kinematics = kinematics
         self.target = angle_deg
+        self.reversed = reversed
+        self.built = False
 
         # early exit when empty segment
         if last_state is None:
@@ -23,7 +26,11 @@ class AngularSegment(MotionSegment):
         
         super().__init__(last_state)
         
-        self.diff = toRadians(findShortestPath(angle_deg, last_state.pose.head))
+        self.diff = (toRadians(findShortestPath(angle_deg, last_state.pose.head))
+                                    if not reversed else
+                     toRadians(findLongestPath(angle_deg, last_state.pose.head))
+        )
+        
         self.sign = signum(self.diff)
         self.diff = abs(self.diff)
 
@@ -45,11 +52,15 @@ class AngularSegment(MotionSegment):
             print("\n\ncan't add profile without generating")
             return None
 
-        new_start_time = time
+        new_start_time = self.states[time].time
         new_start_distance = self.profile_states[time].dis
         new_start_velocity = self.profile_states[time].vel
 
-        distance = self.diff - new_start_distance
+        previous = 0
+        for i in range(len(self.profiles) - 1):
+            previous += self.profiles[i].distance
+        distance = self.profile_states[-1].dis - new_start_distance + previous
+
 
         self.profiles.append(MotionProfile(distance, constraints2d.angular,
                                            new_start_velocity,
@@ -66,12 +77,15 @@ class AngularSegment(MotionSegment):
         else:
             # update the previous profile to end when the new one starts
             self.profiles[-2] = self.profiles[-2].copy(
-                distance = new_start_distance,
+                distance = new_start_distance - previous,
                 end_velocity = new_start_velocity
             )
-        
-        if auto_build:
-            self.generate()
+
+            if time == 0:
+                self.profiles.pop(-2)
+
+            self.built = False
+            if auto_build: self.generate()
 
     def motionFromProfileState(self, t: int, profile_state: ProfileState) -> MotionState:
         ang, ang_vel, ang_acc = profile_state.tuple()
@@ -87,7 +101,7 @@ class AngularSegment(MotionSegment):
         absolute_center_of_rotation: Point = rotateByPoint(Point(x, y), relative_center_of_rotation + self.current_pose, ang)
 
         new_point = rotateByPoint(absolute_center_of_rotation, Point(x, y), delta_head)
-        new_pose = Pose(new_point.x, new_point.y, normalizeDegrees(toDegrees(ang)))
+        new_pose = Pose(new_point.x, new_point.y, normalizeDegrees(self.last_state.pose.head + toDegrees(ang)))
         self.current_pose = new_pose
                 
         # no linear velocity on pure angular motion
@@ -106,9 +120,10 @@ class AngularSegment(MotionSegment):
     def getAction(self) -> MotionAction:
         return MotionAction.TURN
     
-    def copy(self, last_state: MotionState):
+    def copy(self, last_state: MotionState, constraints2d: Constraints2D):
         return AngularSegment(last_state,
-                              self.constraints,
+                              constraints2d.angular,
                               self.kinematics,
-                              self.target)
+                              self.target,
+                              self.reversed)
         

@@ -19,7 +19,7 @@ class TrajectoryFollower():
         self.end_pose = motion_states[-1].pose
         self.time = motion_states[-1].time + 1
 
-        self.perfect_increment = 20
+        self.perfect_increment = 10
         self.marker_iterator = 0
 
         self.sim = sim
@@ -34,7 +34,7 @@ class TrajectoryFollower():
             marker = self.markers[self.marker_iterator]
 
             if marker.time > self.time:
-                print('\nThe marker number {0} exceded the time limit of {1}ms with {2}ms'
+                print('\n\nThe marker number {0} exceded the time limit of {1}ms with {2}ms'
                       .format(self.marker_iterator + 1, self.time, marker.time - self.time))
 
             threading.Thread(target = marker.do).start()

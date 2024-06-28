@@ -121,6 +121,10 @@ class AbsButton(ABC):
     @abstractmethod
     def check(self):
         ...
+    
+    @abstractmethod
+    def resetDefault(self):
+        ...
 
     # gets the value stored by the button
     def getType(self) -> ButtonType:
@@ -246,6 +250,9 @@ class EmptyButton(AbsButton):
     def default(self, default: bool):
         if not default:
             return 0
+    
+    def resetDefault(self):
+       ...
 
     def change(self):
         ...
@@ -283,6 +290,8 @@ class DynamicButton(AbsButton):
     def default(self, default: bool):
         if not default:
             return 0
+        
+    def resetDefault(self):
         ...
     
     def getNext(self) -> Selected:
@@ -350,6 +359,9 @@ class ToggleButton(AbsButton):
     def default(self, default: bool):
         if not default:
             return 0
+        
+    def resetDefault(self):
+        ...
     
     def on(self):
         return (self.toggle, self.ON.get())
@@ -422,6 +434,8 @@ class InputButton(AbsButton):
                 value == pygame.K_8 or 
                 value == pygame.K_9)
 
+
+
     def default(self, default: bool):
         if not default or not self.selected is self.name or self.write.get():
             return 0
@@ -429,6 +443,16 @@ class InputButton(AbsButton):
         self.input = self.original
         self.change()
     
+    def resetDefault(self):
+        self.original = getattr(self.constants, self.name.name)
+        if self.type is InputType.PERCENT: 
+            self.original *= 100
+        
+        self.input = self.original
+        self.change()
+    
+
+
     def inRange(self, value):
         try: return self.dimension[0] < value and value < self.dimension[1]
         except: pass
@@ -445,6 +469,8 @@ class InputButton(AbsButton):
         self.display_value_rect = self.display_value.get_rect()
         try: self.display_value_rect.center = self.value_center
         except: pass
+
+
 
     def change(self):
 
@@ -488,7 +514,6 @@ class InputButton(AbsButton):
             
         self.displayValue(self.raw_value)
 
-    
     def update(self, selected: Selected, clicked: bool, value = None):
         if not isinstance(self.type, InputType):
             raise Exception("please initialize {0}'s input type".format(self.name))
@@ -571,12 +596,14 @@ class InputButton(AbsButton):
 class BoolButton(AbsButton):
     def __init__(self, 
                  name: Selected, quadrant_surface: pygame.Surface | None, 
+                 constants: Constants,
                  title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  selected_title_surface: List[pygame.Surface] | pygame.Surface | None, 
                  value = None, 
                  size = None, 
                  font = default_system_font) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
+        self.constants = constants
         self.selected = None
         self.getIndex()
     
@@ -594,6 +621,8 @@ class BoolButton(AbsButton):
                 self.display_title = self.selected_title[self.index]
             else: self.display_title = self.title[self.index]
 
+
+
     def default(self, default: bool):
         if not default or not self.selected is self.name:
             return 0
@@ -602,6 +631,13 @@ class BoolButton(AbsButton):
             self.raw_value.set(self.original)
         except: self.raw_value = self.original
         finally: self.getIndex()
+    
+    def resetDefault(self):
+        try:
+            self.original = self.raw_value.get()
+        except: self.original = self.raw_value
+
+
 
     def change(self): 
         try:

@@ -444,6 +444,10 @@ def findShortestPath(current_angle, target_angle):
         return -error
     return signum(error) * 360 - error
 
+def findLongestPath(current_angle, target_angle):
+    shortest = findShortestPath(current_angle, target_angle)
+    return (360 - abs(shortest)) * -signum(shortest)
+
 def getTimeMs():
     return int(time.time() * 1000)
 

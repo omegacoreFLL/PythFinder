@@ -35,3 +35,7 @@ class MecanumKinematics(Kinematics):
 
     def getType(self) -> ChassisType:
         return ChassisType.HOLONOMIC
+
+    def copy(self):
+        return MecanumKinematics(self.track_width,
+                                 self.center_offset)

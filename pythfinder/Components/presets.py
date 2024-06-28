@@ -67,20 +67,17 @@ class Preset():
         
         elif self.ON.rising:
             self.constants.check(self.preset_constants)
+    
+    def off(self):
+        self.constants.check(self.original_constants)
         
-        elif self.ON.falling:
-            self.constants.check(self.original_constants)
 
 class PresetManager():
-    def __init__(self, presets: None | List[Preset] = None):
-        if presets is not None:
-            self.presets = presets
-        else: self.presets = [None for _ in range(10)]
-
-        while len(self.presets) < 10:
-            self.presets.append(None)
+    def __init__(self):
+        self.presets: List[Preset] = [None for _ in range(10)]
 
         self.value = None
+        self.previous = 0
         self.WRITING = EdgeDetectorEx()
     
     def add(self, preset: Preset, key: None | int = None):
@@ -92,10 +89,10 @@ class PresetManager():
 
                     self.presets[i] = preset
                     hasSpace = True
+                    break
             
             if not hasSpace:
                 print("\n\n you've reached the presets limit")
-            
             return self
             
         if isinstance(key, int):
@@ -105,7 +102,7 @@ class PresetManager():
                     print("\n\nyou already had a preset on key {0}".format(key))
                     print("I deleted it for you, no worries, but maybe you wanted that preset 🤷🏻‍♂️")
 
-                self.presets[key - 1] = preset
+                self.presets[key - 1] = preset 
                 return self
                 
         print("\n\nnot a valid key")
@@ -114,7 +111,8 @@ class PresetManager():
     
     def recalculate(self):
         for preset in self.presets:
-            preset.recalculate()
+            if preset is not None:
+                preset.recalculate()
     
     def addKey(self, key):
         self.value = key
@@ -127,7 +125,8 @@ class PresetManager():
         self.WRITING.update()
     
         for preset in self.presets:
-            preset.onScreen(screen)
+            if preset is not None:
+                preset.onScreen(screen)
 
        
         if self.value is None or not self.WRITING.high:
@@ -157,17 +156,21 @@ class PresetManager():
             case pygame.K_0:
                 on = 0 # reset key
 
-
         if on is None:
             return None
-        
-        index = 0
-        for preset in self.presets:
-            if preset is None: continue
 
-            if index + 1 == on:
-                preset.ON.set(True)
-            else: preset.ON.set(False)
+        for i in range(len(self.presets)):
+            if self.presets[i] is None: 
+                continue
             
-            index += 1
+            if i + 1 == on:
+                self.presets[i].ON.set(True)
+            else: self.presets[i].ON.set(False)
+
+            if i + 1 == self.previous and not on == self.previous:
+                self.presets[i].off()
+        
+        self.previous = on
+            
+            
 

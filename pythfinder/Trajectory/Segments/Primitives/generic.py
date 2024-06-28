@@ -43,6 +43,12 @@ class MotionState():
     def print(self):
         print("\n\ntime: {0}\ndisplacement: {1}".format(self.time, self.displacement))
         self.pose.print()
+    
+    def copy(self):
+        return MotionState(self.time,
+                           self.velocities,
+                           self.displacement,
+                           self.pose)
 
 class MotionSegment(ABC):
     def __init__(self,last_state: MotionState):
@@ -60,7 +66,7 @@ class MotionSegment(ABC):
 
     # makes the time positive
     def normalizeSegmTime(self, time: int):
-        if time < 0: time = self.total_time + time
+        if time < 0: time = self.total_time + time - 1
 
         return time
 
@@ -89,11 +95,11 @@ class MotionSegment(ABC):
             t += 1
 
         # check for an empty segment        
-        if len(self.states) == 0:
-            self.states.append(self.last_state)
+        if len(self.states) == 1:
+            self.states[-1] = self.last_state
         
-        self.total_time = self.states[-1].time
-        self.end_time = self.start_time + self.total_time - 1
+        self.total_time = len(self.states)
+        self.end_time = self.states[-1].time
         self.built = True
 
 
@@ -103,7 +109,7 @@ class MotionSegment(ABC):
         pass
 
     @abstractmethod
-    def copy(self, last_state: MotionState):
+    def copy(self, last_state: MotionState, constraints2d: Constraints2D):
         pass
     
     @abstractmethod
@@ -123,6 +129,13 @@ class MotionSegment(ABC):
 
 
 
+    def interruptTrajTime(self, time: int):
+        self.interruptSegmTime(self.trajTime_2_segmTime(time))
+
+    def interruptSegmTime(self, time: int):
+        self.states = self.states[:time]
+
+
 
     def getTrajTime(self, time: int) -> MotionState:
         return self.getSegmTime(self.trajTime_2_segmTime(time))
@@ -132,7 +145,18 @@ class MotionSegment(ABC):
             print("\n\nplease generate the states of this segment first")
             return MotionState()
         
-        return self.states[self.normalizeSegmTime(time)]
+        try: return self.states[self.normalizeSegmTime(time)]
+        except: return None
+    
+
+
+    def timeInSegmentSegmTime(self, time: int) -> bool:
+        if time is None: return False
+
+        return inOpenInterval(self.normalizeSegmTime(time), 0, len(self.states) - 1)
+    
+    def timeInSegmentTrajTime(self, time: int) -> bool:
+        return self.timeInSegmentSegmTime(self.trajTime_2_segmTime(time))
 
 
 
@@ -140,7 +164,7 @@ class MotionSegment(ABC):
         if not self.built:
             print("\n\nplease generate the states of this segment first")
             return []
-        
+    
         return self.states
     
     def graphMotionStates(self, atr: str, second_atr: str = None):

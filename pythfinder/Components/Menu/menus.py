@@ -45,6 +45,10 @@ class AbsMenu(ABC):
     
     def backgroundCenter(self, center: tuple):
         self.background_rect.center = center
+    
+    def resetButtonsDefault(self):
+        for b in self.buttons:
+            b.resetDefault()
 
 
 

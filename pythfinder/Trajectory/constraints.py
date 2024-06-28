@@ -1,4 +1,3 @@
-from enum import Enum, auto
 import math
 
 # file containting constraints data
@@ -23,15 +22,11 @@ default_track_width = 9.97
 
 class Constraints():
     def __init__(self, 
-                 vel_x: float = default_max_robot_vel_x,
-                 vel_y: float = default_max_robot_vel_y,
-            
+                 vel: float = math.hypot(default_max_robot_vel_x, default_max_robot_vel_y),
                  acc: float = default_max_robot_acc, 
                  dec: float = default_max_robot_dec):
         
-        self.VEL_X = vel_x
-        self.VEL_Y = vel_y
-        self.MAX_VEL = math.hypot(self.VEL_X, self.VEL_Y) 
+        self.MAX_VEL = abs(vel)
 
         self.ACC = abs(acc)
         self.DEC = -abs(dec)
@@ -47,11 +42,17 @@ class Constraints():
             self.ACC = abs(acc)
         if dec is not None:
             self.DEC = -abs(dec)
-
+    
+    def isLike(self, other):
+        return (self.MAX_VEL == other.MAX_VEL 
+                            and
+                self.ACC == other.ACC
+                            and
+                self.DEC == other.DEC)
 
     # creates a different instance to avoid unwanted modifications
     def copy(self):
-        return Constraints(self.VEL_X, self.VEL_Y, self.ACC, self.DEC)
+        return Constraints(self.MAX_VEL, self.ACC, self.DEC)
 
 class Constraints2D():
     def __init__(self, 
@@ -60,8 +61,20 @@ class Constraints2D():
                  track_width: float = default_track_width) -> None:
         
         self.linear = Constraints() if linear is None else linear
-        self.angular = (Constraints(default_max_robot_ang_vel, 0,
+        self.angular = (Constraints(default_max_robot_ang_vel,
                                     default_max_robot_ang_acc,
                                     default_max_robot_ang_dec) if angular is None else angular)
 
         self.TRACK_WIDTH = track_width
+    
+    def copy(self):
+        return Constraints2D(self.linear.copy(),
+                             self.angular.copy(),
+                             self.TRACK_WIDTH)
+    
+    def isLike(self, other):
+        return (self.linear.isLike(other.linear)
+                            and
+                self.angular.isLike(other.angular)
+                            and
+                self.TRACK_WIDTH == other.TRACK_WIDTH)

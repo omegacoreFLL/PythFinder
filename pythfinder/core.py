@@ -29,13 +29,10 @@ class Auto(Enum):
 
 
 class Simulator():
-    def __init__(self, 
-                 constants: Constants = Constants(),
-                 constraints: Constraints2D = Constraints2D(),
-                 kinematics: Kinematics = None):
+    def __init__(self, constants: Constants = Constants()):
         
         pygame.init()
-        pygame.display.set_caption("FLL PythFinder simulator")
+        pygame.display.set_caption("PythFinder")
         self.running = BooleanEx(True)
         self.manual_control = BooleanEx(True)
 
@@ -49,19 +46,10 @@ class Simulator():
         self.presets = PresetManager()
         self.fade = Fade(self.constants)
         self.menu = Menu(MenuType.UNDEFINED, self.constants, None)
-        self.robot = Robot(constants = self.constants, constraints = constraints, kinematics = kinematics)
+        self.robot = Robot(constants = self.constants)
         self.controls = Controls()
 
-        self.presets.add(
-            Preset(name = "FLL Table",
-                   constants = self.constants,
-                   preset_constants = Constants(screen_size = ScreenSize().setTable(),
-                                                pixels_to_dec = 60,
-                                                trail_width = 8),
-                   image = fll_table_image,
-                   image_size = Size(fll_table_width_cm, fll_table_height_cm)
-            )
-        )
+        self.__addDefaultPresets()
         
 
 
@@ -70,7 +58,7 @@ class Simulator():
         self.constants.FORWARDS.set(True)
     
     def chooseDrawRobotBorder(self, fun: Fun, bool = None):
-        self.constants.DRAW_ROBOT_BORDER.choose(fun, bool)
+        self.constants.ROBOT_BORDER.choose(fun, bool)
     
     def chooseUsingScreenBorder(self, fun: Fun, bool = None):
         self.constants.USE_SCREEN_BORDER.choose(fun, bool)
@@ -88,8 +76,15 @@ class Simulator():
         self.constants.JOYSTICK_ENABLED.choose(fun, bool)
 
 
-    def addPreset(self, preset: Preset, key: None | int = None):
-        self.presets.add(preset, key)
+    def addPreset(self, 
+                  name: str, 
+                  constants: Constants, 
+                  image: pygame.Surface | None = None,
+                  size: Size | None = None,
+                  key: None | int = None):
+        
+        constants.reset_buttons_default = True
+        self.presets.add(Preset(name, self.constants, constants, image, size), key)
 
     def autonomus(self, do: Auto):
         match do:
@@ -238,6 +233,7 @@ class Simulator():
                     linear_x_multiplier, linear_y_multiplier = (rotated_vel_x + rotated_vel_y).tuple()
 
                 angular_multiplier = right_x
+
 
         joy_vel_x = linear_x_multiplier * self.robot.constraints.linear.MAX_VEL
         joy_vel_y = linear_y_multiplier * self.robot.constraints.linear.MAX_VEL
@@ -388,7 +384,13 @@ class Simulator():
                         break
 
                 print(device_screenshot_path)
-                
+
+
+
+
+    def __addDefaultPresets(self):
+        for preset in default_presets:
+            self.addPreset(*preset)     
             
 
 

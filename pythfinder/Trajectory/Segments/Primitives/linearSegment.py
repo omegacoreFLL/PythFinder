@@ -11,7 +11,7 @@ class LinearSegment(MotionSegment):
         self.last_state = last_state
         self.constraints = constraints
         self.target = point_cm
-
+        self.built = False
 
 
         if last_state is None:
@@ -22,13 +22,12 @@ class LinearSegment(MotionSegment):
                                             else 
                        self.__pointFromDistance(point_cm, self.last_state.pose.copy()))
         
-
         
         self.diff = self.target - last_state.pose.point()
-        self.distance = self.diff.hypot()  # cm
+        self.distance = round(self.diff.hypot(), 3)  # cm
         self.angle = self.diff.atan2()  # rad
 
-        self.finish_distance = self.distance + self.last_state.displacement
+        self.start_dis = self.last_state.displacement
 
         self.profiles.append(MotionProfile(self.distance, constraints,
                                            start_velocity = self.last_state.velocities.getVelocityMagnitude(),
@@ -44,11 +43,19 @@ class LinearSegment(MotionSegment):
             print("\n\ncan't add profile without generating")
             return None
 
-        new_start_time = time
+        new_start_time = self.states[time].time
         new_start_distance = self.states[time].displacement
         new_start_velocity = self.states[time].velocities.getVelocityMagnitude()
 
-        distance = self.distance - new_start_distance
+        print("time: {0} dist: {1} vel: {2}"
+              .format(new_start_time,
+                      new_start_distance,
+                      new_start_velocity))
+
+        previous = 0
+        for i in range(len(self.profiles) - 1):
+            previous += self.profiles[i].distance
+        distance = self.profiles[-1].distance - (new_start_distance - self.states[0].displacement - previous)
 
         self.profiles.append(MotionProfile(distance, constraints2d.linear,
                                            new_start_velocity,
@@ -65,21 +72,23 @@ class LinearSegment(MotionSegment):
         else:
             # update the previous profile to end when the new one starts
             self.profiles[-2] = self.profiles[-2].copy(
-                distance = new_start_distance,
+                distance = new_start_distance -self.states[0].displacement - previous,
                 end_velocity = new_start_velocity
             )
 
+            if time == 0:
+                self.profiles.pop(-2)
+
             self.built = False
-        
-        if auto_build: self.generate()
+            if auto_build: self.generate()
 
     def motionFromProfileState(self, t: int, profile_state: ProfileState) -> MotionState:
         dis, vel, acc = profile_state.tuple()
 
          # Calculate the current pose based on the start pose and distance
-        current_pose = self.last_state.pose + Pose(x = math.cos(self.angle) * dis,
-                                                   y = math.sin(self.angle) * dis,
-                                                   head = 0)
+        self.current_pose = self.last_state.pose + Pose(x = math.cos(self.angle) * (dis - self.start_dis),
+                                                        y = math.sin(self.angle) * (dis - self.start_dis),
+                                                        head = 0)
             
         # Decompose the velocity
         VEL = Point(x = math.cos(self.angle) * vel,
@@ -89,19 +98,32 @@ class LinearSegment(MotionSegment):
         return MotionState(time = t,
                            field_vel = ChassisState(VEL, ANG_VEL),
                            displacement = dis,
-                           pose = current_pose.copy())
+                           pose = self.current_pose.copy())
 
 
 
     def getAction(self) -> MotionAction:
         return MotionAction.LINE
     
-    def copy(self, last_state: MotionState):
+    def copy(self, last_state: MotionState, constraints2d: Constraints2D):
         return LinearSegment(last_state,
-                             self.constraints,
+                             constraints2d.linear,
                              self.target)
+
+    def addCM(self, cm: int):
+        if isinstance(self.target, Point):
+            print("\n\ncan't add a distance to a point :<")
+            return self
+        
+        return LinearSegment(self.last_state,
+                             self.constraints,
+                             self.target + cm)
+        
+        
+            
 
     def __pointFromDistance(self, cm: float, pose: Pose):
         return Point(x = pose.x + math.cos(pose.rad()) * cm,
                      y = pose.y + math.sin(pose.rad()) * cm)
+    
     

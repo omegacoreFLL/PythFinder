@@ -58,8 +58,7 @@ class Trajectory():
             print("\nyour greatest dreams and some pizza, right?")
             return None
         
-        print(' ')
-        print('computing graph...')
+        print('\n\ncomputing graph...')
 
         if wheel_speeds:
             self.trajGrapher.graphWheelSpeeds(connect, velocity, acceleration)

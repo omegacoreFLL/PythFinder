@@ -35,3 +35,7 @@ class KiwiKinematics(Kinematics):
     
     def getType(self) -> ChassisType:
         return ChassisType.HOLONOMIC
+
+    def copy(self):
+        return KiwiKinematics(self.R,
+                              self.center_offset)
