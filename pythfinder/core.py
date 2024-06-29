@@ -23,11 +23,6 @@ import pygame
 #   quiting events
 
 
-class Auto(Enum):
-    ENTER = auto()
-    EXIT = auto()
-
-
 class Simulator():
     def __init__(self, constants: Constants = Constants()):
         
@@ -61,7 +56,7 @@ class Simulator():
         self.constants.ROBOT_BORDER.choose(fun, bool)
     
     def chooseUsingScreenBorder(self, fun: Fun, bool = None):
-        self.constants.USE_SCREEN_BORDER.choose(fun, bool)
+        self.constants.SCREEN_BORDER.choose(fun, bool)
     
     def chooseMenuEntered(self, fun: Fun, bool = None):
         self.constants.MENU_ENTERED.choose(fun, bool)
@@ -85,31 +80,6 @@ class Simulator():
         
         constants.reset_buttons_default = True
         self.presets.add(Preset(name, self.constants, constants, image, size), key)
-
-    def autonomus(self, do: Auto):
-        match do:
-            case Auto.ENTER:
-                print("\n\nentering autonomus... ready?")
-
-                self.robot.trail.draw_trail.set(True)
-                self.constants.ERASE_TRAIL.set(False)
-                self.manual_control.set(False)
-                self.constants.USE_SCREEN_BORDER.set(False)
-                self.presets.WRITING.set(False)
-                #self.presets.on(1)
-
-                self.robot.zeroDistance()
-            case Auto.EXIT:
-                self.manual_control.set(True)
-                self.robot.trail.draw_trail.set(False)
-                self.constants.ERASE_TRAIL.set(True)
-                self.constants.USE_SCREEN_BORDER.set(True)
-
-                print("\n\ntele-op just started! ---- ding ding 🔔")            
-            case _:
-                pass
-        
-        self.menu.check()
 
 
     def recalculate(self):

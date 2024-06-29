@@ -106,9 +106,11 @@ class MotionProfile():
         self.x_total = self.x1 + self.x2 + self.x3 # cm
         self.t_total = self.t1 + self.t2 + self.t3 # s
 
-        if not round(self.x_total, 2) == round(self.distance, 2):
+        error = self.distance - self.x_total
+        
+        if abs(error) > 0.1:
             print("\n\nwith these constraints, you get a distance with {0} cm off than you wanted"
-                  .format(self.distance - self.x_total))
+                  .format(error))
             print("'PROFILE NOT DEFINED' error")
             self.NOT_DEFINED = True
 

@@ -16,13 +16,35 @@ class TrajectoryBuilder():
     def __init__(self,
                  sim: Simulator,
                  start_pose: Pose | None = None,
-                 start_constraints: Constraints2D | None = None):
+                 preset: int = 1):
         
         self.sim = sim
         self.robot = sim.robot
 
+        self.preset_nr = preset
+
+        self.sim.presets.on(self.preset_nr)
+        self.preset = self.sim.presets.get(self.preset_nr)
+        
+
+        
+        if preset is None:
+            self.kinematics = self.sim.constants.kinematics
+            self.CONSTRAINTS = self.sim.constants.constraints
+        
+        else:
+            self.kinematics = self.preset.preset_constants.kinematics
+            self.CONSTRAINTS = self.preset.preset_constants.constraints
+
+            self.sim.constants.REAL_MAX_VEL = self.preset.preset_constants.REAL_MAX_VEL
+            self.sim.constants.MAX_POWER = self.preset.preset_constants.MAX_POWER
+
+        self.sim.constants.kinematics = self.kinematics.copy()
+        self.sim.constants.constraints = self.CONSTRAINTS.copy()
+
+
+
         self.START_POSE = Pose() if start_pose is None else start_pose
-        self.CONSTRAINTS = self.robot.constraints if start_constraints is None else start_constraints
 
         self.segments: List[MotionSegment] = []
         self.relative_markers: List[Marker] = []
@@ -69,7 +91,7 @@ class TrajectoryBuilder():
     def turnToDeg(self, deg: float, reversed: bool = False):
         self.segments.append(AngularSegment(last_state = None,
                                             constraints = self.CONSTRAINTS.angular,
-                                            kinematics = self.robot.kinematics,
+                                            kinematics = self.kinematics,
                                             angle_deg = deg,
                                             reversed = reversed))
         self.relative_markers.append(None)
@@ -80,7 +102,7 @@ class TrajectoryBuilder():
 
     def toPoint(self, point: Point, reversed: bool = False):
         self.segments.append(PointSegment(last_state = None,
-                                          kinematics = self.robot.kinematics,
+                                          kinematics = self.kinematics,
                                           constraints2d = self.CONSTRAINTS,
                                           point = point,
                                           tangent = False,
@@ -91,7 +113,7 @@ class TrajectoryBuilder():
 
     def toPointTangentHead(self, point: Point, reversed: bool = False):
         self.segments.append(PointSegment(last_state = None,
-                                          kinematics = self.robot.kinematics,
+                                          kinematics = self.kinematics,
                                           constraints2d = self.CONSTRAINTS,
                                           point = point,
                                           tangent = True,
@@ -102,13 +124,40 @@ class TrajectoryBuilder():
     
 
 
-    def toPose(self, pose: Pose):
+    def toPose(self, pose: Pose, reversed: bool = False):
+        self.segments.append(PoseSegment(last_state = None,
+                                         kinematics = self.kinematics,
+                                         constraints2d = self.CONSTRAINTS,
+                                         pose = pose.norm(),
+                                         tangent = False,
+                                         linear_head = False,
+                                         reversed = reversed))
+        self.relative_markers.append(None)
+
         return self
 
-    def toPoseTangentHead(self, pose: Pose):
+    def toPoseTangentHead(self, pose: Pose, reversed: bool = False):
+        self.segments.append(PoseSegment(last_state = None,
+                                         kinematics = self.kinematics,
+                                         constraints2d = self.CONSTRAINTS,
+                                         pose = pose.norm(),
+                                         tangent = True,
+                                         linear_head = False,
+                                         reversed = reversed))
+        self.relative_markers.append(None)
+
         return self
 
-    def toPoseLinearHead(self, pose: Pose):
+    def toPoseLinearHead(self, pose: Pose, reversed: bool = False):
+        self.segments.append(PoseSegment(last_state = None,
+                                         kinematics = self.kinematics,
+                                         constraints2d = self.CONSTRAINTS,
+                                         pose = pose.norm(),
+                                         tangent = False,
+                                         linear_head = True,
+                                         reversed = reversed))
+        self.relative_markers.append(None)
+
         return self
 
 

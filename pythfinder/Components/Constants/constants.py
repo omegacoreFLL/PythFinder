@@ -480,10 +480,9 @@ class Constants():
                 dif += 1
 
 
-            self.kinematics = other.kinematics.copy()
-
             if not dif == 0:
                 self.reset_buttons_default = other.reset_buttons_default
+                self.kinematics = other.kinematics.copy()
                 self.recalculate.set(True)
     
 
@@ -538,7 +537,7 @@ xbox_zero_button = 1
 xbox_head_selection_button = 5
 xbox_trail_button = 0
 xbox_erase_trail_button = 4
-xbox_screenshot_button = 8
+xbox_screenshot_button = 7
 
 xbox_turn_0 = (0, 1)
 xbox_turn_45 = (1, 1)
@@ -561,7 +560,7 @@ ps4_zero_button = 1
 ps4_head_selection_button = 10
 ps4_trail_button = 0
 ps4_erase_trail_button = 9
-ps4_screenshot_button = 8
+ps4_screenshot_button = 5
 
 ps4_turn_0 = 11
 ps4_turn_45 = None
@@ -584,7 +583,7 @@ ps5_zero_button = 1
 ps5_head_selection_button = 10
 ps5_trail_button = 0
 ps5_erase_trail_button = 9
-ps5_screenshot_button = 11
+ps5_screenshot_button = 10
 
 ps5_turn_0 = (0, 1)
 ps5_turn_45 = (1, 1)
@@ -835,6 +834,9 @@ ftc_robot_image_relative_source = os.path.join(device_relative_path, ftc_robot_i
 ftc_robot_image_width_cm = 34
 ftc_robot_image_height_cm = 53
 
+ftc_real_max_velocity = 90
+ftc_max_power = 1
+
 ftc_field_width_cm = 366  # og - 12ft
 ftc_field_height_cm = 366 # og - 12ft
 
@@ -861,12 +863,14 @@ default_presets = [["FLL Table",
                                                 robot_height = ftc_robot_image_height_cm,
                                                 trail_color = "white",
                                                 field_centric = False,
-                                                constraints2d = Constraints2D(linear = Constraints(80, 40, 40),
+                                                real_max_velocity = ftc_real_max_velocity,
+                                                max_power = ftc_max_power,
+                                                constraints2d = Constraints2D(linear = Constraints(80, 60, 60),
                                                                               angular = Constraints(toRadians(100),
                                                                                                     toRadians(120),
                                                                                                     toRadians(120)),
-                                                                              track_width = ftc_field_width_cm - 2),
-                                                                              kinematics = MecanumKinematics(ftc_field_width_cm - 2,
+                                                                              track_width = ftc_robot_image_width_cm - 2),
+                                                                              kinematics = MecanumKinematics(ftc_robot_image_width_cm - 2,
                                                                                                              center_offset = Point(5, 0))),
                     ftc_center_stage_field_image,
                     Size(ftc_field_width_cm, ftc_field_height_cm)]

@@ -97,8 +97,8 @@ class AngularSegment(MotionSegment):
         delta_head = ang - head
 
         # calculate the current pose based on the start pose
-        relative_center_of_rotation: Point = self.kinematics.center_offset
-        absolute_center_of_rotation: Point = rotateByPoint(Point(x, y), relative_center_of_rotation + self.current_pose, ang)
+        relative_center_of_rotation: Point = self.kinematics.center_offset.rotateMatrix(head)
+        absolute_center_of_rotation: Point = rotateByPoint(Point(x, y), relative_center_of_rotation + self.current_pose.point(), ang)
 
         new_point = rotateByPoint(absolute_center_of_rotation, Point(x, y), delta_head)
         new_pose = Pose(new_point.x, new_point.y, normalizeDegrees(self.last_state.pose.head + toDegrees(ang)))
@@ -107,6 +107,9 @@ class AngularSegment(MotionSegment):
         # no linear velocity on pure angular motion
         VEL = Point()
         ANG_VEL = ang_vel
+
+        with open ("matasugepula.txt", "a") as f:
+            f.write(str(ANG_VEL) + "\n")
                 
         return MotionState(time = t,
                            field_vel = ChassisState(VEL, ANG_VEL),

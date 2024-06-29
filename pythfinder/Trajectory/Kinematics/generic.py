@@ -59,31 +59,30 @@ class ChassisState():
         )
 
     def fieldToRobot(self, robot_pose: Pose):
-        alpha = normalizeRadians(self.VEL.atan2())
-        beta = normalizeRadians(alpha + robot_pose.rad())
+        theta = robot_pose.rad()
 
-        magnitude = self.getVelocityMagnitude()
-        
-        x = math.sin(beta) * magnitude
-        y = math.cos(beta) * magnitude
+        x = math.cos(theta) * self.VEL.x + math.sin(theta) * self.VEL.y
+        y = -math.sin(theta) * self.VEL.x + math.cos(theta) * self.VEL.y
 
-        if x < 10e-5: x = 0
-        if y < 10e-5: y = 0
+        if abs(x) < 10e-7: x = 0
+        if abs(y) < 10e-7: y = 0
 
         return ChassisState(Point(x, y), self.ANG_VEL)
 
     def robotToField(self, robot_pose: Pose):
-        beta = normalizeRadians(self.VEL.atan2())
-        alpha = normalizeRadians(beta - robot_pose.rad())
-        magnitude = self.getVelocityMagnitude()
+        theta = robot_pose.rad()
+        
+        x = math.cos(theta) * self.VEL.x - math.sin(theta) * self.VEL.y
+        y = math.sin(theta) * self.VEL.x + math.cos(theta) * self.VEL.y
 
-        x = math.sin(alpha) * magnitude
-        y = math.cos(alpha) * magnitude
-
-        if x < 10e-5: x = 0
-        if y < 10e-5: y = 0
+        if abs(x) < 10e-7: x = 0
+        if abs(y) < 10e-7: y = 0
 
         return ChassisState(Point(x, y), self.ANG_VEL)
+    
+    def str(self) -> str:
+        return ("vel x: {0}  vel y: {1}  vel ang: {2}".format(
+            self.VEL.x, self.VEL.y, self.ANG_VEL))
 
 class KinematicsType(Enum):
     # non-holonomic configurations

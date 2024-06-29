@@ -187,7 +187,7 @@ class Robot():
         self.distance += delta_distance
 
         if not delta_head == 0:
-            relative_center_of_rotation: Point = self.kinematics.center_offset
+            relative_center_of_rotation: Point = self.kinematics.center_offset.rotateMatrix(head)
             absolute_center_of_rotation: Point = rotateByPoint(Point(x, y), relative_center_of_rotation + self.pose, math.radians(head))
 
             new_point = rotateByPoint(absolute_center_of_rotation, Point(x, y), math.radians(delta_head))

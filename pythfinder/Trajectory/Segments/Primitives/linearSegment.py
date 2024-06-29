@@ -47,11 +47,6 @@ class LinearSegment(MotionSegment):
         new_start_distance = self.states[time].displacement
         new_start_velocity = self.states[time].velocities.getVelocityMagnitude()
 
-        print("time: {0} dist: {1} vel: {2}"
-              .format(new_start_time,
-                      new_start_distance,
-                      new_start_velocity))
-
         previous = 0
         for i in range(len(self.profiles) - 1):
             previous += self.profiles[i].distance
@@ -98,7 +93,7 @@ class LinearSegment(MotionSegment):
         return MotionState(time = t,
                            field_vel = ChassisState(VEL, ANG_VEL),
                            displacement = dis,
-                           pose = self.current_pose.copy())
+                           pose = self.current_pose.copy().round(4))
 
 
 

@@ -5,6 +5,10 @@ from pythfinder.Trajectory.Markers import *
 import threading
 
 
+class Auto(Enum):
+    ENTER = auto()
+    EXIT = auto()
+
 class TrajectoryFollower():
     def __init__(self, 
                  sim: Simulator,
@@ -24,8 +28,8 @@ class TrajectoryFollower():
 
         self.sim = sim
 
-    def __wait(self, ms: int):
-        for _ in range(ms):
+    def __wait(self, loops: int):
+        for _ in range(loops):
             self.sim.update()
     
     def __checkForRemainingMarkers(self):
@@ -52,24 +56,57 @@ class TrajectoryFollower():
 
 
 
-    def follow(self, perfect: bool = True, 
-               wait: bool = True, steps: int = None) -> None:
+    def autonomus(self, do: Auto):
+        match do:
+            case Auto.ENTER:
+                print("\n\nentering autonomus... ready?")
+
+                self.sim.manual_control.set(False)
+                self.sim.robot.trail.draw_trail.set(True)
+                self.sim.constants.ERASE_TRAIL.set(False)
+                self.sim.manual_control.set(False)
+                self.sim.constants.SCREEN_BORDER.set(False)
+                self.sim.presets.WRITING.set(False)
+
+                self.sim.robot.zeroDistance()
+            case Auto.EXIT:
+                self.sim.manual_control.set(True)
+                self.sim.robot.trail.draw_trail.set(False)
+                self.sim.constants.ERASE_TRAIL.set(True)
+                self.sim.constants.SCREEN_BORDER.set(True)
+                self.sim.constants.FREEZE_TRAIL.set(False)
+                self.sim.presets.WRITING.set(True)
+
+                print("\n\ntele-op just started! ---- ding ding 🔔")            
+            case _:
+                pass
+        
+        self.sim.menu.check()
+
+
+
+    def follow(self, 
+               perfect: bool = True, 
+               wait: bool = True, 
+               steps: int = None) -> None:
 
         if steps is not None:
             self.perfect_increment = steps
         self.marker_iterator = 0
 
-        self.sim.autonomus(Auto.ENTER)
         self.sim.robot.setPoseEstimate(self.start_pose)
+        self.sim.update()
 
-        if wait: self.__wait(200)
+        self.autonomus(Auto.ENTER)
+
+        if wait: self.__wait(40)
 
         if perfect:
             self.__perfectFollow()
         else: self.__realFollow()
 
         self.__checkForRemainingMarkers()
-        self.sim.autonomus(Auto.EXIT)
+        self.autonomus(Auto.EXIT)
 
     def __perfectFollow(self) -> None:
         rg = int(len(self.states) / self.perfect_increment)

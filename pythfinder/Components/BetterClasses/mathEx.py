@@ -294,6 +294,12 @@ class Point():
     
     def print(self):
         print("x: {0} y: {1}".format(self.x, self.y))
+    
+    def str(self):
+        return "x: {0} y: {1}".format(*self.round(4).tuple())
+    
+    def isEmpty(self):
+        return self.x == 0 and self.y == 0
 
 class PointDual():
     def __init__(self, x: DualNumber = DualNumber.constant(), 
@@ -377,6 +383,9 @@ class Pose(Point):
     def rotateMatrix(self, angle):
         point = super().rotateMatrix(angle)
         return Pose(point.x, point.y, self.head)
+    
+    def norm(self):
+        return Pose(self.x, self.y, normalizeDegrees(self.head))
 
 
 

@@ -21,7 +21,7 @@ class TrajectoryGrapher():
         # get wheel speeds
         for state in self.STATES:
             robot_centric_vel = state.velocities.fieldToRobot(state.pose)
-            wheel_speeds = self.sim.robot.kinematics.inverse(robot_centric_vel)
+            wheel_speeds = self.sim.constants.kinematics.inverse(robot_centric_vel)
 
             for i in range(len(wheel_speeds)):
                 try: VEL[i].append(wheel_speeds[i].VELOCITY)

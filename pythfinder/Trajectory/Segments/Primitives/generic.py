@@ -195,5 +195,12 @@ class MotionSegment(ABC):
         mplt.scatter(time, value, color = 'red', s = 1)
         mplt.show()
 
-    def stateFromLinearSegment(self, state: MotionState):
+    def stateFromPureLinearSegment(self, state: MotionState):
         return state.velocities.ANG_VEL == 0
+    
+    def stateFromPureAngularSegment(self, state: MotionState):
+        return state.velocities.VEL.isEmpty()
+    
+    def stateFromLinearAndAngularSegment(self, state: MotionState):
+        return not (state.velocities.ANG_VEL == 0 or state.velocities.VEL.isEmpty())
+    

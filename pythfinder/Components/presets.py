@@ -172,5 +172,7 @@ class PresetManager():
         
         self.previous = on
             
-            
-
+    def get(self, number: int) -> Preset:
+        if not inOpenInterval(number, 0, 9):
+            return None
+        return self.presets[number - 1]

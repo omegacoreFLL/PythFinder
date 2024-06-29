@@ -1,6 +1,5 @@
-from pythfinder.Trajectory.Control.feedforward import ProfileState
+from pythfinder.Trajectory.Control.feedforward import *
 from pythfinder.Trajectory.Segments.Primitives import *
-from pythfinder.Trajectory.Segments.Primitives.generic import MotionState
 
 class PointSegment(MotionSegment):
     def __init__(self, 
@@ -44,7 +43,7 @@ class PointSegment(MotionSegment):
         # reverse the heading, holonomic or non-holonomic
         if reversed:
             head = normalizeDegrees(180 + head)
-        
+
         # first primitive in this case would be going reverse / tangent (or no turn at all)
         self.primitives.append(AngularSegment(None, None, kinematics, head))
         self.primitives.append(LinearSegment(None, None, self.point))
@@ -61,7 +60,7 @@ class PointSegment(MotionSegment):
         
         time = self.normalizeSegmTime(time)
 
-        if not self.stateFromLinearSegment(self.states[time]):
+        if not self.stateFromPureLinearSegment(self.states[time]):
             self.primitives[-2].addConstraintsSegmTime(self.pointSegmTime_2_angularSegmTime(time), 
                                                        constraints2D, auto_build = False)       # angular
             self.primitives[-1].addConstraintsSegmTime(0, constraints2D, auto_build = False)    # linear
@@ -105,6 +104,7 @@ class PointSegment(MotionSegment):
             self.total_time += self.primitives[i].total_time
 
             self.last_generated_state = self.primitives[i].states[-1]
+        
 
 
         # get the end time
