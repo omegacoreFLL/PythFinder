@@ -77,7 +77,7 @@ class PresetManager():
         self.presets: List[Preset] = [None for _ in range(10)]
 
         self.value = None
-        self.previous = 0
+        self.previous = -1
         self.WRITING = EdgeDetectorEx()
     
     def add(self, preset: Preset, key: None | int = None):
@@ -118,8 +118,24 @@ class PresetManager():
         self.value = key
     
     def on(self, number: int):
-        try: self.presets[number-1].ON.set(True)
-        except: print("no preset for key {0}".format(number))
+        if self.presets[number - 1] is None and not number == 0:
+            print("no preset for key {0}".format(number))
+            return None
+
+        for i in range(len(self.presets)):
+            if self.presets[i] is None: 
+                continue
+            
+            if i + 1 == number:
+                self.presets[i].ON.set(True)
+            else: self.presets[i].ON.set(False)
+
+            if i + 1 == self.previous and not number == self.previous:
+                self.presets[i].off()
+        
+        self.previous = number
+
+    
 
     def onScreen(self, screen: pygame.Surface):
         self.WRITING.update()
@@ -159,18 +175,7 @@ class PresetManager():
         if on is None:
             return None
 
-        for i in range(len(self.presets)):
-            if self.presets[i] is None: 
-                continue
-            
-            if i + 1 == on:
-                self.presets[i].ON.set(True)
-            else: self.presets[i].ON.set(False)
-
-            if i + 1 == self.previous and not on == self.previous:
-                self.presets[i].off()
-        
-        self.previous = on
+        self.on(on)
             
     def get(self, number: int) -> Preset:
         if not inOpenInterval(number, 0, 9):

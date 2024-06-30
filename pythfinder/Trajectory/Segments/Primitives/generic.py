@@ -83,16 +83,11 @@ class MotionSegment(ABC):
         t = self.start_time
         profile_index = 0
 
-        while profile_index < nr_of_profiles:
-            
-            if self.profiles[profile_index].FINISHED_ms(t):
-                profile_index += 1
-                continue
-            
-            profile_state = self.profiles[profile_index].getStateMs(t)
-            self.states.append(self.motionFromProfileState(t, profile_state))
-
-            t += 1
+        for profile in self.profiles:
+            while not profile.FINISHED_ms(t):
+                profile_state = profile.getStateMs(t)
+                self.states.append(self.motionFromProfileState(t, profile_state))
+                t += 1
 
         # check for an empty segment        
         if len(self.states) == 1:
@@ -113,10 +108,6 @@ class MotionSegment(ABC):
         pass
     
     @abstractmethod
-    def motionFromProfileState(self, profile_state: ProfileState) -> MotionState:
-        pass
-    
-    @abstractmethod
     def motionFromProfileState(self, t: int, profile_state: ProfileState) -> MotionState:
         pass
 
@@ -134,6 +125,12 @@ class MotionSegment(ABC):
 
     def interruptSegmTime(self, time: int):
         self.states = self.states[:time]
+        
+        # be sure you ensure continuity, add an additional 0 speed state
+        self.states.append(MotionState(time = self.states[-1].time + 1,
+                                       field_vel = ChassisState(),
+                                       displacement = self.states[-1].displacement,
+                                       pose = self.states[-1].pose))
 
 
 

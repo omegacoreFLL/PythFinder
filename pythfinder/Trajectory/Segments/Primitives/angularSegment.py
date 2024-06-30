@@ -92,30 +92,19 @@ class AngularSegment(MotionSegment):
         ang, ang_vel = ang * self.sign, ang_vel * self.sign
 
         self.profile_states.append(profile_state)
-
-        x, y, head = self.current_pose.x, self.current_pose.y, toRadians(self.current_pose.head)
-        delta_head = ang - head
-
-        # calculate the current pose based on the start pose
-        relative_center_of_rotation: Point = self.kinematics.center_offset.rotateMatrix(head)
-        absolute_center_of_rotation: Point = rotateByPoint(Point(x, y), relative_center_of_rotation + self.current_pose.point(), ang)
-
-        new_point = rotateByPoint(absolute_center_of_rotation, Point(x, y), delta_head)
-        new_pose = Pose(new_point.x, new_point.y, normalizeDegrees(self.last_state.pose.head + toDegrees(ang)))
-        self.current_pose = new_pose
+        self.current_pose = self.last_state.pose + Pose(0, 0, toDegrees(ang))
                 
         # no linear velocity on pure angular motion
         VEL = Point()
         ANG_VEL = ang_vel
-
-        with open ("matasugepula.txt", "a") as f:
-            f.write(str(ANG_VEL) + "\n")
                 
         return MotionState(time = t,
                            field_vel = ChassisState(VEL, ANG_VEL),
                            displacement = self.last_state.displacement,
                            pose = self.current_pose.copy()
         )
+    
+        
                 
 
 
@@ -123,9 +112,9 @@ class AngularSegment(MotionSegment):
     def getAction(self) -> MotionAction:
         return MotionAction.TURN
     
-    def copy(self, last_state: MotionState, constraints2d: Constraints2D):
+    def copy(self, last_state: MotionState, constraints2d: Constraints2D = None):
         return AngularSegment(last_state,
-                              constraints2d.angular,
+                              constraints2d.angular if constraints2d is not None else self.constraints,
                               self.kinematics,
                               self.target,
                               self.reversed)

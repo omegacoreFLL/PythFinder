@@ -485,6 +485,18 @@ class Constants():
                 self.kinematics = other.kinematics.copy()
                 self.recalculate.set(True)
     
+    def checkScreenSize(self, actual_screen_size: tuple):
+        if not (self.screen_size.width == actual_screen_size[0] 
+                                      and
+                self.screen_size.height == actual_screen_size[1]):
+            if self.recalculate.compare(True):
+                return True
+
+            self.recalculate.set(True)
+            return False
+
+        return True
+    
 
 
 def point2Tuple(point: Point):

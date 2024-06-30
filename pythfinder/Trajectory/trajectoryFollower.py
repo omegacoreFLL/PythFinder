@@ -132,4 +132,5 @@ class TrajectoryFollower():
             self.sim.robot.setVelocities(state.velocities)
             self.sim.update()
         
-        self.sim.robot.setVelocities(ChassisState())
+        if self.sim.RUNNING():
+            self.sim.robot.setVelocities(ChassisState())

@@ -61,12 +61,10 @@ class PointSegment(MotionSegment):
         time = self.normalizeSegmTime(time)
 
         if not self.stateFromPureLinearSegment(self.states[time]):
-            self.primitives[-2].addConstraintsSegmTime(self.pointSegmTime_2_angularSegmTime(time), 
-                                                       constraints2D, auto_build = False)       # angular
-            self.primitives[-1].addConstraintsSegmTime(0, constraints2D, auto_build = False)    # linear
+            self.primitives[-2].addConstraintsSegmTime(self.pointSegmTime_2_angularSegmTime(time), constraints2D, auto_build = False)       # angular
+            self.primitives[-1].addConstraintsSegmTime(0, constraints2D, auto_build = False)                                                # linear
 
-        else: self.primitives[-1].addConstraintsSegmTime(self.pointSegmTime_2_linearSegmTime(time), 
-                                                         constraints2D, auto_build = False)
+        else: self.primitives[-1].addConstraintsSegmTime(self.pointSegmTime_2_linearSegmTime(time), constraints2D, auto_build = False)
 
         self.constraints2d = constraints2D
 
@@ -90,11 +88,12 @@ class PointSegment(MotionSegment):
         self.last_generated_state = self.last_state.copy()
 
 
-        for i in range(len(self.primitives)):
-
+        for i, primitive in enumerate(self.primitives):
+    
             # recursively compleate each 
-            if self.primitives[i].last_state is None:
+            if primitive.last_state is None:
                 self.primitives[i] = self.primitives[i].copy(self.last_generated_state.copy(), self.constraints2d)
+            else: self.primitives[i] = self.primitives[i].copy(self.last_generated_state.copy())
 
             # generate the values for each
             self.primitives[i].generate()

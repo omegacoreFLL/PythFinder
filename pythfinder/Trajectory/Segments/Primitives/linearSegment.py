@@ -100,9 +100,9 @@ class LinearSegment(MotionSegment):
     def getAction(self) -> MotionAction:
         return MotionAction.LINE
     
-    def copy(self, last_state: MotionState, constraints2d: Constraints2D):
+    def copy(self, last_state: MotionState, constraints2d: Constraints2D = None):
         return LinearSegment(last_state,
-                             constraints2d.linear,
+                             constraints2d.linear if constraints2d is not None else self.constraints,
                              self.target)
 
     def addCM(self, cm: int):

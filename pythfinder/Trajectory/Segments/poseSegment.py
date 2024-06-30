@@ -82,8 +82,7 @@ class PoseSegment(MotionSegment):
                 self.primitives[2].addConstraintsSegmTime(0, constraints2D)
 
             if time < last_angular_nr:    # last 1
-                self.primitives[2].addConstraintsSegmTime((time - len(self.first_angular_states
-                                                                - linear_nr)), constraints2D)
+                self.primitives[2].addConstraintsSegmTime((time - first_angular_nr - linear_nr), constraints2D)
         
         else:                                           # segments are combined
                 relative_time = time - first_angular_nr
@@ -118,6 +117,7 @@ class PoseSegment(MotionSegment):
             
             if primitive.last_state is None:
                 self.primitives[i] = self.primitives[i].copy(self.last_generated_state.copy(), self.constraints2d)
+            else: self.primitives[i] = self.primitives[i].copy(self.last_generated_state.copy())
 
             # generate the values for each
             self.primitives[i].generate()

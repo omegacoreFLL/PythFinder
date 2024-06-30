@@ -26,14 +26,14 @@ import pygame
 class Simulator():
     def __init__(self, constants: Constants = Constants()):
         
-        pygame.init()
         pygame.display.set_caption("PythFinder")
+        
         self.running = BooleanEx(True)
         self.manual_control = BooleanEx(True)
 
         self.constants = constants
         self.clock = pygame.time.Clock()
-        self.screen = pygame.display.set_mode(self.constants.screen_size.get())
+        self.screen = pygame.display.set_mode(self.constants.screen_size.get(), flags = pygame.RESIZABLE)
 
         self.dt = 0
 
@@ -83,10 +83,16 @@ class Simulator():
 
 
     def recalculate(self):
+        resize_screen = self.constants.checkScreenSize(self.screen.get_size())
+
         if self.constants.recalculate.compare(False):
             return 0
         
-        self.screen = pygame.display.set_mode(self.constants.screen_size.get())
+        if resize_screen:
+            self.screen = pygame.display.set_mode(self.constants.screen_size.get(), pygame.RESIZABLE)
+        else: 
+            self.constants.screen_size = ScreenSize(self.screen.get_size()[0], self.screen.get_size()[1])
+
         self.menu.recalculate()
         self.fade.recalculate()
         self.robot.recalculate()
@@ -111,7 +117,6 @@ class Simulator():
 
     def update(self):
         self.recalculate()
-        self.__updateEventManager()
 
         #reset frame
         self.screen.fill(default_background_color)
@@ -128,9 +133,11 @@ class Simulator():
             self.menu.addControls(self.controls)
             self.menu.onScreen(self.screen)
 
-        self.__updateScreenshoot()
         pygame.display.update()
         self.dt = self.clock.tick(self.constants.FPS) / 1000
+
+        self.__updateScreenshoot()
+        self.__updateEventManager()
     
 
 
@@ -139,25 +146,23 @@ class Simulator():
         self.presets.addKey(None)
         self.menu.addKey(None)
 
-        try:
-            for event in pygame.event.get():
-                if event.type == pygame.JOYDEVICEADDED:
-                    self.controls.addJoystick(pygame.joystick.Joystick(event.device_index))
+
+        for event in pygame.event.get():
+            if event.type == pygame.JOYDEVICEADDED:
+                self.controls.addJoystick(pygame.joystick.Joystick(event.device_index))
                 
-                elif event.type == pygame.JOYDEVICEREMOVED:
-                    self.controls.addJoystick(None)
+            elif event.type == pygame.JOYDEVICEREMOVED:
+                self.controls.addJoystick(None)
                 
-                if event.type == pygame.KEYDOWN:
-                    self.presets.addKey(event)
-                    self.menu.addKey(event)
+            if event.type == pygame.KEYDOWN:
+                self.presets.addKey(event)
+                self.menu.addKey(event)
 
-                if event.type == pygame.QUIT:
-                    self.running.set(False)
-                    print('\n\n')
-                    pygame.quit()
+            if event.type == pygame.QUIT:
+                self.running.set(False)
+                print('\n\n')
+                pygame.quit()
 
-
-        except: pass
 
     def __updateControls(self):
         self.controls.update()

@@ -186,19 +186,11 @@ class Robot():
         head += delta_head
         self.distance += delta_distance
 
-        if not delta_head == 0:
-            relative_center_of_rotation: Point = self.kinematics.center_offset.rotateMatrix(head)
-            absolute_center_of_rotation: Point = rotateByPoint(Point(x, y), relative_center_of_rotation + self.pose, math.radians(head))
-
-            new_point = rotateByPoint(absolute_center_of_rotation, Point(x, y), math.radians(delta_head))
-            new_pose = Pose(new_point.x, new_point.y, normalizeDegrees(head))
-
-        else: new_pose = Pose(x, y, normalizeDegrees(head))
-
-
         self.past_pose = self.pose
-        self.pose = new_pose
-        self.window_pose = self.toWindowCoords(self.pose)
+        self.pose = Pose(x, y, normalizeDegrees(head))
+
+        center_of_rotation = self.kinematics.center_offset.copy().negate().rotateMatrix(self.pose.rad())
+        self.window_pose = self.toWindowCoords(self.pose + center_of_rotation)
 
 
 

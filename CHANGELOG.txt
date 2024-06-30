@@ -71,4 +71,4 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - compleate rework of the trajectory system
 - added presets (default presets include FTC and FLL fields), customizable by the user
 - fixed display bugs in the menu
-    
+- now the simulation window is resizable

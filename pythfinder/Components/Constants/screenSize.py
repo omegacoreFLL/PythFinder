@@ -1,3 +1,5 @@
+import pygame
+
 # file containing screen size data
 #
 # used for ease of writing
@@ -19,10 +21,10 @@ ftc_field_screen_height = 1000
 ftc_field_screen_width = 1200
 
 
-max_screen_height = 1000
-max_screen_width = 1700
-min_screen_height = 700
-min_screen_width = 900
+max_screen_height = pygame.display.Info().current_h
+max_screen_width = pygame.display.Info().current_w
+min_screen_height = 0
+min_screen_width = 0
 
 class Size():
     def __init__(self, width: int = 0, height: int = 0):

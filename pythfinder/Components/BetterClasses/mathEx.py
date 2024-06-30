@@ -347,21 +347,30 @@ class Pose(Point):
     def __sub__(self, other):
         if isinstance(other, Pose):
             return Pose(self.x - other.x, self.y - other.y, normalizeDegrees(self.head - other.head))
+        if isinstance(other, Point):
+            return Pose(self.x - other.x, self.y - other.y, self.head)
         return Pose(self.x - other, self.y - other, normalizeDegrees(self.head - other))
     
     def __add__(self, other):
         if isinstance(other, Pose):
             return Pose(self.x + other.x, self.y + other.y, normalizeDegrees(self.head + other.head))
+        if isinstance(other, Point):
+            return Pose(self.x + other.x, self.y + other.y, self.head)
         return Pose(self.x + other, self.y + other, normalizeDegrees(self.head + other))
+
     
     def __mul__(self, other):
         if isinstance(other, Pose):
             return Pose(self.x * other.x, self.y * other.y, normalizeDegrees(self.head * other.head))
+        if isinstance(other, Point):
+            return Pose(self.x * other.x, self.y * other.y, self.head)
         return Pose(self.x * other, self.y * other, normalizeDegrees(self.head * other))
     
     def __truediv__(self, other):
         if isinstance(other, Pose):
             return Pose(self.x / other.x, self.y / other.y, normalizeDegrees(self.head / other.head))
+        if isinstance(other, Point):
+            return Pose(self.x / other.x, self.y / other.y, self.head)
         return Pose(self.x / other, self.y / other, normalizeDegrees(self.head / other))
     
     def str(self):
