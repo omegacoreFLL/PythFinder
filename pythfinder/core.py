@@ -240,6 +240,7 @@ class Simulator():
         else: 
             joy_y = 0
 
+
         error = findShortestPath(self.robot.target_head, self.robot.pose.head) / 180
         joy_x = self.robot.head_controller.calculate(error)
 
