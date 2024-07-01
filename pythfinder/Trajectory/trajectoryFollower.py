@@ -119,7 +119,6 @@ class TrajectoryFollower():
             self.sim.update()
 
     def __realFollow(self) -> None:
-
         start_time = getTimeMs()
         time = 0
 
