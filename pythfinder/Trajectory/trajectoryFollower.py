@@ -94,10 +94,10 @@ class TrajectoryFollower():
             self.perfect_increment = steps
         self.marker_iterator = 0
 
+        self.autonomus(Auto.ENTER)
+
         self.sim.robot.setPoseEstimate(self.start_pose)
         self.sim.update()
-
-        self.autonomus(Auto.ENTER)
 
         if wait: self.__wait(40)
 
@@ -119,6 +119,7 @@ class TrajectoryFollower():
             self.sim.update()
 
     def __realFollow(self) -> None:
+
         start_time = getTimeMs()
         time = 0
 

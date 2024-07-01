@@ -140,7 +140,7 @@ class Simulator():
         self.__updateEventManager()
     
 
-
+    
     def __updateEventManager(self):
         self.presets.WRITING.set(not self.constants.MENU_ENTERED.get())
         self.presets.addKey(None)
