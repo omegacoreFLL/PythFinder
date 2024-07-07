@@ -192,7 +192,7 @@ class Constants():
 
         self.screen_size = screen_size
         self.constraints = constraints2d
-        self.kinematics = (TankKinematics(default_track_width, center_offset = Point(-2, 0))
+        self.kinematics = (TankKinematics(default_track_width, center_offset = Point(1.5, 0))
                                         if kinematics is None else kinematics)
 
         self.COEFF_JOY_HEAD = PIDCoefficients(kP = default_kP_joystick_head,
@@ -359,8 +359,8 @@ class Constants():
         new.HEAD_SELECTION.set(self.HEAD_SELECTION.get())
         new.FORWARDS.set(self.FORWARDS.get())
         new.ERASE_TRAIL.set(self.ERASE_TRAIL.get())
-        new.JOYSTICK_ENABLED.set(self.ERASE_TRAIL.get())
-        new.FREEZE_TRAIL.set(self.ERASE_TRAIL.get())
+        new.JOYSTICK_ENABLED.set(self.JOYSTICK_ENABLED.get())
+        new.FREEZE_TRAIL.set(self.FREEZE_TRAIL.get())
         new.VELOCITY_VECTOR.set(self.VELOCITY_VECTOR.get())
 
         return new
@@ -497,6 +497,12 @@ class Constants():
 
         return True
     
+    def matchScreenSize(self, image: pygame.Surface, width):
+        size_multiplier = self.WIDTH_PERCENT / 100 * width / self.screen_size.MAX_WIDTH
+
+        return pygame.transform.scale(image, 
+            (size_multiplier * image.get_width(),
+            size_multiplier * image.get_height()))
 
 
 def point2Tuple(point: Point):
@@ -888,12 +894,7 @@ default_presets = [["FLL Table",
                     Size(ftc_field_width_cm, ftc_field_height_cm)]
 ]
 
-#pathing constants
-kP_head = 30
-kD_head = 1
-kS_head = 0.6
 
-kS_fwd = 20 
 
 
 

@@ -73,12 +73,14 @@ class Preset():
         
 
 class PresetManager():
-    def __init__(self):
+    def __init__(self, constants: Constants):
         self.presets: List[Preset] = [None for _ in range(10)]
 
         self.value = None
         self.previous = -1
         self.WRITING = EdgeDetectorEx()
+
+        self.constants = constants
     
     def add(self, preset: Preset, key: None | int = None):
         if key is None:
@@ -139,12 +141,11 @@ class PresetManager():
 
     def onScreen(self, screen: pygame.Surface):
         self.WRITING.update()
-    
+
         for preset in self.presets:
             if preset is not None:
                 preset.onScreen(screen)
 
-       
         if self.value is None or not self.WRITING.high:
                 return None
         on = None

@@ -101,7 +101,8 @@ class AngularSegment(MotionSegment):
         return MotionState(time = t,
                            field_vel = ChassisState(VEL, ANG_VEL),
                            displacement = self.last_state.displacement,
-                           pose = self.current_pose.copy()
+                           pose = self.current_pose.copy(),
+                           profile_state = profile_state
         )
     
         

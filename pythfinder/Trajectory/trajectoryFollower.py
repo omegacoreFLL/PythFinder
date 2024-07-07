@@ -15,7 +15,6 @@ class TrajectoryFollower():
                  motion_states: List[MotionState],
                  markers: List[FunctionMarker]):
         
-        self.head_controller = PIDController(PIDCoefficients(kP = kP_head, kD = kD_head, kI = 0))
         self.states = motion_states
         self.markers = markers
 
@@ -62,25 +61,26 @@ class TrajectoryFollower():
                 print("\n\nentering autonomus... ready?")
 
                 self.sim.manual_control.set(False)
-                self.sim.robot.trail.draw_trail.set(True)
-                self.sim.constants.ERASE_TRAIL.set(False)
-                self.sim.manual_control.set(False)
-                self.sim.constants.SCREEN_BORDER.set(False)
                 self.sim.presets.WRITING.set(False)
+                self.sim.robot.trail.draw_trail.set(True)
+
+                self.sim.constants.ERASE_TRAIL.set(False)
+                self.sim.constants.SCREEN_BORDER.set(False)
 
                 self.sim.robot.zeroDistance()
+
             case Auto.EXIT:
                 self.sim.manual_control.set(True)
+                self.sim.presets.WRITING.set(True)
                 self.sim.robot.trail.draw_trail.set(False)
+
                 self.sim.constants.ERASE_TRAIL.set(True)
                 self.sim.constants.SCREEN_BORDER.set(True)
-                self.sim.constants.FREEZE_TRAIL.set(False)
-                self.sim.presets.WRITING.set(True)
 
                 print("\n\ntele-op just started! ---- ding ding 🔔")            
             case _:
                 pass
-        
+
         self.sim.menu.check()
 
 
@@ -94,10 +94,10 @@ class TrajectoryFollower():
             self.perfect_increment = steps
         self.marker_iterator = 0
 
-        self.autonomus(Auto.ENTER)
-
-        self.sim.robot.setPoseEstimate(self.start_pose)
         self.sim.update()
+        self.autonomus(Auto.ENTER)
+        self.sim.robot.setPoseEstimate(self.start_pose)
+        
 
         if wait: self.__wait(40)
 

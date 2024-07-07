@@ -12,7 +12,7 @@ from pythfinder.Trajectory.constraints import *
 #   the impossible case.
 
 class ProfileState():
-    def __init__(self, dis: float, vel: float, acc: float) -> None:
+    def __init__(self, dis: float = 0, vel: float = 0, acc: float = 0) -> None:
         self.dis = dis
         self.vel = vel
         self.acc = acc

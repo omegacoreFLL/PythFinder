@@ -72,3 +72,18 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - added presets (default presets include FTC and FLL fields), customizable by the user
 - fixed display bugs in the menu
 - now the simulation window is resizable
+
+0.0.4.1 (04.07.2024)
+---------------------
+- fixed trajectory generation bugs
+
+0.0.4.2 (07.07.2024)
+---------------------
+- now you need to click ON the robot to move it with the mouse
+- acceleration graph ends correctly on the X axis
+- no more acceleration spikes when interrupting a motion segment
+  (they are supposed to but it limits the user view of the graph)
+- changed FLL robot rotation center to match our robot exactly
+- trail doesn't freeze anymore when changing presets
+- coordinates resize acording to the screen 
+- now the autonomus mode applies correctly

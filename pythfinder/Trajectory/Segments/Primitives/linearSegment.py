@@ -93,7 +93,8 @@ class LinearSegment(MotionSegment):
         return MotionState(time = t,
                            field_vel = ChassisState(VEL, ANG_VEL),
                            displacement = dis,
-                           pose = self.current_pose.copy().round(4))
+                           pose = self.current_pose.copy().round(4),
+                           profile_state = profile_state)
 
 
 

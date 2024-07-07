@@ -27,13 +27,15 @@ class MotionState():
     def __init__(self, time: int = None, 
                  field_vel: ChassisState = None, 
                  displacement: float = None,
-                 pose: Pose = None):
+                 pose: Pose = None,
+                 profile_state: ProfileState = None):
 
         self.velocities = ChassisState() if field_vel is None else field_vel # cm / s
 
         self.time = 0 if time is None else time # ms
         self.displacement = 0 if displacement is None else displacement
         self.pose = Pose() if pose is None else pose
+        self.profile_state = ProfileState() if profile_state is None else profile_state
     
     def isLike(self, other): 
         return (self.velocities.isLike(other.velocities)
@@ -79,9 +81,7 @@ class MotionSegment(ABC):
         self.current_pose = self.last_state.pose.copy()
         self.states: List[MotionState] = []
 
-        nr_of_profiles = len(self.profiles)
         t = self.start_time
-        profile_index = 0
 
         for profile in self.profiles:
             while not profile.FINISHED_ms(t):

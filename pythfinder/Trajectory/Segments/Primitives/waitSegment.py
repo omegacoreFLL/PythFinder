@@ -37,7 +37,8 @@ class WaitSegment(MotionSegment):
                 MotionState(time = self.start_time + i, 
                             field_vel = ChassisState(),                  # no velocities when stationary
                             displacement = self.last_state.displacement, # same displacement
-                            pose = self.last_state.pose))                # same pose
+                            pose = self.last_state.pose,                 # same pose
+                            profile_state = ProfileState()))             # empty profile state
         
         # empty segment
         if len(self.states) == 0:

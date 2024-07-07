@@ -36,16 +36,17 @@ class Simulator():
         self.screen = pygame.display.set_mode(self.constants.screen_size.get(), flags = pygame.RESIZABLE)
 
         self.dt = 0
+        self.mouse_click = EdgeDetectorEx()
 
         self.background = Background(self.constants)
-        self.presets = PresetManager()
+        self.presets = PresetManager(self.constants)
         self.fade = Fade(self.constants)
         self.menu = Menu(MenuType.UNDEFINED, self.constants, None)
         self.robot = Robot(constants = self.constants)
         self.controls = Controls()
 
         self.__addDefaultPresets()
-        
+
 
 
     def chooseFieldCentric(self, fun: Fun, bool = None):
@@ -103,17 +104,8 @@ class Simulator():
         self.constants.recalculate.set(False)
 
 
-    def matchScreenSize(self, image: pygame.Surface, width):
-        size_multiplier = self.constants.WIDTH_PERCENT / 100 * width / self.constants.screen_size.MAX_WIDTH
-
-        return pygame.transform.scale(image, 
-            (size_multiplier * image.get_width(),
-            size_multiplier * image.get_height()))
-
     def RUNNING(self):
         return self.running.compare()
-
-
 
     def update(self):
         self.recalculate()
@@ -142,7 +134,8 @@ class Simulator():
 
     
     def __updateEventManager(self):
-        self.presets.WRITING.set(not self.constants.MENU_ENTERED.get())
+        if self.manual_control.compare():
+            self.presets.WRITING.set(not self.constants.MENU_ENTERED.get())
         self.presets.addKey(None)
         self.menu.addKey(None)
 
@@ -172,13 +165,11 @@ class Simulator():
         self.__updateCursorRobotMove()
 
     def __updateCursorRobotMove(self):
-        if not (self.robot.cursorOver() and pygame.mouse.get_pressed()[0]):
-            return None 
-        
-        cursor_pose = self.robot.toFieldCoords(Pose(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1], 0))
-        cursor_pose.head = self.robot.pose.head
-        self.robot.setPoseEstimate(cursor_pose)
+        self.mouse_click.set(pygame.mouse.get_pressed()[0]) # left click
+        self.mouse_click.update()
 
+        self.robot.updateCursorMove(clicked = self.mouse_click.rising, released = self.mouse_click.falling,
+                                    cursor_point = Point(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
 
 
 
@@ -288,8 +279,8 @@ class Simulator():
                 self.constants.FORWARDS.negate()
 
                 if self.constants.FORWARDS.compare():  
-                    self.fade.reset(self.matchScreenSize(img_forwards, self.constants.screen_size.width))
-                else: self.fade.reset(self.matchScreenSize(img_backwards, self.constants.screen_size.width))
+                    self.fade.reset(self.constants.matchScreenSize(img_forwards, self.constants.screen_size.width))
+                else: self.fade.reset(self.constants.matchScreenSize(img_backwards, self.constants.screen_size.width))
 
 
         if self.controls.joystick_detector[self.controls.keybinds.zero_button].rising:
@@ -302,17 +293,17 @@ class Simulator():
         else: self.constants.HEAD_SELECTION.set(False)
 
         if self.controls.joystick_detector[self.controls.keybinds.head_selection_button].rising:
-                self.fade.reset(self.matchScreenSize(img_selecting_on, self.constants.screen_size.width))
+                self.fade.reset(self.constants.matchScreenSize(img_selecting_on, self.constants.screen_size.width))
         elif self.controls.joystick_detector[self.controls.keybinds.head_selection_button].falling:
-                self.fade.reset(self.matchScreenSize(img_selecting_off, self.constants.screen_size.width))
+                self.fade.reset(self.constants.matchScreenSize(img_selecting_off, self.constants.screen_size.width))
 
         
         if self.controls.joystick_detector[self.controls.keybinds.trail_button].rising:
             self.robot.trail.draw_trail.negate()
 
             if self.robot.trail.draw_trail.compare():
-                self.fade.reset(self.matchScreenSize(img_show_trail, self.constants.screen_size.width))
-            else: self.fade.reset(self.matchScreenSize(img_hide_trail, self.constants.screen_size.width))
+                self.fade.reset(self.constants.matchScreenSize(img_show_trail, self.constants.screen_size.width))
+            else: self.fade.reset(self.constants.matchScreenSize(img_hide_trail, self.constants.screen_size.width))
 
 
 

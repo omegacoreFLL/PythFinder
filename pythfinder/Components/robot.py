@@ -54,6 +54,7 @@ class Robot():
         self.last_rotation = Point()
 
         self.is_stopped = BooleanEx(True)
+        self.mouse_locked = BooleanEx(False)
         self.head_controller = PIDController(constants.COEFF_JOY_HEAD)
 
         self.constants = constants
@@ -69,8 +70,8 @@ class Robot():
 
     def recalculate(self):
         self.head_controller.set(self.constants.COEFF_JOY_HEAD)
-        self.pose_font = pygame.font.SysFont(self.constants.TEXT_FONT, 50)
-        self.image = pygame.image.load(self.constants.ROBOT_IMG_SOURCE)
+        self.pose_font = pygame.font.SysFont(self.constants.TEXT_FONT, 300) # this big because it will resize
+        self.image = pygame.image.load(self.constants.ROBOT_IMG_SOURCE)     #   with the screen
 
         self.getRobotSizeInPixels()
 
@@ -84,6 +85,9 @@ class Robot():
         self.mask = pygame.mask.from_surface(self.rotating_instance)
 
         self.constraints = self.constants.constraints
+
+        self.__coords_width_offset_ratio = 3.9 / 4
+        self.__coords_height_offset_ratio = 3.95 / 4
 
         self.trail.recalculate()
 
@@ -117,7 +121,7 @@ class Robot():
                 self.constants.screen_size.half_h - point.x * self.constants.PIXELS_2_DEC / 10)
 
  
-    # @autonomus - FALSE (field centric velocities) / TRUE (robot centric velocities)
+    # FALSE (field centric velocities) / TRUE (robot centric velocities)
     def setVelocities(self, chassis_state: ChassisState, robot_centric: bool = False):
         
         if abs(chassis_state.getVelocityMagnitude()) < 0.01 and abs(chassis_state.ANG_VEL) < 0.01:
@@ -210,13 +214,25 @@ class Robot():
     def elapsed_time(self):
         return pygame.time.get_ticks() - self.start_time
 
-    def cursorOver(self):
-        x, y = pygame.mouse.get_pos()
-
-        cursor_point: Point = Point(x, y)
+    def cursorOver(self, cursor_point: Point):
         rectangle_corners = pygame_vector_to_point(self.__findBorder(self.window_pose))
 
         return point_in_rectangle(cursor_point, rectangle_corners)
+
+    def updateCursorMove(self, clicked: bool, released: bool, cursor_point: Point):
+        if clicked and self.cursorOver(cursor_point):
+            self.mouse_locked.set(True)
+        
+        if released:
+            self.mouse_locked.set(False)
+        
+        if self.mouse_locked.get():
+            new_pose = self.toFieldCoords(Pose(cursor_point.x, cursor_point.y, 0))
+            new_pose.head = self.pose.head
+            self.target_head = self.pose.head
+
+            self.setPoseEstimate(new_pose)
+
 
 
 
@@ -235,9 +251,11 @@ class Robot():
     def __drawPose(self, screen: pygame.Surface):
         coords = self.pose_font.render("x: {:.2f}  y: {:.2f} h: {:.2f}".format(self.pose.x, self.pose.y, self.pose.head), 
                                 True, self.constants.TEXT_COLOR)
+        coords = self.constants.matchScreenSize(coords, self.constants.screen_size.width)
 
         coords_rectangle = coords.get_rect()
-        coords_rectangle.center = (3 / 4 * self.constants.screen_size.width, self.constants.screen_size.height - 30)
+        coords_rectangle.center = (self.__coords_width_offset_ratio * self.constants.screen_size.width - coords.get_width() / 2,
+                                   self.__coords_height_offset_ratio * self.constants.screen_size.height - coords.get_height() / 2)
 
         screen.blit(coords, coords_rectangle)
     
@@ -247,11 +265,14 @@ class Robot():
     def __drawCursor(self, screen: pygame.Surface):
         x, y = pygame.mouse.get_pos()
         to_field = self.toFieldPoint(Point(x, y)).tuple()
+
         coords = self.pose_font.render("x: {:.2f}  y: {:.2f}".format(to_field[0], to_field[1]), 
                                 True, self.constants.TEXT_COLOR)
+        coords = self.constants.matchScreenSize(coords, self.constants.screen_size.width)
         
         coords_rectangle = coords.get_rect()
-        coords_rectangle.center = (1 / 6 * self.constants.screen_size.width, self.constants.screen_size.height - 30)
+        coords_rectangle.center = ((1 - self.__coords_width_offset_ratio) * self.constants.screen_size.width + coords.get_width() / 2, 
+                                   self.__coords_height_offset_ratio * self.constants.screen_size.height - coords.get_height() / 2)
 
         screen.blit(coords, coords_rectangle)
 

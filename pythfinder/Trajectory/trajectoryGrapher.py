@@ -11,6 +11,8 @@ class TrajectoryGrapher():
         
         self.sim = sim
         self.STATES = motion_states
+        self.spike_threshold = 0.9 # means an instant dec of 9 m/s
+                                   # (which is still a lot, but keep it for bigger robots, like FRC)
 
    
     
@@ -39,7 +41,7 @@ class TrajectoryGrapher():
 
         # get wheel accelerations
         for vel in VEL:
-            ACC.append(self.__getDerivative(time, vel))
+            ACC.append(self.__getDerivative(vel))
         
 
 
@@ -122,7 +124,7 @@ class TrajectoryGrapher():
             each.append(0)
 
         time = linspace(0, len(VEL_X), len(VEL_X))
-        plots_deriv = [self.__getDerivative(time, vel) for vel in plots]
+        plots_deriv = [self.__getDerivative(vel) for vel in plots]
         
 
 
@@ -183,17 +185,21 @@ class TrajectoryGrapher():
 
 
 
-    def __getDerivative(self, t: List[int], vel: List[float]):
+    def __getDerivative(self, vel: List[float]):
         ACC = []
 
-        for i in range(len(t)):
-            if i > 1:
-                dt = (t[i] - t[i-1]) / 1000 #ms to s
+        for i in range(len(vel)):
+            acceleration = 0
+
+            if i > 1 :
+                dt = 0.001                  # default dt is 1 ms
                 dv = vel[i] - vel[i-1]
                     
-                ACC.append(dv / dt)
-            else: ACC.append(0)
-        
+                if abs(dv) < self.spike_threshold and not vel[i-1] == 0:
+                    acceleration = dv / dt
+
+            ACC.append(acceleration)
+
         return ACC
 
             
