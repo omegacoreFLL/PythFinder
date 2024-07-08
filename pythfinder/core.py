@@ -109,6 +109,7 @@ class Simulator():
 
     def update(self):
         self.recalculate()
+        self.__updateEventManager()
 
         #reset frame
         self.screen.fill(default_background_color)
@@ -121,7 +122,7 @@ class Simulator():
         self.background.onScreen(self.screen)
         self.robot.onScreen(self.screen)
         self.fade.onScreen(self.screen)
-        if self.constants.MENU_ENTERED.compare():
+        if self.constants.MENU_ENTERED.compare() and self.controls.using_joystick.compare():
             self.menu.addControls(self.controls)
             self.menu.onScreen(self.screen)
 
@@ -129,7 +130,6 @@ class Simulator():
         self.dt = self.clock.tick(self.constants.FPS) / 1000
 
         self.__updateScreenshoot()
-        self.__updateEventManager()
     
 
     

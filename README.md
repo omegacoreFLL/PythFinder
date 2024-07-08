@@ -2,13 +2,12 @@
       <img src="https://i.ibb.co/YbtktKX/pyth-finder-logo.png" alt="pyth-finder-logo" border="0">
 </p>
 
-![version_badge](https://img.shields.io/badge/alpha-0.0.3-006400)
+![version_badge](https://img.shields.io/badge/alpha-0.0.4-006400)
 ![license](https://img.shields.io/badge/license-MIT-62e39e)
 
 <br />
-<br />
 
-# Instalation
+# Installation
 Before we dive into it, make sure you have:
 * a ``python`` version greater than 3.10 ([latest version][1] is recommended) ;
 * [``pip``][2] installed on your device (usually pip3 for 3.x versions, but pip works too) ;
@@ -17,15 +16,12 @@ Before we dive into it, make sure you have:
 
 Now the installation it's as easy as writing a command in the command prompt or in Visual Studio's terminal:
 
-```bash
-pip install pythfinder
-```
-or (on most devices):
+<br/>
 
-```bash
-pip3 install pythfinder 
-```
-<br />
+<p align="center">
+      <img src="https://github.com/omegacoreFLL/PythFinder/assets/159171107/1734dba9-d9a7-4ad4-a3d9-1485a205c082" width = 100% alt="pyth-finder-install" border="0">
+</p>
+
 <br />
 
 
@@ -58,15 +54,14 @@ It's a small price to have one of the most reliable autonomous programs in the F
 <br/>
 <br/>
 
-To clarify, this library is **NOT EV3 dependent**, even though we developed it on this type of brick. Because the hardware is separated from this library, ``SPIKE PRIME`` or ``NXT`` robots can still benefit from the .txt file.
+To clarify, this library is **NOT EV3 dependent**, even though we developed it on this type of brick. Because the hardware is separated from this library, ``SPIKE PRIME`` or ``NXT`` robots can still benefit from the .txt file. The chosen method for uploading data to the robot is versatile, making it compatible with any microprocessor capable of reading from a .txt file, thus can be used outside the FLL competition.
 
 For now, we have a plug-and-play implementation **ONLY** for EV3 robots [pythfinder-quick-start][11], other bricks would need custom implementation of the reading and using of the data. We also recommend running the code for all launches in one program to not deal with loading and waiting in the match.
 
-If you need help with this implementation, contact us on our Instagram ([@omega.core][12]). We would love to help! 
+If you need help with this implementation, think of any improvements or just want to know more about the project, contact us on our Instagram ([@omega.core][12]). We would love to help! 
 
-We would like to create a ``quick-start`` for every FLL-legal brick, but we don't have any besides EV3 at the moment to be able to do tests. If you want to **collaborate with us** on this project by any means, don't hesitate to contact us. 💚🤍
+We would like to create a ``quick-start`` for every FLL-legal brick. A ``SPIKE PRIME`` version will come out around the launch of the **Sumerged** season. If you want to **collaborate with us** on this project by any means, don't hesitate to contact us. 💚🤍
 
-<br/>
 <br/>
 
 # Usage
@@ -104,8 +99,15 @@ Finally, display your simulation:
 
 ```python
 while sim.RUNNING():
-    sim.updade()
+    sim.update()
 ```
+
+<br/>
+
+<p align="center">
+      <img src="https://i.ibb.co/CKtP4wg/first-impresion.png" width = 100% alt="pyth-finder-joystick" border="0">
+</p>
+
 
 The code runs until you exit the simulator window. Connecting a [*supported controller*](#joystick-control) will allow you to move freely on the field.
 
@@ -129,71 +131,106 @@ The controls used to manipulate the simulator are the following:
 * ``D-pad`` **--** move through the interface menu / select the robot's orientation (when selection mode is on) ;
 * ``left joystick`` **--** control robot's linear velocity + angular velocity (when field centric is on) ;
 * ``right joystick`` *--* control angular velocity (**ONLY** when field centric is off) ;
-* ``left joystick button`` **--** take a screenshot (found in the 'Screenshots' folder inside the locally installed library location) ;
+* ``options / start`` **--** take a screenshot (found in the 'Screenshots' folder inside the locally installed library location) ;
 
-## Create a Trajectory
+<br/>
 
-Trajectory building is the main feature of our library. Although its implementation is complicated (see the [documentation](#advanced-usage)), its usage is trivially simple.
+<p align="center">
+      <img src="https://github.com/omegacoreFLL/PythFinder/assets/159171107/7be00ab0-aa3b-433c-968d-4bc78f33f0b3" width = 100% alt="pyth-finder-joystick" border="0">
+</p>
 
-<span style="font-size:1.5em;">*What are trajectories?*</span> <br />
-Firstly, we define a particular set of robot information (like the pose, velocity, distance traveled, etc.) as a '**MotionState**'. Multiple motion states sharing a specific similarity are called '**MotionSegments**'. With the same logic in mind, multiple motion segments compose a '**Trajectory**'.
+## Trajectory Usage
 
-Trajectories are constructed using the '**TrajectoryBuilder**' class. This takes, as optional parameters, a *start_pose* and a *constants*. By default, the starting pose is at the origin of the cartesian system.
+### What are trajectories?
 
-The builder has intuitive methods for accomplishing a desired, simple trajectory. This includes **motion** functions:
-* *``inLineCM()``* ;
-* *``toPoint()``* ;
-* *``toPose()``* ;
-* *``wait()``* ;
+First, we define a specific set of data regarding the robot's position, speed, and distance traveled as a **state of motion**.
 
-These can be combined with **markers**, allowing parallel task management, utilising multithreading.
-Markers can be set by *time* or *distance*, **relative** to the last motion function, or **absolute**, relative to the start of the trajectory.
+Multiple states of motion that exhibit certain similarities are referred to as **motion segments**. These segments are further categorized based on their *complexity*. `Primitives` denote movements with a single degree of freedom (1D), such as pure rotation, pure linear movement, or even stationary states (waiting). These primitives serve as building blocks for `complex` segments, which incorporate two or more primitives and characterize movements with two or three degrees of freedom, primarily intended for *omnidirectional* robots. For For FLL purposes, you'll mostly use primitives, but any motion segment adapts automatically to the chassis used.
+
+Ultimately, all motion segments and auxiliary elements that perform various functions (e.g., other motors usage), known as *markers*, collectively constitute a *`trajectory`*.
+
+<br/>
+
+### How to Create Trajectories
+
+Trajectories are constructed using the '**TrajectoryBuilder**' class. This class requires a *Simulator* object as a parameter, and optionally, a `starting position` and a `preset` to use. By default, the initial position is set at the origin of the Cartesian coordinate system.
+
+The constructor offers intuitive methods for crafting precise trajectories, incorporating personalised **motion** functions. These functions are engineered to accommodate both omnidirectional and unidirectional robots.
+
+The constructor identifies the type of chassis in use and **adjusts** the provided functions accordingly, as certain chassis types may have physical limitations that render some movements **impossible**. By default, non-holonomic chassis are `tangent` to the trajectory, whereas holonomic chassis are given the option to `interpolate` orientation.
+
+Here is a list of available motion functions:
+* *`wait()`*
+* *`inLineCM()`*
+* *`turnToDeg()`*
+* *`toPoint()`* <span style="font-size:0.8em; color: darkgreen">*or*</span> 
+  *`toPointTangentHead()`*
+* *`toPose()`* <span style="font-size:0.8em; color: darkgreen">*or*</span>
+  *`toPoseTangentHead()`* <span style="font-size:0.8em; color: darkgreen">*or*</span>
+  *`toPoseLinearHead()`*
+
+<br/>
+
+### What are Markers?
+
+These functionalities can be integrated with **markers**, facilitating the management of parallel tasks that are independent of the robots' movement by employing `multithreading` techniques. Markers can be configured to activate after a certain **`time`** period or **`distance`**, either **`relative`** to the last motion function or **`absolute`** with respect to the start of the trajectory.
+<br/>
 
 The library also includes special types of markers:
-* **``interrupters``**: break the continuity of the trajectory at the specified point in time / distance. Imagine interrupters as sudden brakes made by a car ;
-* **``dynamic constraints``**: allow you to modify portions of the trajectory to run at different speeds without sacrificing continuity ;
+* <span style="color: darkgreen">**`interrupts`**</span>: Disrupt the trajectory's continuity at the specified moment, based on time or distance. Think of interrupts as the sudden braking of a car;
+* <span style="color: darkgreen">**`dynamic constraints`**</span>: Allow you to modify portions of the trajectory to operate at different speeds without sacrificing continuity.
 
-A list of all the markers:
-* *``interruptTemporal()``* <span style="font-size:0.8em; color: lightgreen">*or*</span> *``interruptDisplacement()``* ;
-* *``addConstraintsTemporal()``* <span style="font-size:0.8em; color: lightgreen">*or*</span> *``addConstraintsDisplacement()``* ;
-* *``addTemporalMarker()``* <span style="font-size:0.8em; color: lightgreen">*or*</span> *``addDisplacementMarker()``* ;
-* *``addRelativeTemporalMarker()``* <span style="font-size:0.8em; color: lightgreen">*or*</span> *``addRelativeDisplacementMarker()``* ;
+Here is a list of all markers:
+* *`interruptTemporal()`* <span style="font-size:0.8em; color: darkgreen">*or*</span> *`interruptDisplacement()`*
+* *`addTemporalMarker()`* <span style="font-size:0.8em; color: darkgreen">*or*</span> *`addDisplacementMarker()`*
+* *`addRelativeTemporalMarker()`* <span style="font-size:0.8em; color: darkgreen">*or*</span> *`addRelativeDisplacementMarker()`*
+* *`addRelativeTemporalConstraints()`* <span style="font-size:0.8em; color: darkgreen">*or*</span> *`addRelativeDisplacementConstraints()`*
 
-And other uncategorized methods:
-* *``setPoseEstimate()``* ;
-* *``turnDeg()``* ;
+<br/>
+`Interrupts` and `Constraints` are **strictly** relative, as we have observed that users find it **difficult** to visualize the trajectory segments to which they apply. They modify the trajectory's course itself, as opposed to markers that call functions and might adversely affect the trajectory's construction. However, if users **request**, I will reintroduce these functionalities, as they were included in the library's initial prototypes.
 
-which are neither motion functions nor markers.
+Markers can also include **negative** values, which are interpreted as relative to the end of the trajectory or motion segment, while **positive** values are interpreted as relative to the beginning of these elements.
 
-After specifying the desired motion, the '*.build()*' method needs to be called to compute a trajectory. 
-<br />
-Putting it all together, we get:
+<br/>
+
+### Example
+
+After specifying the desired motion, the *`.build()`* function must be called to compute the trajectory values.
+
+Putting it all together, we obtain:
 
 ```python
-# example from our Masterpiece first launch code
+# first launch from our Masterpiece code
 
 START_POSE = Pose(-47, 97, -45)
-START_CONSTRAINTS = Constraints(vel = 27.7, acc = 27.7, dec = -27.7)
+PRESET = 1
 
-trajectory = (TrajectoryBuilder(START_POSE, START_CONSTRAINTS)
+trajectory = (TrajectoryBuilder(sim, START_POSE, PRESET)
               .inLineCM(75)
                     .addRelativeDisplacementMarker(35, lambda: print('womp womp'))
                     .addRelativeDisplacementMarker(-12, lambda: print('motor goes brr'))
-                    .addConstraintsRelativeDisplacement(start = 30, constraints = Constraints(vel = 10, dec = -50))
-                    .addConstraintsRelativeDisplacement(start = 36, constraints = Constraints(vel = 27.7, acc = 35, dec = -30))
-                    .interruptDisplacement(66)
+                    .addRelativeDisplacementConstraints(cm = 30, 
+  						constraints2d = Constraints2D(linear = Constraints(
+                                                               vel = 10, 
+                                                               dec = -50)))                                                   
+                    .addRelativeDisplacementConstraints(cm = 36, 
+  						constraints2d = Constraints2D(linear = Constraints(
+ 										   vel = 27.7, 
+                                                               acc = 35, 
+                                                               dec = -30)))
+                    .interruptDisplacement(cm = 66)
               .wait(2600)
                     .addRelativeTemporalMarker(-1, lambda: print('motor goes :('))
               .inLineCM(-30)
-              .turnDeg(90)
+              .turnToDeg(90)
               .inLineCM(-20)
-              .turnDeg(105)
+              .turnToDeg(105)
               .inLineCM(-47)
-              .turnDeg(20)
-              .wait(1200)
+              .turnToDeg(20)
+              .wait(ms = 1200)
                     .addRelativeTemporalMarker(0, lambda: print("spin'n'spin'n'spin.."))
-                    .addRelativeTemporalMarker(-1, lambda: print("the party's over :<"))
-              .turnDeg(80)
+                    .addRelativeTemporalMarker(-1, lambda: print("the party's over :("))
+              .turnToDeg(80)
               .inLineCM(-120)
               .build())
 ```
@@ -206,7 +243,7 @@ This method takes as an optional parameter the following type as a boolean:
 * <span style="color: lightgreen">*``perfect``*</span> **=** simulator iterates through each motion state and displays the robot in the pre-calculated position. For this mode, you can also change the step size in which the list is iterated. A bigger step size means a faster robot on screen.
 * <span style="color: lightgreen">*``real``*</span> **=** simulator gives the calculated powers to the robot object, which looks exactly like it would run in real time. This mode is **recommended** for better visualization.
 
-The last optional parameter is '*wait*'. When this boolean is set to True, it waits until the simulator is fully rendered on the user's screen before proceeding with the trajectory. This is useful when perfect following and a big step number are set, it makes you be able to see even the start.
+The last optional parameter is '*wait*'. When this boolean is set to True, it waits until the simulator is fully rendered on the user's screen before proceeding with the trajectory. This is useful when perfect following and a big step number are set, it makes you be able to see even the start. Our fifth run looks something like this:
 
 ```python
 # default values
@@ -216,25 +253,36 @@ WAIT = True
 
 trajectory.follow(sim, PERFECT_FOLLOWING, WAIT, PERFECT_STEPS)
 ```
+<br/>
+
+<p align="center">
+      <img src="https://github.com/omegacoreFLL/PythFinder/assets/159171107/2449776e-9608-4199-a631-119ef2d28aa1" width = 100% alt="pyth-finder-traj-follow" border="0">
+</p>
 
 ## Velocity Graph
 
-For a better understanding of the 'trajectory' concept, we decided to implement a user-friendly **graphical visualization** of the profiles used, mostly because in FLL teams there are lots of youngsters who have just been introduced to robotics.
+To facilitate the understanding of the 'trajectory' concept, I have implemented an easy-to-use graphical visualization method for motion profiles.
 
-We really think that this library is one of the best ways to start learning **industrially-used** concepts, with which we hope to help and inspire future engineers and programmers!
+I truly believe that this library represents one of the best ways to begin learning the concepts **used in industry**, aiming to assist and inspire future engineers and programmers!
 
-The '*.graph()*' method call will display a matplotlib graph of the left and right wheel **velocities** and **accelerations**. Optional parameters for displaying just one or both are also included.
+Calling the *`.graph()`* function will display a Matplotlib graph of the **velocity** and **acceleration** for the left and right wheels. There are also optional parameters to display each value separately. Additionally, users can choose whether they want to view the velocity and acceleration of the wheels or the chassis.
 
-One neat implementation is the '*connect*' parameter. The default is set to True, this variable draws lines between points. Setting it to False really shows the discontinuities (in acceleration, because velocity is optimized for continuity).
+An interesting aspect is the *`connect`* parameter. By default, it is set to True, causing lines to be drawn between points. Setting it to False reveals discontinuities (in acceleration, as velocity is optimized for continuity).
 
 ```python
 # default values
 CONNECT = True
 VELOCITY = True
 ACCELERATION = True
+WHEEL_SPEEDS = True
 
-trajectory.graph(CONNECT, VELOCITY, ACCELERATION)
+trajectory.graph(CONNECT, VELOCITY, ACCELERATION, WHEEL_SPEEDS)
 ```
+<br/>
+
+<p align="center">
+      <img src="https://i.ibb.co/V2Ts2QG/simulator-trajgraph.png" width = 100% alt="pyth-finder-graph" border="0">
+</p>
 
 ## Generate Velocities
 
@@ -248,6 +296,11 @@ trajectory.generate(FILE_NAME, STEPS)
 ```
 
 Now you can copy the '.txt' file and load it into the quick-start to see it running!
+<br/>
+
+<p align="center">
+      <img src="https://i.ibb.co/8BBsxFF/traj-generator.png" width = 100% alt="pyth-finder-generate" border="0">
+</p>
 
 ## Interface Settings
 
@@ -260,7 +313,7 @@ The first way is to simply pass a new instance of '**Constants**' when creating 
 
 # all modifiable values:
 class Constants():
-    def __init__(self, 
+def __init__(self, 
                  pixels_to_dec,
                  fps,
                  robot_img_source,
@@ -281,17 +334,38 @@ class Constants():
                  width_percent,
                  backing_distance,
                  arrow_offset,
-                 half_unit_measure_line,
                  time_until_fade,
                  fade_percent,
-                 screen_size):
+                 real_max_velocity,
+                 max_power,
+                 
+                 screen_size,
+                 constraints2d,
+                 kinematics):
     ...
-        
 ```
 
 As described in the [Create a Robot](#create-a-robot) section, these changes will be automatically applied at the start of the simulation. For an in-depth explanation of the constants, see the [documentation](#advanced-usage).
 
 The second way is through the interface menu (**NOT FULLY IMPLEMENTED YET**) with joystick control. This is a more 'on-the-go' change and will reset every time you restart the simulator.
+<br/>
+
+<p align="center">
+      <img src="https://i.ibb.co/R2HMqKW/simulator-intefacemenu.png" width = 100% alt="pyth-finder-presets" border="0">
+</p>
+
+## Presets
+
+A **remarkable innovation** introduced by this library is the feature called `presets`. These allow you to completely transform the interface appearance, robot configuration, and chassis type with the press of a button. You can utilize the number keys from `1` to `9` on the keyboard, each assigned to a distinct set of constants that adjust the simulation in various ways. The `0` key serves to reset the interface to its *default* settings.
+
+Beyond these predefined options, you have the ability to create your **own** custom presets, tailored to your individual needs and preferences. This functionality adds an extra level of **flexibility** and **control** over the configuration of the `interface`, `robot behavior`, and `simulator parameters`.
+
+By default, the button **1** is the latest `FLL` field and the button **2** is the latest `FTC` field:
+<br/>
+
+<p align="center">
+      <img src="https://github.com/omegacoreFLL/PythFinder/assets/159171107/0ea2aa63-31f7-41cb-b267-3ee00500d26b" width = 100% alt="pyth-finder-presets" border="0">
+</p>
 
 ## Advanced Usage
 
@@ -304,12 +378,12 @@ Check out the full [**documentation**][17].
 * *design made with: [illustrator][16]*
 * *inspiration: [roadrunner FTC][13]*
 * *font: [graffitiyouthregular][5]*
-* *table image: [source][15]*
+* *fields: [reddit][15]*
 
 <br />
 
 
-*v. 0.0.3.21-alpha*
+*v. 0.0.4.3-alpha*
 
 
 [1]: https://www.python.org/downloads/             "python download page"
@@ -326,6 +400,6 @@ Check out the full [**documentation**][17].
 [12]: https://www.instagram.com/omegacoreFLL "instagram link"
 [13]: https://github.com/acmerobotics/road-runner "roadrunner"
 [14]: https://www.bricklink.com/v3/studio/download.page "lego cad software"
-[15]: https://www.reddit.com/r/FLL/comments/168hh95/hires_image_of_the_masterpiece_table_3208px_x/ "fll table image"
+[15]: https://www.reddit.com "field images"
 [16]: https://www.adobe.com/ro/products/illustrator.html "adobe illustrator"
 [17]: https://github.com/omegacoreFLL/PythFinder/wiki "pythfinder's extended documentation"

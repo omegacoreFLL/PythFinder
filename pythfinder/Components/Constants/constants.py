@@ -847,7 +847,7 @@ fll_master_piece_table_image = pygame.image.load(os.path.join(device_relative_pa
 
 
 # FTC
-ftc_robot_image_absolute_source = 'Robot/ftc_robot.png'
+ftc_robot_image_absolute_source = 'Robot\\ftc_robot.png'
 ftc_robot_image_relative_source = os.path.join(device_relative_path, ftc_robot_image_absolute_source)
 ftc_robot_image_width_cm = 34
 ftc_robot_image_height_cm = 53

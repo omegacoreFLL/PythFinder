@@ -200,9 +200,9 @@ class Robot():
 
     def onScreen(self, screen: pygame.Surface):
         self.__drawPose(screen)
+        self.__drawCursor(screen)
         self.trail.drawTrail(screen, self.pose)
         self.__drawRobot(screen)
-        self.__drawCursor(screen)
         if self.constants.ROBOT_BORDER.compare():
             self.__drawBorder(screen)
         if self.constants.VELOCITY_VECTOR.compare():

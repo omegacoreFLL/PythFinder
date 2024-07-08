@@ -87,3 +87,9 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - trail doesn't freeze anymore when changing presets
 - coordinates resize acording to the screen 
 - now the autonomus mode applies correctly
+
+0.0.4.3 (xx.07.2024)
+---------------------
+- robot image path "\" inversed in settings menu for 'ftc_robot.png'
+- cursor coordinates are back under the robot image
+- simulator doesn't crash anymore when disconnecting a controller while menu is opened
