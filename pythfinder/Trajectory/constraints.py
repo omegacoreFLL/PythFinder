@@ -10,12 +10,12 @@ import math
 
 default_max_robot_vel_x = 27.7 # cm/sec
 default_max_robot_vel_y = 0
-default_max_robot_ang_vel = math.radians(130) #rad/sec
+default_max_robot_ang_vel = math.radians(150) #rad/sec
 
-default_max_robot_acc = 10
-default_max_robot_dec = -10
-default_max_robot_ang_acc = math.radians(130)
-default_max_robot_ang_dec = math.radians(-130)
+default_max_robot_acc = 27.7
+default_max_robot_dec = -27.7
+default_max_robot_ang_acc = math.radians(150)
+default_max_robot_ang_dec = math.radians(-150)
 
 default_track_width = 9.97
 

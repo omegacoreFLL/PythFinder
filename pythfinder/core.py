@@ -139,22 +139,23 @@ class Simulator():
         self.presets.addKey(None)
         self.menu.addKey(None)
 
+        try:
+            for event in pygame.event.get():
+                if event.type == pygame.JOYDEVICEADDED:
+                    self.controls.addJoystick(pygame.joystick.Joystick(event.device_index))
+                    
+                elif event.type == pygame.JOYDEVICEREMOVED:
+                    self.controls.addJoystick(None)
+                    
+                if event.type == pygame.KEYDOWN:
+                    self.presets.addKey(event)
+                    self.menu.addKey(event)
 
-        for event in pygame.event.get():
-            if event.type == pygame.JOYDEVICEADDED:
-                self.controls.addJoystick(pygame.joystick.Joystick(event.device_index))
-                
-            elif event.type == pygame.JOYDEVICEREMOVED:
-                self.controls.addJoystick(None)
-                
-            if event.type == pygame.KEYDOWN:
-                self.presets.addKey(event)
-                self.menu.addKey(event)
-
-            if event.type == pygame.QUIT:
-                self.running.set(False)
-                print('\n\n')
-                pygame.quit()
+                if event.type == pygame.QUIT:
+                    self.running.set(False)
+                    print('\n\n')
+                    pygame.quit()
+        except: pass
 
 
     def __updateControls(self):
@@ -168,8 +169,9 @@ class Simulator():
         self.mouse_click.set(pygame.mouse.get_pressed()[0]) # left click
         self.mouse_click.update()
 
-        self.robot.updateCursorMove(clicked = self.mouse_click.rising, released = self.mouse_click.falling,
-                                    cursor_point = Point(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
+        if self.manual_control.compare() and self.constants.MENU_ENTERED.compare(False):   # move only manual control is enabled and not entered meny
+            self.robot.updateCursorMove(clicked = self.mouse_click.rising, released = self.mouse_click.falling,
+                                        cursor_point = Point(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
 
 
 
@@ -200,10 +202,15 @@ class Simulator():
 
                 angular_multiplier = right_x
 
+                linear_x_multiplier = 0 if abs(linear_x_multiplier) < self.controls.keybinds.threshold else linear_x_multiplier
+                linear_y_multiplier = 0 if abs(linear_y_multiplier) < self.controls.keybinds.threshold else linear_y_multiplier
+                angular_multiplier = 0 if abs(angular_multiplier) < self.controls.keybinds.threshold else angular_multiplier
+
 
         joy_vel_x = linear_x_multiplier * self.robot.constraints.linear.MAX_VEL
         joy_vel_y = linear_y_multiplier * self.robot.constraints.linear.MAX_VEL
         joy_ang_vel = angular_multiplier * self.robot.constraints.angular.MAX_VEL
+
 
         self.robot.setVelocities(ChassisState(
             velocity = Point(x = joy_vel_x, y = joy_vel_y),

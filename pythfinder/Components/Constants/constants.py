@@ -870,7 +870,8 @@ default_presets = [["FLL Table",
                                                 field_centric = True,
                                                 trail_color = "black"),
                     fll_master_piece_table_image,
-                    Size(fll_table_width_cm, fll_table_height_cm)],
+                    Size(fll_table_width_cm, fll_table_height_cm),
+                    1],
 
                     ["FTC Field",
                      Constants(screen_size = ScreenSize(ftc_field_screen_width, ftc_field_screen_height),
@@ -891,7 +892,8 @@ default_presets = [["FLL Table",
                                                                               kinematics = MecanumKinematics(ftc_robot_image_width_cm - 2,
                                                                                                              center_offset = Point(5, 0))),
                     ftc_center_stage_field_image,
-                    Size(ftc_field_width_cm, ftc_field_height_cm)]
+                    Size(ftc_field_width_cm, ftc_field_height_cm),
+                    2]
 ]
 
 

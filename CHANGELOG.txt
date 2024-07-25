@@ -88,8 +88,14 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - coordinates resize acording to the screen 
 - now the autonomus mode applies correctly
 
-0.0.4.3 (xx.07.2024)
+0.0.4.3 (08.07.2024)
 ---------------------
 - robot image path "\" inversed in settings menu for 'ftc_robot.png'
 - cursor coordinates are back under the robot image
 - simulator doesn't crash anymore when disconnecting a controller while menu is opened
+
+0.0.4.4 (25.07.2024)
+---------------------
+- you can't move the robot with the cursor when setting menu is enabled or in auto anymore
+- holonomic drivetrains don't move tiny amounts anymore when the joystick is resting
+- added documentation and merch files

@@ -51,9 +51,6 @@ testing/
 *.svg
 *.svgz
 
-# Portable Document Format
-*.pdf
-
 # X BitMap
 *.xbm
 
