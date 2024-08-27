@@ -83,7 +83,7 @@ class AbsMenu(ABC):
             move_to = button.move(direction)
             
             try: 
-                next = button.getNext() # if it's a dynamic button and is pressed
+                next = button.get_next() # if it's a dynamic button and is pressed
                 if next is not None:    # get the button linked with the press
                     FINAL = next
             except: pass
@@ -117,7 +117,7 @@ class AbsMenu(ABC):
     def get_next(self): 
         for button in self.buttons:  # checks each button, and if it's a dynamic button and it's pressed,
             try:                     #      gets the next menu it links to
-                next = button.getNext()
+                next = button.get_next()
                 if next is not None:
                     return next
             except: pass

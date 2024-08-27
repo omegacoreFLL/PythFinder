@@ -58,8 +58,8 @@ class TrailSegment():
 class Trail():
     def __init__(self, constants: Constants):
         self.segments = [TrailSegment(constants)]
-        self.draw_trail = BooleanEx(False)
-        self.hide_trail = BooleanEx(False)
+        self.DRAW_TRAIL = BooleanEx(False)
+        self.HIDE_TRAIL = BooleanEx(False)
 
         self.pop_trail_loop = 0
         self.past_trail_length = 0
@@ -85,10 +85,10 @@ class Trail():
     def draw_trail(self, 
                   screen: pygame.Surface, 
                   pose: Pose):
-        if self.draw_trail.compare():
+        if self.DRAW_TRAIL.compare():
             self.build_trail(pose)
 
-        if self.hide_trail.compare():
+        if self.HIDE_TRAIL.compare():
             self.erase_trail()
             self.hide_trail.set(False)
         else:

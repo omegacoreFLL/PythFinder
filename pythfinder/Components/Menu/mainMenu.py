@@ -83,8 +83,8 @@ class Menu(AbsMenu):
         self.upper_bar.ENABLED.set(True)
     
     def recalculate_upper_bar(self):
-        self.MENU.title_center((self.constants.screen_size.half_w - 400, self.constants.screen_size.half_h - 300))
-        self.HOME.title_center((self.constants.screen_size.half_w + 400, self.constants.screen_size.half_h - 300))
+        self.MENU.set_title_center((self.constants.screen_size.half_w - 400, self.constants.screen_size.half_h - 300))
+        self.HOME.set_title_center((self.constants.screen_size.half_w + 400, self.constants.screen_size.half_h - 300))
 
         self.upper_bar.set_buttons([self.MENU, self.HOME])
 
@@ -134,11 +134,11 @@ class Menu(AbsMenu):
         self.selection_menu = Submenu(MenuType.SELECTION_MENU, self.constants, img_selection_menu, overlap = True)
         
     def recalculate_selection_menu(self):
-        self.ROBOT.title_center((self.constants.screen_size.half_w - 273, self.constants.screen_size.half_h - 145))
-        self.INTERFACE.title_center((self.constants.screen_size.half_w - 273, self.constants.screen_size.half_h - 56))
-        self.DRAW.title_center((self.constants.screen_size.half_w - 273, self.constants.screen_size.half_h + 27))
-        self.PATHING.title_center((self.constants.screen_size.half_w - 271, self.constants.screen_size.half_h + 120))
-        self.OTHER.title_center((self.constants.screen_size.half_w - 273, self.constants.screen_size.half_h + 207))
+        self.ROBOT.set_title_center((self.constants.screen_size.half_w - 273, self.constants.screen_size.half_h - 145))
+        self.INTERFACE.set_title_center((self.constants.screen_size.half_w - 273, self.constants.screen_size.half_h - 56))
+        self.DRAW.set_title_center((self.constants.screen_size.half_w - 273, self.constants.screen_size.half_h + 27))
+        self.PATHING.set_title_center((self.constants.screen_size.half_w - 271, self.constants.screen_size.half_h + 120))
+        self.OTHER.set_title_center((self.constants.screen_size.half_w - 273, self.constants.screen_size.half_h + 207))
 
         self.selection_menu.set_buttons([self.ROBOT, self.INTERFACE, self.DRAW, self.PATHING, self.OTHER])
         self.selection_menu.background_center((self.constants.screen_size.half_w - 273, self.constants.screen_size.half_h - 7))
@@ -188,25 +188,25 @@ class Menu(AbsMenu):
         self.ROBOT_HEIGHT.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
                             value = (Selected.ROBOT_IMG_SOURCE, Selected.ROBOT_SCALE, None, Selected.ROBOT_WIDTH))
         self.ROBOT_SCALE.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
-                            value = (Selected.ROBOT_IMG_SOURCE,None, None, Selected.ROBOT_HEIGHT))
+                            value = (Selected.ROBOT_IMG_SOURCE, None, None, Selected.ROBOT_HEIGHT))
         
         self.robot_menu = Submenu(MenuType.ROBOT_MENU, self.constants, img_general_menu, indicator = img_robot_indicator)
 
     def recalculate_robot_menu(self):
-        self.ROBOT_IMG_SOURCE.title_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 155))
-        self.ROBOT_WIDTH.title_center((self.constants.screen_size.half_w - 256, self.constants.screen_size.half_h + 112))
-        self.ROBOT_HEIGHT.title_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h + 112))
-        self.ROBOT_SCALE.title_center((self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 112))
+        self.ROBOT_IMG_SOURCE.set_title_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 155))
+        self.ROBOT_WIDTH.set_title_center((self.constants.screen_size.half_w - 256, self.constants.screen_size.half_h + 112))
+        self.ROBOT_HEIGHT.set_title_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h + 112))
+        self.ROBOT_SCALE.set_title_center((self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 112))
 
-        self.ROBOT_IMG_SOURCE.quadrant_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 110))
-        self.ROBOT_WIDTH.quadrant_center((self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 170))
-        self.ROBOT_HEIGHT.quadrant_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h + 170))
-        self.ROBOT_SCALE.quadrant_center((self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 170))
+        self.ROBOT_IMG_SOURCE.set_quadrant_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 110))
+        self.ROBOT_WIDTH.set_quadrant_center((self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 170))
+        self.ROBOT_HEIGHT.set_quadrant_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h + 170))
+        self.ROBOT_SCALE.set_quadrant_center((self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 170))
                                         
-        self.ROBOT_IMG_SOURCE.value_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 60))
-        self.ROBOT_WIDTH.value_center((self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 235))
-        self.ROBOT_HEIGHT.value_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h + 235))
-        self.ROBOT_SCALE.value_center((self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 235))
+        self.ROBOT_IMG_SOURCE.set_value_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 60))
+        self.ROBOT_WIDTH.set_value_center((self.constants.screen_size.half_w - 260, self.constants.screen_size.half_h + 235))
+        self.ROBOT_HEIGHT.set_value_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h + 235))
+        self.ROBOT_SCALE.set_value_center((self.constants.screen_size.half_w + 260, self.constants.screen_size.half_h + 235))
 
         self.robot_menu.set_buttons([self.ROBOT_IMG_SOURCE, self.ROBOT_WIDTH, self.ROBOT_HEIGHT, self.ROBOT_SCALE])
         self.robot_menu.background_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h))
@@ -286,26 +286,26 @@ class Menu(AbsMenu):
 
     def recalculate_other_menu(self):
 
-        self.FIELD_CENTRIC.title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 140))
-        self.ROBOT_BORDER.title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 10))
-        self.SCREEN_BORDER.title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 120))
-        self.HAND_DRAWING.title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 244))
+        self.FIELD_CENTRIC.set_title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 140))
+        self.ROBOT_BORDER.set_title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 10))
+        self.SCREEN_BORDER.set_title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 120))
+        self.HAND_DRAWING.set_title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 244))
 
-        self.NONE5.title_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 145))
-        self.NONE6.title_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 15))
-        self.NONE7.title_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 115))
-        self.NONE8.title_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 245))
+        self.NONE5.set_title_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 145))
+        self.NONE6.set_title_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 15))
+        self.NONE7.set_title_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 115))
+        self.NONE8.set_title_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 245))
 
 
-        self.FIELD_CENTRIC.quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 150))
-        self.ROBOT_BORDER.quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 20))
-        self.SCREEN_BORDER.quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 110))
-        self.HAND_DRAWING.quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 240)) 
+        self.FIELD_CENTRIC.set_quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 150))
+        self.ROBOT_BORDER.set_quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 20))
+        self.SCREEN_BORDER.set_quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 110))
+        self.HAND_DRAWING.set_quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 240)) 
 
-        self.NONE5.quadrant_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 150))
-        self.NONE6.quadrant_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 20))
-        self.NONE7.quadrant_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 110))
-        self.NONE8.quadrant_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 240))
+        self.NONE5.set_quadrant_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 150))
+        self.NONE6.set_quadrant_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h - 20))
+        self.NONE7.set_quadrant_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 110))
+        self.NONE8.set_quadrant_center((self.constants.screen_size.half_w + 173, self.constants.screen_size.half_h + 240))
 
 
         self.other_menu.set_buttons([self.FIELD_CENTRIC, self.ROBOT_BORDER, self.SCREEN_BORDER, self.HAND_DRAWING,
@@ -385,6 +385,7 @@ class Menu(AbsMenu):
                 
 
             next = menu.update_selections(key) # gets the next button to move to
+
             if next is not None and not moved: # you can move only once / loop, because otherwise things go boom
                 
                 if key is not None:

@@ -195,17 +195,17 @@ class AbsButton(ABC):
 
 
 
-    def quadrant_center(self, center: tuple):
+    def set_quadrant_center(self, center: tuple):
         try: self.display_quadrant_rect.center = center
         except: pass
         finally: self.quadrant_center = center
 
-    def title_center(self, center: tuple):
+    def set_title_center(self, center: tuple):
         try: self.display_title_rect.center = center
         except: pass
         finally: self.title_center = center
     
-    def value_center(self, center: tuple):
+    def set_value_center(self, center: tuple):
         try: self.display_value_rect.center = center
         except: pass
         finally: self.value_center = center
@@ -427,7 +427,7 @@ class InputButton(AbsButton):
             self.raw_value *= 100
             self.original *= 100
 
-        self.display_value(self.raw_value)
+        self.display(self.raw_value)
     
     def is_digit(self, value):
         return (value == pygame.K_0 or 
@@ -464,7 +464,7 @@ class InputButton(AbsButton):
         try: return in_open_interval(value, self.dimension[0], self.dimension[1])
         except: pass
 
-    def display_value(self, value):
+    def display(self, value):
         if isinstance(self.type.value, str):
             suffix = self.type.value
         else: suffix = ''
@@ -483,11 +483,11 @@ class InputButton(AbsButton):
 
         if self.write.get():
             self.input = '_'
-            self.display_value(self.input)
+            self.display(self.input)
             return None
 
         if self.input == '_':
-            self.display_value(self.raw_value)
+            self.display(self.raw_value)
             return None
     
         match self.type:
@@ -519,7 +519,7 @@ class InputButton(AbsButton):
             self.original_value = getattr(self.constants, self.name.name)
             self.constants.recalculate.set(True)
             
-        self.display_value(self.raw_value)
+        self.display(self.raw_value)
 
     def update(self, selected: Selected, clicked: bool, value = None):
         if not isinstance(self.type, InputType):
@@ -556,7 +556,7 @@ class InputButton(AbsButton):
                     if len(self.input) > 1:
                         self.input = self.input[:-1]
                     else: self.input = '_'
-                    self.display_value(self.input)
+                    self.display(self.input)
                 case _:
                     key_val = value.unicode
 
@@ -598,7 +598,7 @@ class InputButton(AbsButton):
                                 if len(self.input) + 1 <= self.dimension:
                                     self.input += key_val
 
-                    self.display_value(self.input)
+                    self.display(self.input)
 
         elif self.WRITING.rising:
             self.cursor = pygame.mouse.get_cursor()
