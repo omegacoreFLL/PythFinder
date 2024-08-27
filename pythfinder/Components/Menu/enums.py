@@ -16,7 +16,7 @@ class Selected(Enum):
 
     ROBOT = auto()
     INTERFACE = auto()
-    TRAIL = auto()
+    DRAW = auto()
     PATHING = auto()
     OTHER = auto()
 
@@ -28,7 +28,7 @@ class Selected(Enum):
     FIELD_CENTRIC = auto()
     ROBOT_BORDER = auto()
     SCREEN_BORDER = auto()
-    OTHER_NONE4  = auto()
+    HAND_DRAWING  = auto()
 
     OTHER_NONE5 = auto()
     OTHER_NONE6 = auto()
@@ -40,9 +40,9 @@ class MenuType(Enum):
     UPPER_BAR = [Selected.HOME_BUTTON, Selected.MENU_BUTTON]
     MAIN_MENU = [Selected.ON_MAIN_PAGE]
     SELECTION_MENU = [Selected.ROBOT, Selected.INTERFACE, 
-                      Selected.TRAIL, Selected.PATHING, Selected.OTHER]
+                      Selected.DRAW, Selected.PATHING, Selected.OTHER]
     ROBOT_MENU = [Selected.ROBOT_IMG_SOURCE, Selected.ROBOT_WIDTH, Selected.ROBOT_HEIGHT, Selected.ROBOT_SCALE]
-    OTHER_MENU = [Selected.FIELD_CENTRIC, Selected.ROBOT_BORDER, Selected.SCREEN_BORDER, Selected.OTHER_NONE4,
+    OTHER_MENU = [Selected.FIELD_CENTRIC, Selected.ROBOT_BORDER, Selected.SCREEN_BORDER, Selected.HAND_DRAWING,
                   Selected.OTHER_NONE5, Selected.OTHER_NONE6, Selected.OTHER_NONE7, Selected.OTHER_NONE8]
 
     UNDEFINED = auto()

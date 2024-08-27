@@ -30,8 +30,8 @@ class TrailPoint():
         self.point = point_in_pixels
 
 class TrailSegment():
-    def __init__(self, constants: Constants, points: List[TrailPoint] = None):
-        if exists(points):
+    def __init__(self, constants: Constants, points: List[TrailPoint] | None = None):
+        if points is not None:
             self.points = points
         else: self.points = []
 
@@ -48,11 +48,11 @@ class TrailSegment():
     
     def recalculate(self):
         for each in self.points:
-            each.point = self.toWindowPoint(each.CM).tuple()
+            each.point = self.to_window_point(each.CM).tuple()
     
-    def toWindowPoint(self, point: Pose):
+    def to_window_point(self, point: Point):
         return Point(self.constants.screen_size.half_w + point.y * self.constants.PIXELS_2_DEC / 10, 
-                self.constants.screen_size.half_h - point.x * self.constants.PIXELS_2_DEC / 10)
+                     self.constants.screen_size.half_h - point.x * self.constants.PIXELS_2_DEC / 10)
 
 
 class Trail():
@@ -72,30 +72,30 @@ class Trail():
     
 
 
-    def eraseTrailSegment(self, number: int):
+    def erase_trail_segment(self, number: int):
         self.segments.pop(number - 1)
         self.current_segment -= 1
     
-    def eraseTrail(self):
+    def erase_trail(self):
         self.segments = [TrailSegment(self.constants)]
         self.current_segment = 0
 
 
 
-    def drawTrail(self, 
+    def draw_trail(self, 
                   screen: pygame.Surface, 
                   pose: Pose):
         if self.draw_trail.compare():
-            self.buildTrail(pose)
+            self.build_trail(pose)
 
         if self.hide_trail.compare():
-            self.eraseTrail()
+            self.erase_trail()
             self.hide_trail.set(False)
         else:
             for segment in self.segments:
                 segment.draw(screen)
     
-    def buildTrail(self, pose: Pose):
+    def build_trail(self, pose: Pose):
         if self.constants.FREEZE_TRAIL.compare():
             return 0
         
@@ -104,7 +104,7 @@ class Trail():
         for segment in self.segments:
             trail_length += len(segment.points)
 
-        if self.shouldErasePoint(trail_length):
+        if self.should_erase_point(trail_length):
             if len(self.segments[0].points) == 0:
                 self.segments.pop(0)
                 self.current_segment -= 1
@@ -116,11 +116,11 @@ class Trail():
         if segment_length == 0:
             self.segments[self.current_segment].points.append(
                     TrailPoint(point_in_cm = pose,
-                               point_in_pixels = self.toWindowPoint(pose).tuple()))
+                               point_in_pixels = self.to_window_point(pose).tuple()))
 
-        elif self.segments[self.current_segment].points[-1].point != self.toWindowPoint(pose).tuple():
+        elif self.segments[self.current_segment].points[-1].point != self.to_window_point(pose).tuple():
             last_point = self.segments[self.current_segment].points[-1].point
-            current_point = self.toWindowPoint(pose).tuple()
+            current_point = self.to_window_point(pose).tuple()
 
             if distance(last_point, current_point) > self.constants.DRAW_TRAIL_THRESHOLD:
                 self.segments.append(TrailSegment(self.constants))
@@ -128,11 +128,11 @@ class Trail():
 
             self.segments[self.current_segment].points.append(
                     TrailPoint(point_in_cm = pose,
-                               point_in_pixels = self.toWindowPoint(pose).tuple()))
+                               point_in_pixels = self.to_window_point(pose).tuple()))
         
         self.past_trail_length = trail_length
 
-    def shouldErasePoint(self, length: int) -> bool:
+    def should_erase_point(self, length: int) -> bool:
         if self.constants.ERASE_TRAIL.compare(False):
             return False
         
@@ -147,7 +147,8 @@ class Trail():
     
         return False
     
-    def toWindowPoint(self, pose: Pose):
+    
+    def to_window_point(self, pose: Pose):
         return Point(self.constants.screen_size.half_w + pose.y * self.constants.PIXELS_2_DEC / 10, 
                 self.constants.screen_size.half_h - pose.x * self.constants.PIXELS_2_DEC / 10)
     

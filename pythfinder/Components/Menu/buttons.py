@@ -93,7 +93,7 @@ class AbsButton(ABC):
         self.value_center = None
 
         self.SELECTED = EdgeDetectorEx()
-        self.type = self.getType()
+        self.type = self.get_type()
 
         self.next = None
 
@@ -123,11 +123,21 @@ class AbsButton(ABC):
         ...
     
     @abstractmethod
-    def resetDefault(self):
+    def reset_default(self):
         ...
+    
+    @abstractmethod
+    def change(self):
+        ...
+    
+    @abstractmethod
+    def update(self, selected: Selected, clicked: bool, value = None):
+        self.selected = selected
+        ...
+    
 
     # gets the value stored by the button
-    def getType(self) -> ButtonType:
+    def get_type(self) -> ButtonType:
         if isinstance(self.raw_value, (int, float)):
             return ButtonType.INT
         if isinstance(self.raw_value, (bool, BooleanEx)):
@@ -149,7 +159,9 @@ class AbsButton(ABC):
 
         if isinstance(next, Selected):
             self.next = next
-    
+
+
+
     # remembers the button who led to the current button, pressing an arbitrary key
     #
     # default value to remember is needed, as it's how it knows to remember for that specific key
@@ -174,38 +186,31 @@ class AbsButton(ABC):
 
                 self.remember_links[key[each]][1] = value[each]
         
-
     # remembers the the same buttons as the other button
     # 
     # helps chaining remember relationships
-    def rememberAsButton(self, other):
+    def remember_as_button(self, other):
         if isinstance(other, AbsButton):
             self.remember_other = other
 
-    def quadrantCenter(self, center: tuple):
+
+
+    def quadrant_center(self, center: tuple):
         try: self.display_quadrant_rect.center = center
         except: pass
         finally: self.quadrant_center = center
 
-    def titleCenter(self, center: tuple):
+    def title_center(self, center: tuple):
         try: self.display_title_rect.center = center
         except: pass
         finally: self.title_center = center
     
-    def valueCenter(self, center: tuple):
+    def value_center(self, center: tuple):
         try: self.display_value_rect.center = center
         except: pass
         finally: self.value_center = center
 
-    @abstractmethod
-    def change(self):
-        ...
-    
-    @abstractmethod
-    def update(self, selected: Selected, clicked: bool, value = None):
-        self.selected = selected
-        ...
-    
+
     def move(self, direction: Dpad | None) -> Selected:
         if self.selected is self.name:  # if this button is selected
             try: 
@@ -249,9 +254,9 @@ class EmptyButton(AbsButton):
     
     def default(self, default: bool):
         if not default:
-            return 0
+            return None
     
-    def resetDefault(self):
+    def reset_default(self):
        ...
 
     def change(self):
@@ -289,12 +294,12 @@ class DynamicButton(AbsButton):
     
     def default(self, default: bool):
         if not default:
-            return 0
+            return None
         
-    def resetDefault(self):
+    def reset_default(self):
         ...
     
-    def getNext(self) -> Selected:
+    def get_next(self) -> Selected:
         if self.go_next:
             self.go_next = False
             return self.next
@@ -349,7 +354,7 @@ class ToggleButton(AbsButton):
     def change(self):
         self.ON.negate()
     
-    def linkToggle(self, key: Dpad | List[Dpad], value: Selected | List[Selected]):
+    def link_toggle(self, key: Dpad | List[Dpad], value: Selected | List[Selected]):
         try:
             if len(key) == len(value):
                 for each in range(len(key)):
@@ -358,9 +363,9 @@ class ToggleButton(AbsButton):
 
     def default(self, default: bool):
         if not default:
-            return 0
+            return None
         
-    def resetDefault(self):
+    def reset_default(self):
         ...
     
     def on(self):
@@ -411,8 +416,10 @@ class InputButton(AbsButton):
         self.original_value = None
         self.input = '_'
         self.limit = limit
+
+        self.cursor = pygame.mouse.get_cursor()
     
-    def setInputType(self, type: InputType, dimension: tuple | int):
+    def set_input_type(self, type: InputType, dimension: tuple | int):
         self.type = type
         self.dimension = dimension
 
@@ -420,9 +427,9 @@ class InputButton(AbsButton):
             self.raw_value *= 100
             self.original *= 100
 
-        self.displayValue(self.raw_value)
+        self.display_value(self.raw_value)
     
-    def isDigit(self, value):
+    def is_digit(self, value):
         return (value == pygame.K_0 or 
                 value == pygame.K_1 or
                 value == pygame.K_2 or
@@ -438,12 +445,12 @@ class InputButton(AbsButton):
 
     def default(self, default: bool):
         if not default or not self.selected is self.name or self.write.get():
-            return 0
+            return None
 
         self.input = self.original
         self.change()
     
-    def resetDefault(self):
+    def reset_default(self):
         self.original = getattr(self.constants, self.name.name)
         if self.type is InputType.PERCENT: 
             self.original *= 100
@@ -453,11 +460,11 @@ class InputButton(AbsButton):
     
 
 
-    def inRange(self, value):
-        try: return self.dimension[0] < value and value < self.dimension[1]
+    def in_range(self, value):
+        try: return in_open_interval(value, self.dimension[0], self.dimension[1])
         except: pass
 
-    def displayValue(self, value):
+    def display_value(self, value):
         if isinstance(self.type.value, str):
             suffix = self.type.value
         else: suffix = ''
@@ -476,12 +483,12 @@ class InputButton(AbsButton):
 
         if self.write.get():
             self.input = '_'
-            self.displayValue(self.input)
-            return 0
+            self.display_value(self.input)
+            return None
 
         if self.input == '_':
-            self.displayValue(self.raw_value)
-            return 0
+            self.display_value(self.raw_value)
+            return None
     
         match self.type:
             case InputType.DIMENSION:
@@ -512,7 +519,7 @@ class InputButton(AbsButton):
             self.original_value = getattr(self.constants, self.name.name)
             self.constants.recalculate.set(True)
             
-        self.displayValue(self.raw_value)
+        self.display_value(self.raw_value)
 
     def update(self, selected: Selected, clicked: bool, value = None):
         if not isinstance(self.type, InputType):
@@ -535,21 +542,21 @@ class InputButton(AbsButton):
 
         if self.SELECTED.rising:
             self.display_title = self.selected_title
+
         elif self.SELECTED.falling:
             self.write.set(False)
             self.change()
             self.display_title = self.title
         
+
+
         if self.WRITING.high and value is not None:
             match value.key:
-                case pygame.K_RETURN:
-                    self.write.set(False)
-                    self.change()
                 case pygame.K_BACKSPACE:
                     if len(self.input) > 1:
                         self.input = self.input[:-1]
                     else: self.input = '_'
-                    self.displayValue(self.input)
+                    self.display_value(self.input)
                 case _:
                     key_val = value.unicode
 
@@ -557,13 +564,13 @@ class InputButton(AbsButton):
                         match self.type:
                             case InputType.DIMENSION:
                                 try: 
-                                    if self.isDigit(value.key):
-                                        if self.inRange(int(key_val)):
+                                    if self.is_digit(value.key):
+                                        if self.in_range(int(key_val)):
                                             self.input = key_val
                                 except: pass
                             case InputType.PERCENT:
-                                if self.isDigit(value.key):
-                                    if self.inRange(int(key_val)):
+                                if self.is_digit(value.key):
+                                    if self.in_range(int(key_val)):
                                         self.input = key_val
                             case InputType.FONT:
                                 ...
@@ -575,13 +582,13 @@ class InputButton(AbsButton):
                         match self.type:
                             case InputType.DIMENSION:
                                 try:
-                                    if self.isDigit(value.key):
-                                        if self.inRange(int(self.input + key_val)):
+                                    if self.is_digit(value.key):
+                                        if self.in_range(int(self.input + key_val)):
                                             self.input += key_val
                                 except: pass
                             case InputType.PERCENT:
-                                if self.isDigit(value.key):
-                                    if self.inRange(int(self.input + key_val)):
+                                if self.is_digit(value.key):
+                                    if self.in_range(int(self.input + key_val)):
                                         self.input += key_val
                             case InputType.FONT:
                                 ...
@@ -591,7 +598,15 @@ class InputButton(AbsButton):
                                 if len(self.input) + 1 <= self.dimension:
                                     self.input += key_val
 
-                    self.displayValue(self.input)
+                    self.display_value(self.input)
+
+        elif self.WRITING.rising:
+            self.cursor = pygame.mouse.get_cursor()
+            pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_IBEAM)
+        
+        elif self.WRITING.falling:
+            pygame.mouse.set_cursor(self.cursor)
+
 
 class BoolButton(AbsButton):
     def __init__(self, 
@@ -605,9 +620,9 @@ class BoolButton(AbsButton):
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
         self.constants = constants
         self.selected = None
-        self.getIndex()
+        self.get_index()
     
-    def getIndex(self):
+    def get_index(self):
         try: 
             if self.raw_value.compare():
                 self.index = 1
@@ -625,14 +640,14 @@ class BoolButton(AbsButton):
 
     def default(self, default: bool):
         if not default or not self.selected is self.name:
-            return 0
+            return None
 
         try:
             self.raw_value.set(self.original)
         except: self.raw_value = self.original
-        finally: self.getIndex()
+        finally: self.get_index()
     
-    def resetDefault(self):
+    def reset_default(self):
         try:
             self.original = self.raw_value.get()
         except: self.original = self.raw_value

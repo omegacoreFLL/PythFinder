@@ -162,7 +162,7 @@ class MotionProfile():
             case 2: return round(self.get_vel(t), 15)
             case _: raise Exception('not a valid differentiation grade')
 
-    def getStateS(self, t: float) -> ProfileState:
+    def get_state_sec(self, t: float) -> ProfileState:
         '''with open ("muie.txt", "a") as f:
             f.write(str(t) + " " + str(self.start_t_ms) + " " 
                     + str(round(self.get_dis(t), 2)) + 
@@ -172,8 +172,8 @@ class MotionProfile():
                             self.get_vel(t),
                             self.get_acc(t))
 
-    def getStateMs(self, t: float) -> ProfileState:
-        return self.getStateS(msToS(t - self.start_t_ms))
+    def get_state_ms(self, t: float) -> ProfileState:
+        return self.get_state_sec(ms_to_sec(t - self.start_t_ms))
 
 
 
@@ -181,7 +181,7 @@ class MotionProfile():
         return t > self.t_total or self.NOT_DEFINED
 
     def FINISHED_ms(self, t: float) -> bool:
-        return self.FINISHED(msToS(t - self.start_t_ms))
+        return self.FINISHED(ms_to_sec(t - self.start_t_ms))
     
 
 

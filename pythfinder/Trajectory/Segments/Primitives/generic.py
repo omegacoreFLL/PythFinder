@@ -37,10 +37,31 @@ class MotionState():
         self.pose = Pose() if pose is None else pose
         self.profile_state = ProfileState() if profile_state is None else profile_state
     
-    def isLike(self, other): 
-        return (self.velocities.isLike(other.velocities)
+    def is_like(self, other): 
+        return (self.velocities.is_like(other.velocities)
                         and 
                 self.pose.head == other.pose.head)
+    
+    def decompose(self, n: int) -> Point: 
+        match n:
+            case 0: # pose
+                return self.pose.point()
+            case 1: # velocity
+                if not self.velocities.VEL.is_zero():
+                    return self.velocities.VEL 
+
+                magnitude = 20
+                angle = self.pose.rad() - math.pi / 2
+
+                return Point(magnitude * math.cos(angle),
+                             magnitude * math.sin(angle))
+
+            case 2: # acceleration
+                magnitude = self.profile_state.acc
+                angle = self.pose.rad()
+
+                return Point(magnitude * math.cos(angle),
+                             magnitude * math.sin(angle))
 
     def print(self):
         print("\n\ntime: {0}\ndisplacement: {1}".format(self.time, self.displacement))
@@ -53,7 +74,7 @@ class MotionState():
                            self.pose)
 
 class MotionSegment(ABC):
-    def __init__(self,last_state: MotionState):
+    def __init__(self, last_state: MotionState):
         self.last_state = last_state
 
         self.start_time = self.last_state.time + 1
@@ -67,12 +88,12 @@ class MotionSegment(ABC):
         self.built = False
 
     # makes the time positive
-    def normalizeSegmTime(self, time: int):
+    def normalize_segm_time(self, time: int):
         if time < 0: time = self.total_time + time - 1
 
         return time
 
-    def trajTime_2_segmTime(self, time: int):
+    def traj_time_to_segm_time(self, time: int):
         return time - self.start_time
 
 
@@ -85,8 +106,8 @@ class MotionSegment(ABC):
 
         for profile in self.profiles:
             while not profile.FINISHED_ms(t):
-                profile_state = profile.getStateMs(t)
-                self.states.append(self.motionFromProfileState(t, profile_state))
+                profile_state = profile.get_state_ms(t)
+                self.states.append(self.motion_from_profile_state(t, profile_state))
                 t += 1
 
         # check for an empty segment        
@@ -100,7 +121,7 @@ class MotionSegment(ABC):
 
 
     @abstractmethod
-    def getAction(self) -> MotionAction:
+    def get_action(self) -> MotionAction:
         pass
 
     @abstractmethod
@@ -108,25 +129,25 @@ class MotionSegment(ABC):
         pass
     
     @abstractmethod
-    def motionFromProfileState(self, t: int, profile_state: ProfileState) -> MotionState:
+    def motion_from_profile_state(self, t: int, profile_state: ProfileState) -> MotionState:
         pass
 
     @abstractmethod
-    def addConstraintsSegmTime(self, time: int, constraints2d: Constraints2D, auto_build: bool = True):
+    def add_constraints_segm_time(self, time: int, constraints2d: Constraints2D, auto_build: bool = True):
         pass
 
-    def addConstraintsTrajTime(self, time: int, constraints2d: Constraints2D, auto_build: bool = True):
-        self.addConstraintsSegmTime(self.trajTime_2_segmTime(time), constraints2d, auto_build)
+    def add_constraints_traj_time(self, time: int, constraints2d: Constraints2D, auto_build: bool = True):
+        self.add_constraints_segm_time(self.traj_time_to_segm_time(time), constraints2d, auto_build)
 
 
 
-    def interruptTrajTime(self, time: int):
-        self.interruptSegmTime(self.trajTime_2_segmTime(time))
+    def interrupt_traj_time(self, time: int):
+        self.interrupt_segm_time(self.traj_time_to_segm_time(time))
 
-    def interruptSegmTime(self, time: int):
+    def interrupt_segm_time(self, time: int):
         self.states = self.states[:time]
         
-        # be sure you ensure continuity, add an additional 0 speed state
+        # to ensure continuity, add an additional 0 speed state
         self.states.append(MotionState(time = self.states[-1].time + 1,
                                        field_vel = ChassisState(),
                                        displacement = self.states[-1].displacement,
@@ -134,26 +155,26 @@ class MotionSegment(ABC):
 
 
 
-    def getTrajTime(self, time: int) -> MotionState:
-        return self.getSegmTime(self.trajTime_2_segmTime(time))
+    def get_traj_time(self, time: int) -> MotionState:
+        return self.get_segm_time(self.traj_time_to_segm_time(time))
     
-    def getSegmTime(self, time: int) -> MotionState:
+    def get_segm_time(self, time: int) -> MotionState:
         if not self.built:
             print("\n\nplease generate the states of this segment first")
             return MotionState()
         
-        try: return self.states[self.normalizeSegmTime(time)]
+        try: return self.states[self.normalize_segm_time(time)]
         except: return None
     
 
 
-    def timeInSegmentSegmTime(self, time: int) -> bool:
+    def time_in_segment_segm_time(self, time: int) -> bool:
         if time is None: return False
 
-        return inOpenInterval(self.normalizeSegmTime(time), 0, len(self.states) - 1)
+        return in_open_interval(self.normalize_segm_time(time), 0, len(self.states) - 1)
     
-    def timeInSegmentTrajTime(self, time: int) -> bool:
-        return self.timeInSegmentSegmTime(self.trajTime_2_segmTime(time))
+    def time_in_segment_traj_time(self, time: int) -> bool:
+        return self.time_in_segment_segm_time(self.traj_time_to_segm_time(time))
 
 
 
@@ -164,7 +185,7 @@ class MotionSegment(ABC):
     
         return self.states
     
-    def graphMotionStates(self, atr: str, second_atr: str = None):
+    def graph_motion_states(self, atr: str, second_atr: str = None):
         if not self.built:
             print("\n\ncan't graph the states without generating them")
             return None
@@ -192,12 +213,12 @@ class MotionSegment(ABC):
         mplt.scatter(time, value, color = 'red', s = 1)
         mplt.show()
 
-    def stateFromPureLinearSegment(self, state: MotionState):
+    def state_from_pure_linear_segment(self, state: MotionState):
         return state.velocities.ANG_VEL == 0
     
-    def stateFromPureAngularSegment(self, state: MotionState):
-        return state.velocities.VEL.isEmpty()
+    def state_from_pure_angular_segment(self, state: MotionState):
+        return state.velocities.VEL.is_zero()
     
-    def stateFromLinearAndAngularSegment(self, state: MotionState):
-        return not (state.velocities.ANG_VEL == 0 or state.velocities.VEL.isEmpty())
+    def state_from_linear_and_angular_segment(self, state: MotionState):
+        return not (state.velocities.ANG_VEL == 0 or state.velocities.VEL.is_zero())
     

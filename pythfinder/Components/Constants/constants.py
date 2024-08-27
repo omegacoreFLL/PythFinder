@@ -1,5 +1,6 @@
 from pythfinder.Trajectory.Control.Controllers.PIDCoefficients import *
 from pythfinder.Components.BetterClasses.booleanEx import *
+from pythfinder.Components.BetterClasses.cursorEx import *
 from pythfinder.Components.Constants.screenSize import *
 from pythfinder.Components.BetterClasses.mathEx import *
 from pythfinder.Trajectory.constraints import *
@@ -23,15 +24,13 @@ import os
 device_relative_path = os.path.join(os.path.dirname(__file__), '..', '..', 'Images')
 
 screenshot_path = os.path.join(device_relative_path, 'Screenshots\\')
+default_robot_image_source = os.path.join(device_relative_path, 'Robot\\fll_robot2.png')
 
-default_robot_image_name = 'fll_robot'
-default_robot_image_path = 'Robot\\'
-default_robot_image_extension = 'png'
-default_robot_image_source = os.path.join(device_relative_path, 'Robot\\fll_robot.png')
+
 
 default_robot_scaling_factor = 1
-default_robot_height_cm = 20
-default_robot_width_cm = 15 
+default_robot_height_cm = 19
+default_robot_width_cm = 14
 default_robot_real_max_velocity = 27.7 # cm/s
 default_max_power = 100 # motor dc input
 
@@ -58,6 +57,8 @@ default_erase_trail = True
 default_joystick_enabled = True
 default_freeze_trail = False
 default_velocity_vector = False
+default_hand_drawing = False
+default_drawing_visible = True
 
 default_kP_joystick_head = 6
 default_kI_joystick_head = 0
@@ -83,10 +84,12 @@ default_backing_distance = 1
 
 
 if default_system_font not in pygame.font.get_fonts():
+    font_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'Font'))
+
     print("\n\nunable to find the default font '{0}'.".format(default_system_font))
     print("\nplease install the font from the files provided in the root")
-    print("library project or from the following link:")
-    print("      https://www.dafont.com/graffiti-youth.font")
+    print("library project: ")
+    print(f"        \"{font_path}\"")
     print("\n\n")
     raise Exception("FONT NOT FOUND")
 
@@ -129,33 +132,24 @@ class Constants():
                  joystick_enabled: bool = default_joystick_enabled,
                  freeze_trail: bool = default_freeze_trail,
                  velocity_vector: bool = default_velocity_vector,
+                 hand_drawing: bool = default_hand_drawing,
+                 drawing_visible: bool = default_drawing_visible,
 
                  screen_size: ScreenSize = ScreenSize(),
                  constraints2d: Constraints2D = Constraints2D(),
-                 kinematics: Kinematics = None,
+                 kinematics: Kinematics | None = None,
                  
-                 __reset_buttons_default: bool = False):
+                 __reset_buttons_default: bool = False,
+                 __cursor: CursorEx | None = None):
+        
         
         self.recalculate = BooleanEx(False)
         self.reset_buttons_default = __reset_buttons_default
-
-        self.rb = draw_robot_border
-        self.fc = field_centric
-        self.sb = use_screen_border
-        self.me = menu_entered
-        self.hs = head_selection
-        self.f = forwards
-        self.et = erase_trail
-        self.je = joystick_enabled
-        self.ft = freeze_trail
-        self.vv = velocity_vector
+        self.cursor = CursorEx() if __cursor is None else __cursor
 
         self.PIXELS_2_DEC = pixels_to_dec
         self.FPS = fps
 
-        self.ROBOT_IMG_NAME = default_robot_image_name
-        self.ROBOT_IMG_EX = default_robot_image_extension
-        self.ROBOT_IMG_PATH = default_robot_image_path
         self.ROBOT_IMG_SOURCE = robot_img_source
 
         self.ROBOT_SCALE = robot_scale
@@ -209,106 +203,12 @@ class Constants():
         self.JOYSTICK_ENABLED = BooleanEx(joystick_enabled)
         self.FREEZE_TRAIL = BooleanEx(freeze_trail)
         self.VELOCITY_VECTOR = BooleanEx(velocity_vector)
+        self.HAND_DRAWING = BooleanEx(hand_drawing)
+        self.DRAWING_VISIBLE = BooleanEx(drawing_visible)
 
-
-
-    #resets all the values to default
-    def default(self):
-        self.reset_buttons_default = False
-
-        self.PIXELS_2_DEC = default_pixels_to_decimeters
-        self.FPS = default_frame_rate
-
-        self.ROBOT_IMG_NAME = default_robot_image_name
-        self.ROBOT_IMG_EX = default_robot_image_extension
-        self.ROBOT_IMG_PATH = default_robot_image_path
-        self.updateRobotImgSource()
-
-        self.ROBOT_SCALE = default_robot_scaling_factor
-        self.ROBOT_WIDTH = default_robot_width_cm
-        self.ROBOT_HEIGHT = default_robot_height_cm
-
-        self.TEXT_COLOR = default_text_color
-        self.TEXT_FONT = default_system_font
-
-        self.MAX_TRAIL_LEN = default_max_trail_length
-        self.MAX_TRAIL_SEGMENT_LEN = default_max_segment_length
-
-        self.DRAW_TRAIL_THRESHOLD = default_drawing_trail_threshold
-        self.TRAIL_COLOR = default_trail_color
-        self.TRAIL_LOOPS = default_trail_loops
-        self.TRAIL_WIDTH = default_trail_width
-
-        self.BACKGROUND_COLOR = default_background_color
-        self.AXIS_COLOR = default_coordinate_system_color
-        self.GRID_COLOR = default_grid_color
-
-        self.WIDTH_PERCENT = default_width_percent
-
-        self.BACKING_DISTANCE = default_backing_distance
-
-        self.ARROW_OFFSET = default_positive_direction_arrow_offset
-        self.UNIT_SIZE = default_unit_size
-
-        self.TIME_UNTIL_FADE = default_time_until_fade
-        self.FADE_PERCENT = default_fade_percent
-
-        self.REAL_MAX_VEL = default_robot_real_max_velocity
-        self.MAX_POWER = default_max_power
-
-        self.COEFF_JOY_HEAD = PIDCoefficients(kP = default_kP_joystick_head,
-                                              kI = default_kI_joystick_head,
-                                              kD = default_kD_joystick_head)
-
-        self.ROBOT_BORDER = BooleanEx(default_draw_robot_border)
-        self.FIELD_CENTRIC = BooleanEx(default_field_centric)
-        self.SCREEN_BORDER = BooleanEx(default_use_screen_border)
-        self.MENU_ENTERED = BooleanEx(default_menu_entered)
-        self.HEAD_SELECTION = BooleanEx(default_head_selection)
-        self.FORWARDS = BooleanEx(default_forwards)
-        self.ERASE_TRAIL = BooleanEx(default_erase_trail)
-        self.JOYSTICK_ENABLED = BooleanEx(default_joystick_enabled)
-        self.FREEZE_TRAIL = BooleanEx(default_freeze_trail)
-        self.VELOCITY_VECTOR = BooleanEx(default_velocity_vector)
-
-        self.screen_size = ScreenSize()
-        self.constraints = Constraints2D()
-        self.kinematics = TankKinematics(default_track_width, center_offset = Point(-2, 0))
-    
-    def updateRobotImgSource(self, 
-                             path = None, 
-                             name = None, 
-                             extension = None):
-        
-        if path is not None:
-            self.ROBOT_IMG_PATH = path
-        if name is not None:
-            self.ROBOT_IMG_NAME = name
-        if extension is not None:
-            self.ROBOT_IMG_EX = extension
-
-        self.ROBOT_IMG_SOURCE = os.path.join(device_relative_path, "{0}{1}.{2}".format(self.ROBOT_IMG_PATH, 
-                                                    self.ROBOT_IMG_NAME, 
-                                                    self.ROBOT_IMG_EX))
-          
-    def pixelsToCm(self, 
-                   val: int):
-        
-        return val / self.PIXELS_2_DEC * 10
-
-    def cmToPixels(self, 
-                   val: int | float):
-        
-        return val * self.PIXELS_2_DEC / 10
-    
-    def pixelsToCmPoint(self, 
-                        point: Point):
-        
-        return Point(self.pixelsToCm(point.x), self.pixelsToCm(point.y))
-    
     def copy(self):
 
-        new = Constants(
+        return Constants(
             self.PIXELS_2_DEC,
             self.FPS,
             self.ROBOT_IMG_SOURCE,
@@ -334,37 +234,27 @@ class Constants():
             self.REAL_MAX_VEL,
             self.MAX_POWER,
 
-            self.rb,
-            self.fc,
-            self.sb,
-            self.me,
-            self.hs,
-            self.f,
-            self.et,
-            self.je,
-            self.ft,
-            self.vv,
+            self.ROBOT_BORDER.get(),
+            self.FIELD_CENTRIC.get(),
+            self.SCREEN_BORDER.get(),
+            self.MENU_ENTERED.get(),
+            self.HEAD_SELECTION.get(),
+            self.FORWARDS.get(),
+            self.ERASE_TRAIL.get(),
+            self.JOYSTICK_ENABLED.get(),
+            self.FREEZE_TRAIL.get(),
+            self.VELOCITY_VECTOR.get(),
+            self.HAND_DRAWING.get(),
+            self.DRAWING_VISIBLE.get(),
 
             self.screen_size,
             self.constraints,
             self.kinematics,
 
-            self.reset_buttons_default
+            self.reset_buttons_default,
+            self.cursor
         )
-
-        new.ROBOT_BORDER.set(self.ROBOT_BORDER.get())
-        new.FIELD_CENTRIC.set(self.FIELD_CENTRIC.get())
-        new.SCREEN_BORDER.set(self.SCREEN_BORDER.get())
-        new.MENU_ENTERED.set(self.MENU_ENTERED.get())
-        new.HEAD_SELECTION.set(self.HEAD_SELECTION.get())
-        new.FORWARDS.set(self.FORWARDS.get())
-        new.ERASE_TRAIL.set(self.ERASE_TRAIL.get())
-        new.JOYSTICK_ENABLED.set(self.JOYSTICK_ENABLED.get())
-        new.FREEZE_TRAIL.set(self.FREEZE_TRAIL.get())
-        new.VELOCITY_VECTOR.set(self.VELOCITY_VECTOR.get())
-
-        return new
-    
+      
     def check(self, other):
         if isinstance(other, Constants):
             dif = 0
@@ -440,10 +330,10 @@ class Constants():
             if not self.MAX_POWER == other.MAX_POWER:
                 self.MAX_POWER = other.MAX_POWER
                 dif += 1
-            if not self.screen_size.isLike(other.screen_size):
+            if not self.screen_size.is_like(other.screen_size):
                 self.screen_size = other.screen_size.copy()
                 dif += 1
-            if not self.constraints.isLike(other.constraints):
+            if not self.constraints.is_like(other.constraints):
                 self.constraints = other.constraints.copy()
                 dif += 1
 
@@ -478,26 +368,48 @@ class Constants():
             if not self.VELOCITY_VECTOR.get() == other.VELOCITY_VECTOR.get():
                 self.VELOCITY_VECTOR.set(other.VELOCITY_VECTOR.get())
                 dif += 1
-
+            if not self.HAND_DRAWING.get() == other.HAND_DRAWING.get():
+                self.HAND_DRAWING.set(other.HAND_DRAWING.get())
+                dif += 1
+            if not self.DRAWING_VISIBLE.get() == other.DRAWING_VISIBLE.get():
+                self.DRAWING_VISIBLE.set(other.DRAWING_VISIBLE.get())
+                dif += 1
 
             if not dif == 0:
                 self.reset_buttons_default = other.reset_buttons_default
                 self.kinematics = other.kinematics.copy()
                 self.recalculate.set(True)
     
-    def checkScreenSize(self, actual_screen_size: tuple):
+
+
+    def pixels_to_cm(self, val: int):
+        return val / self.PIXELS_2_DEC * 10
+
+    def cm_to_pixels(self, val: int | float):
+        return val * self.PIXELS_2_DEC / 10
+    
+    def pixels_to_cm_point(self, point: Point):
+        
+        return Point(self.pixels_to_cm(point.x), self.pixels_to_cm(point.y))
+
+
+
+    def check_screen_size(self, actual_screen_size: tuple):
         if not (self.screen_size.width == actual_screen_size[0] 
                                       and
                 self.screen_size.height == actual_screen_size[1]):
-            if self.recalculate.compare(True):
+            
+            if self.recalculate.compare():
                 return True
-
+            
+            self.screen_size.set(actual_screen_size[0], actual_screen_size[1])
             self.recalculate.set(True)
-            return False
 
-        return True
+            return True
+
+        return False
     
-    def matchScreenSize(self, image: pygame.Surface, width):
+    def resize_image_to_fit_screen_width(self, image: pygame.Surface, width):
         size_multiplier = self.WIDTH_PERCENT / 100 * width / self.screen_size.MAX_WIDTH
 
         return pygame.transform.scale(image, 
@@ -505,22 +417,9 @@ class Constants():
             size_multiplier * image.get_height()))
 
 
-def point2Tuple(point: Point):
-    return (point.x, point.y)
 
-def tuple2Point(tuple: tuple):
-    return Point(tuple[0], tuple[1])
 
-def percent2Alpha(value):
-    return value * 2.25
-
-def distance(p1: tuple, p2: tuple):
-    return hypot(p2[0] - p1[0], p2[1] - p1[1])
-
-def exists(value):
-    return value is not None
-
-def getRelativeFromAbsolutePath(path: str) -> str:
+def get_relative_from_absolute_path(path: str) -> str:
     return os.path.join(device_relative_path, path)
 
 
@@ -631,15 +530,15 @@ img_selected_menu_button_source = "Menu/Main/selected_menu_button.png"
 img_selected_home_button_source = "Menu/Main/selected_menu_home_button.png"
 
 
+img_draw_button_source = "Menu/Selection/draw_button.png"
 img_other_button_source = "Menu/Selection/other_button.png"
 img_robot_button_source = "Menu/Selection/robot_button.png"
-img_trail_button_source = "Menu/Selection/trail_button.png"
 img_selection_menu_source = "Menu/Selection/selection_menu.png"
 img_pathing_button_source = "Menu/Selection/pathing_button.png"
 img_interface_button_source = "Menu/Selection/interface_button.png"
+img_selected_draw_button_source = "Menu/Selection/selected_draw_button.png"
 img_selected_other_button_source = "Menu/Selection/selected_other_button.png"
 img_selected_robot_button_source = "Menu/Selection/selected_robot_button.png"
-img_selected_trail_button_source = "Menu/Selection/selected_trail_button.png"
 img_selected_pathing_button_source = "Menu/Selection/selected_pathing_button.png"
 img_selected_interface_button_source = "Menu/Selection/selected_interface_button.png"
 
@@ -673,10 +572,10 @@ img_screen_border_off_source = "Menu/Other/ScreenBorder/screen_border_off.png"
 img_selected_screen_border_on_source = "Menu/Other/ScreenBorder/selected_screen_border_on.png"
 img_selected_screen_border_off_source = "Menu/Other/ScreenBorder/selected_screen_border_off.png"
 
-img_draw_table_on_source = "Menu/Other/DrawTable/draw_table_on.png"
-img_draw_table_off_source = "Menu/Other/DrawTable/draw_table_off.png"
-img_selected_draw_table_on_source = "Menu/Other/DrawTable/selected_draw_table_on.png"
-img_selected_draw_table_off_source = "Menu/Other/DrawTable/selected_draw_table_off.png"
+img_hand_drawing_on_source = "Menu/Other/HandDrawing/hand_drawing_on.png"
+img_hand_drawing_off_source = "Menu/Other/HandDrawing/hand_drawing_off.png"
+img_selected_hand_drawing_on_source = "Menu/Other/HandDrawing/selected_hand_drawing_on.png"
+img_selected_hand_drawing_off_source = "Menu/Other/HandDrawing/selected_hand_drawing_off.png"
 
 
 img_scale_source = "Menu/Robot/scale.png"
@@ -694,6 +593,13 @@ img_robot_indicator_source = "Menu/Robot/robot_indicator.png"
 img_other_indicator_source = "Menu/Other/other_indicator.png"
 
 
+img_line_cursor_source = "Cursor/line_cursor.png"
+img_circle_cursor_source = "Cursor/circle_cursor.png"
+img_eraser_cursor_source = "Cursor/eraser_cursor.png"
+img_triangle_cursor_source = "Cursor/triangle_cursor.png"
+img_rectangle_cursor_source = "Cursor/rectangle_cursor.png"
+
+
 img_forwards = pygame.image.load(os.path.join(device_relative_path, img_forwards_source))
 img_main_menu = pygame.image.load(os.path.join(device_relative_path, img_main_menu_source))
 img_backwards = pygame.image.load(os.path.join(device_relative_path, img_backwards_source))
@@ -707,15 +613,15 @@ img_selected_menu_button = pygame.image.load(os.path.join(device_relative_path, 
 img_selected_home_button = pygame.image.load(os.path.join(device_relative_path, img_selected_home_button_source))
 
 
+img_draw_button = pygame.image.load(os.path.join(device_relative_path, img_draw_button_source))
 img_other_button = pygame.image.load(os.path.join(device_relative_path, img_other_button_source))
 img_robot_button = pygame.image.load(os.path.join(device_relative_path, img_robot_button_source))
-img_trail_button = pygame.image.load(os.path.join(device_relative_path, img_trail_button_source))
 img_pathing_button= pygame.image.load(os.path.join(device_relative_path, img_pathing_button_source))
 img_selection_menu = pygame.image.load(os.path.join(device_relative_path, img_selection_menu_source))
 img_interface_button = pygame.image.load(os.path.join(device_relative_path, img_interface_button_source))
+img_selected_draw_button = pygame.image.load(os.path.join(device_relative_path, img_selected_draw_button_source))
 img_selected_other_button= pygame.image.load(os.path.join(device_relative_path, img_selected_other_button_source))
 img_selected_robot_button = pygame.image.load(os.path.join(device_relative_path, img_selected_robot_button_source))
-img_selected_trail_button = pygame.image.load(os.path.join(device_relative_path, img_selected_trail_button_source))
 img_selected_pathing_button = pygame.image.load(os.path.join(device_relative_path, img_selected_pathing_button_source))
 img_selected_interface_button= pygame.image.load(os.path.join(device_relative_path, img_selected_interface_button_source))
 
@@ -745,10 +651,10 @@ img_screen_border_off = pygame.image.load(os.path.join(device_relative_path, img
 img_selected_screen_border_on = pygame.image.load(os.path.join(device_relative_path, img_selected_screen_border_on_source))
 img_selected_screen_border_off = pygame.image.load(os.path.join(device_relative_path, img_selected_screen_border_off_source))
 
-img_draw_table_on = pygame.image.load(os.path.join(device_relative_path, img_draw_table_on_source))
-img_draw_table_off = pygame.image.load(os.path.join(device_relative_path, img_draw_table_off_source))
-img_selected_draw_table_on = pygame.image.load(os.path.join(device_relative_path, img_selected_draw_table_on_source))
-img_selected_draw_table_off = pygame.image.load(os.path.join(device_relative_path, img_selected_draw_table_off_source))
+img_hand_drawing_on = pygame.image.load(os.path.join(device_relative_path, img_hand_drawing_on_source))
+img_hand_drawing_off = pygame.image.load(os.path.join(device_relative_path, img_hand_drawing_off_source))
+img_selected_hand_drawing_on = pygame.image.load(os.path.join(device_relative_path, img_selected_hand_drawing_on_source))
+img_selected_hand_drawing_off = pygame.image.load(os.path.join(device_relative_path, img_selected_hand_drawing_off_source))
 
 img_scale = pygame.image.load(os.path.join(device_relative_path, img_scale_source))
 img_width = pygame.image.load(os.path.join(device_relative_path, img_width_source))
@@ -763,6 +669,12 @@ img_selected_robot_image_path = pygame.image.load(os.path.join(device_relative_p
 
 img_robot_indicator = pygame.image.load(os.path.join(device_relative_path, img_robot_indicator_source))
 img_other_indicator = pygame.image.load(os.path.join(device_relative_path, img_other_indicator_source))
+
+img_line_cursor = pygame.image.load(os.path.join(device_relative_path, img_line_cursor_source))
+img_circle_cursor = pygame.image.load(os.path.join(device_relative_path, img_circle_cursor_source))
+img_eraser_cursor = pygame.image.load(os.path.join(device_relative_path, img_eraser_cursor_source))
+img_triangle_cursor = pygame.image.load(os.path.join(device_relative_path, img_triangle_cursor_source))
+img_rectangle_cursor = pygame.image.load(os.path.join(device_relative_path, img_rectangle_cursor_source))
 
 
 
@@ -780,20 +692,20 @@ img_selected_menu_button = pygame.transform.scale(img_selected_menu_button, (63,
 
 img_selection_menu = pygame.transform.scale(img_selection_menu, (279, 516))
 
-img_robot_button = pygame.transform.scale(img_robot_button, (176, 51))
-img_selected_robot_button = pygame.transform.scale(img_selected_robot_button, (176, 51))
+img_robot_button = pygame.transform.scale(img_robot_button, (176, 78))
+img_selected_robot_button = pygame.transform.scale(img_selected_robot_button, (176, 78))
 
-img_interface_button = pygame.transform.scale(img_interface_button, (245, 51))
-img_selected_interface_button = pygame.transform.scale(img_selected_interface_button, (245, 51))
+img_interface_button = pygame.transform.scale(img_interface_button, (245, 74))
+img_selected_interface_button = pygame.transform.scale(img_selected_interface_button, (245, 74))
 
-img_trail_button = pygame.transform.scale(img_trail_button, (175, 51))
-img_selected_trail_button = pygame.transform.scale(img_selected_trail_button, (175, 51))
+img_draw_button = pygame.transform.scale(img_draw_button, (160, 57))
+img_selected_draw_button = pygame.transform.scale(img_selected_draw_button, (160, 57))
 
-img_other_button = pygame.transform.scale(img_other_button, (185, 51))
-img_selected_other_button = pygame.transform.scale(img_selected_other_button, (185, 51))
+img_other_button = pygame.transform.scale(img_other_button, (185, 78))
+img_selected_other_button = pygame.transform.scale(img_selected_other_button, (185, 78))
 
-img_pathing_button = pygame.transform.scale(img_pathing_button, (248, 51))
-img_selected_pathing_button = pygame.transform.scale(img_selected_pathing_button, (248, 51))
+img_pathing_button = pygame.transform.scale(img_pathing_button, (244, 78))
+img_selected_pathing_button = pygame.transform.scale(img_selected_pathing_button, (244, 78))
 
 img_other_quadrant = pygame.transform.scale(img_other_quadrant, (310, 103))
 img_selected_none = pygame.transform.scale(img_selected_none, (230, 100))
@@ -814,10 +726,10 @@ img_screen_border_off = pygame.transform.scale(img_screen_border_off, (390, 110)
 img_selected_screen_border_on = pygame.transform.scale(img_selected_screen_border_on, (390, 110))
 img_selected_screen_border_off = pygame.transform.scale(img_selected_screen_border_off, (390, 110))
 
-img_draw_table_on = pygame.transform.scale(img_draw_table_on, (390, 110))
-img_draw_table_off = pygame.transform.scale(img_draw_table_off, (390, 110))
-img_selected_draw_table_on = pygame.transform.scale(img_selected_draw_table_on, (390, 110))
-img_selected_draw_table_off = pygame.transform.scale(img_selected_draw_table_off, (390, 110))
+img_hand_drawing_on = pygame.transform.scale(img_hand_drawing_on, (300, 90))
+img_hand_drawing_off = pygame.transform.scale(img_hand_drawing_off, (300, 90))
+img_selected_hand_drawing_on = pygame.transform.scale(img_selected_hand_drawing_on, (300, 90))
+img_selected_hand_drawing_off = pygame.transform.scale(img_selected_hand_drawing_off, (300, 90))
 
 img_robot_indicator = pygame.transform.scale(img_robot_indicator, (170, 95))
 img_other_indicator = pygame.transform.scale(img_other_indicator, (170, 95))
@@ -835,13 +747,19 @@ img_selected_height = pygame.transform.scale(img_selected_height, (175, 100))
 img_scale = pygame.transform.scale(img_scale, (170, 85))
 img_selected_scale = pygame.transform.scale(img_selected_scale, (170, 85))
 
+img_line_cursor = pygame.transform.scale(img_line_cursor, (32, 32))
+img_circle_cursor = pygame.transform.scale(img_circle_cursor, (32, 32))
+img_eraser_cursor = pygame.transform.scale(img_eraser_cursor, (32, 32))
+img_triangle_cursor = pygame.transform.scale(img_triangle_cursor, (32, 32))
+img_rectangle_cursor = pygame.transform.scale(img_rectangle_cursor, (32, 32))
+
 
 
 # FLL
 fll_table_width_cm = 227  # og - 93in
 fll_table_height_cm = 120 # og - 45in
 
-fll_master_piece_table_source = 'Field/FLL_table_MP.jpg'
+fll_master_piece_table_source = 'Field\\FLL_table_MP.jpg'
 fll_master_piece_table_image = pygame.image.load(os.path.join(device_relative_path, fll_master_piece_table_source))
 
 
@@ -864,7 +782,7 @@ ftc_center_stage_field_image = pygame.image.load(os.path.join(device_relative_pa
 
 
 default_presets = [["FLL Table", 
-                    Constants(screen_size = ScreenSize(fll_table_screen_width, fll_table_screen_height),
+                    Constants(screen_size = ScreenSize(FLL_TABLE_SCREEN_WIDTH, FLL_TABLE_SCREEN_HEIGHT),
                                                 pixels_to_dec = 60,
                                                 trail_width = 7,
                                                 field_centric = True,
@@ -874,7 +792,7 @@ default_presets = [["FLL Table",
                     1],
 
                     ["FTC Field",
-                     Constants(screen_size = ScreenSize(ftc_field_screen_width, ftc_field_screen_height),
+                     Constants(screen_size = ScreenSize(FTC_FIELD_SCREEN_WIDTH, FTC_FIELD_SCREEN_HEIGHT),
                                                 pixels_to_dec = 27,
                                                 trail_width = 5,
                                                 robot_img_source = ftc_robot_image_relative_source,
@@ -885,9 +803,9 @@ default_presets = [["FLL Table",
                                                 real_max_velocity = ftc_real_max_velocity,
                                                 max_power = ftc_max_power,
                                                 constraints2d = Constraints2D(linear = Constraints(80, 60, 60),
-                                                                              angular = Constraints(toRadians(100),
-                                                                                                    toRadians(120),
-                                                                                                    toRadians(120)),
+                                                                              angular = Constraints(math.radians(100),
+                                                                                                    math.radians(120),
+                                                                                                    math.radians(120)),
                                                                               track_width = ftc_robot_image_width_cm - 2),
                                                                               kinematics = MecanumKinematics(ftc_robot_image_width_cm - 2,
                                                                                                              center_offset = Point(5, 0))),

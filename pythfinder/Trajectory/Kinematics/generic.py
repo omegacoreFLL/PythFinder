@@ -14,7 +14,7 @@ from typing import Tuple
 #     (https://en.wikipedia.org/wiki/Differential_wheeled_robot)
 
 
-def kinematicOptions():
+def getKinematicModelOptions():
     print("\n\nchoose from the following kinematic models: ")
     print(list(KinematicsType.__members__.keys()))
 
@@ -40,10 +40,10 @@ class ChassisState():
         self.VEL = velocity
         self.ANG_VEL = angular_velocity
     
-    def getVelocityMagnitude(self):
+    def get_velocity_magnitude(self):
         return self.VEL.hypot()
 
-    def isLike(self, other):
+    def is_like(self, other):
         return (
             self.VEL.x == other.VEL.x
                         and
@@ -58,7 +58,7 @@ class ChassisState():
             angular_velocity = self.ANG_VEL + other.ANG_VEL
         )
 
-    def fieldToRobot(self, robot_pose: Pose):
+    def field_to_robot(self, robot_pose: Pose):
         theta = robot_pose.rad()
 
         x = math.cos(theta) * self.VEL.x + math.sin(theta) * self.VEL.y
@@ -69,7 +69,7 @@ class ChassisState():
 
         return ChassisState(Point(x, y), self.ANG_VEL)
 
-    def robotToField(self, robot_pose: Pose):
+    def robot_to_field(self, robot_pose: Pose):
         theta = robot_pose.rad()
         
         x = math.cos(theta) * self.VEL.x - math.sin(theta) * self.VEL.y
@@ -114,7 +114,7 @@ class Kinematics(ABC):
         pass
 
     @abstractmethod
-    def getType(self) -> ChassisType:
+    def get_type(self) -> ChassisType:
         pass
 
     @abstractmethod

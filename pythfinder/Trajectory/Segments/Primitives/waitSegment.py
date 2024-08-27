@@ -21,12 +21,12 @@ class WaitSegment(MotionSegment):
         self.end_time = self.start_time + self.total_time - 1
     
 
-    def addConstraintsSegmTime(self, time: int, constraints2d: Constraints2D, auto_build: bool = True):
+    def add_constraints_segm_time(self, time: int, constraints2d: Constraints2D, auto_build: bool = True):
         # what did you expect? Sure, speed constraints when staying in one place, sure
         # go to sleep man
         pass
 
-    def motionFromProfileState(self, t: int, profile_state: ProfileState) -> MotionState:
+    def motion_from_profile_state(self, t: int, profile_state: ProfileState) -> MotionState:
         pass # no profile heh
 
 
@@ -48,13 +48,13 @@ class WaitSegment(MotionSegment):
     
 
 
-    def getAction(self) -> MotionAction:
+    def get_action(self) -> MotionAction:
         return MotionAction.WAIT
 
     def copy(self, last_state: MotionState, constraints2d: Constraints2D):
         return WaitSegment(last_state,
                            self.ms)
     
-    def addMS(self, ms: int):
+    def add_ms(self, ms: int):
         return WaitSegment(self.last_state,
                            self.ms + ms)

@@ -1,6 +1,7 @@
+from pythfinder.Components.BetterClasses.edgeDetectorEx import *
 from pythfinder.Components.BetterClasses.booleanEx import *
-from pythfinder.Trajectory.constraints import *
 from pythfinder.Components.Constants.constants import *
+from pythfinder.Trajectory.constraints import *
 from pythfinder.Components.trail import *
 
 from pythfinder.Trajectory.Control.Controllers.PIDController import *
@@ -54,12 +55,12 @@ class Robot():
         self.last_rotation = Point()
 
         self.is_stopped = BooleanEx(True)
-        self.mouse_locked = BooleanEx(False)
+        self.mouse_locked = EdgeDetectorEx()
         self.head_controller = PIDController(constants.COEFF_JOY_HEAD)
 
         self.constants = constants
 
-        self.window_pose = self.toWindowCoords(self.pose)
+        self.window_pose = self.to_window_coords(self.pose)
         
         self.trail = Trail(self.constants)
         self.constraints = self.constants.constraints.copy()
@@ -73,7 +74,7 @@ class Robot():
         self.pose_font = pygame.font.SysFont(self.constants.TEXT_FONT, 300) # this big because it will resize
         self.image = pygame.image.load(self.constants.ROBOT_IMG_SOURCE)     #   with the screen
 
-        self.getRobotSizeInPixels()
+        self.get_robot_size_in_pixels()
 
         #resize to match unit measure
         self.image = pygame.transform.scale(self.image, 
@@ -92,39 +93,39 @@ class Robot():
         self.trail.recalculate()
 
 
-    def getRobotSizeInPixels(self):
-        self.width_in_pixels = self.constants.ROBOT_SCALE * self.constants.cmToPixels(self.constants.ROBOT_WIDTH)
-        self.height_in_pixels =  self.constants.ROBOT_SCALE * self.constants.cmToPixels(self.constants.ROBOT_HEIGHT)
+    def get_robot_size_in_pixels(self):
+        self.width_in_pixels = self.constants.ROBOT_SCALE * self.constants.cm_to_pixels(self.constants.ROBOT_WIDTH)
+        self.height_in_pixels =  self.constants.ROBOT_SCALE * self.constants.cm_to_pixels(self.constants.ROBOT_HEIGHT)
 
-    def getWheelSpeeds(self):
+    def get_wheel_speeds(self):
         return self.kinematics.inverse(self.chassis_state)
 
-    def toMotorPower(self, value):
+    def to_motor_power(self, value):
         return round(value * self.constants.MAX_POWER / self.constants.REAL_MAX_VEL, 2)
 
-    def toFieldCoords(self, pose: Pose):
+    def to_field_coords(self, pose: Pose):
         return Pose((self.constants.screen_size.half_h - pose.y) * 10 / self.constants.PIXELS_2_DEC, 
                     (pose.x - self.constants.screen_size.half_w) * 10 / self.constants.PIXELS_2_DEC, 
-                    normalizeDegrees(pose.head - 90))
+                    normalize_degres(pose.head - 90))
     
-    def toWindowCoords(self, pose: Pose):
+    def to_window_coords(self, pose: Pose):
         return Pose(self.constants.screen_size.half_w + pose.y * self.constants.PIXELS_2_DEC / 10, 
                     self.constants.screen_size.half_h - pose.x * self.constants.PIXELS_2_DEC / 10, 
-                    normalizeDegrees(pose.head + 90))
+                    normalize_degres(pose.head + 90))
     
-    def toFieldPoint(self, point: Point):
+    def to_field_point(self, point: Point):
         return Point((self.constants.screen_size.half_h - point.y) * 10 / self.constants.PIXELS_2_DEC, 
                 (point.x - self.constants.screen_size.half_w) * 10 / self.constants.PIXELS_2_DEC)
 
-    def toWindowPoint(self, point: Point):
+    def to_window_point(self, point: Point):
         return Point(self.constants.screen_size.half_w + point.y * self.constants.PIXELS_2_DEC / 10, 
                 self.constants.screen_size.half_h - point.x * self.constants.PIXELS_2_DEC / 10)
 
  
     # FALSE (field centric velocities) / TRUE (robot centric velocities)
-    def setVelocities(self, chassis_state: ChassisState, robot_centric: bool = False):
+    def set_velocities(self, chassis_state: ChassisState, robot_centric: bool = False):
         
-        if abs(chassis_state.getVelocityMagnitude()) < 0.01 and abs(chassis_state.ANG_VEL) < 0.01:
+        if abs(chassis_state.get_velocity_magnitude()) < 0.01 and abs(chassis_state.ANG_VEL) < 0.01:
             self.is_stopped.set(True)
         else: self.is_stopped.set(False)
 
@@ -132,17 +133,17 @@ class Robot():
         self.chassis_state = chassis_state
 
         if robot_centric:
-            self.chassis_state.robotToField(self.pose)
+            self.chassis_state.robot_to_field(self.pose)
 
-    def setPoseEstimate(self, pose: Pose):
-        self.pose = self.past_pose = Pose(pose.x, pose.y, normalizeDegrees(pose.head))
+    def set_pose_estimate(self, pose: Pose):
+        self.pose = self.past_pose = Pose(pose.x, pose.y, normalize_degres(pose.head))
         
-        self.window_pose = self.toWindowCoords(self.pose)
+        self.window_pose = self.to_window_coords(self.pose)
         self.target_head = self.pose.head
 
 
 
-    def zeroDistance(self):
+    def zero(self):
         self.distance = 0
 
 
@@ -156,11 +157,11 @@ class Robot():
         delta_y = self.chassis_state.VEL.y * time
 
         delta_head = math.degrees(self.chassis_state.ANG_VEL) * time
-        delta_distance = self.pose.distanceTo(self.past_pose) / 10 #dec
+        delta_distance = self.pose.distance_to(self.past_pose) / 10 #dec
 
         if self.constants.SCREEN_BORDER.compare():
-            next_pose = self.toWindowCoords(Pose(x + delta_x, y + delta_y, head + delta_head))
-            border_points = self.__findBorder(next_pose)
+            next_pose = self.to_window_coords(Pose(x + delta_x, y + delta_y, head + delta_head))
+            border_points = self.__find_border(next_pose)
             
             out_of_screen = True
 
@@ -191,54 +192,66 @@ class Robot():
         self.distance += delta_distance
 
         self.past_pose = self.pose
-        self.pose = Pose(x, y, normalizeDegrees(head))
+        self.pose = Pose(x, y, normalize_degres(head))
 
-        center_of_rotation = self.kinematics.center_offset.copy().negate().rotateMatrix(self.pose.rad())
-        self.window_pose = self.toWindowCoords(self.pose + center_of_rotation)
+        center_of_rotation = self.kinematics.center_offset.copy().negate().rotate_by(self.pose.rad())
+        self.window_pose = self.to_window_coords(self.pose + center_of_rotation)
 
 
 
-    def onScreen(self, screen: pygame.Surface):
-        self.__drawPose(screen)
-        self.__drawCursor(screen)
-        self.trail.drawTrail(screen, self.pose)
-        self.__drawRobot(screen)
+    def on_screen(self, screen: pygame.Surface):
+        self.__draw_pose(screen)
+        self.__draw_cursor(screen)
+        self.trail.draw_trail(screen, self.pose)
+        self.__draw_robot(screen)
         if self.constants.ROBOT_BORDER.compare():
-            self.__drawBorder(screen)
+            self.__draw_border(screen)
         if self.constants.VELOCITY_VECTOR.compare():
-            self.__drawVelocityVector(screen)
+            self.__draw_velocity_vector(screen)
         
 
 
 
-    def elapsed_time(self):
+    def elapsed_time(self) -> int:
         return pygame.time.get_ticks() - self.start_time
 
-    def cursorOver(self, cursor_point: Point):
-        rectangle_corners = pygame_vector_to_point(self.__findBorder(self.window_pose))
+    def is_cursor_over(self, cursor_point: Point) -> bool:
+        rectangle_corners = pygame_vector_to_point(self.__find_border(self.window_pose))
 
         return point_in_rectangle(cursor_point, rectangle_corners)
 
-    def updateCursorMove(self, clicked: bool, released: bool, cursor_point: Point):
-        if clicked and self.cursorOver(cursor_point):
+    def update_cursor_move(self, clicked: bool, released: bool, cursor_point: Point) -> None:
+        
+        
+        if clicked and self.is_cursor_over(cursor_point):
             self.mouse_locked.set(True)
-        
-        if released:
+        elif released:
             self.mouse_locked.set(False)
+        else: 
+            self.mouse_locked.set(self.mouse_locked.get())
+
+
+        self.mouse_locked.update()
+            
         
-        if self.mouse_locked.get():
-            new_pose = self.toFieldCoords(Pose(cursor_point.x, cursor_point.y, 0))
+        if self.mouse_locked.high:
+            new_pose = self.to_field_coords(Pose(cursor_point.x, cursor_point.y, 0))
             new_pose.head = self.pose.head
             self.target_head = self.pose.head
 
-            self.setPoseEstimate(new_pose)
+            self.set_pose_estimate(new_pose)
+        
+        elif self.mouse_locked.rising:
+            self.constants.cursor.apply_system(pygame.SYSTEM_CURSOR_HAND)  
+        elif self.mouse_locked.falling:
+            self.constants.cursor.throwback()
+            
 
 
 
-
-    def __drawRobot(self, screen: pygame.Surface):
+    def __draw_robot(self, screen: pygame.Surface) -> None:
         self.rotating_instance = pygame.transform.rotate(self.rotating_instance, 
-                        normalizeDegrees(360 - self.window_pose.head))
+                        normalize_degres(360 - self.window_pose.head))
 
         self.rectangle = self.rotating_instance.get_rect()
         self.rectangle.center = (self.window_pose.x, self.window_pose.y)
@@ -248,10 +261,10 @@ class Robot():
 
         self.rotating_instance = self.image
 
-    def __drawPose(self, screen: pygame.Surface):
+    def __draw_pose(self, screen: pygame.Surface) -> None:
         coords = self.pose_font.render("x: {:.2f}  y: {:.2f} h: {:.2f}".format(self.pose.x, self.pose.y, self.pose.head), 
                                 True, self.constants.TEXT_COLOR)
-        coords = self.constants.matchScreenSize(coords, self.constants.screen_size.width)
+        coords = self.constants.resize_image_to_fit_screen_width(coords, self.constants.screen_size.width)
 
         coords_rectangle = coords.get_rect()
         coords_rectangle.center = (self.__coords_width_offset_ratio * self.constants.screen_size.width - coords.get_width() / 2,
@@ -259,16 +272,16 @@ class Robot():
 
         screen.blit(coords, coords_rectangle)
     
-    def __drawBorder(self, screen: pygame.Surface):
-        pygame.draw.lines(screen, "yellow", True, self.__findBorder(self.window_pose), 3)
+    def __draw_border(self, screen: pygame.Surface) -> None:
+        pygame.draw.lines(screen, "yellow", True, self.__find_border(self.window_pose), 3)
     
-    def __drawCursor(self, screen: pygame.Surface):
+    def __draw_cursor(self, screen: pygame.Surface) -> None:
         x, y = pygame.mouse.get_pos()
-        to_field = self.toFieldPoint(Point(x, y)).tuple()
+        to_field = self.to_field_point(Point(x, y)).tuple()
 
         coords = self.pose_font.render("x: {:.2f}  y: {:.2f}".format(to_field[0], to_field[1]), 
                                 True, self.constants.TEXT_COLOR)
-        coords = self.constants.matchScreenSize(coords, self.constants.screen_size.width)
+        coords = self.constants.resize_image_to_fit_screen_width(coords, self.constants.screen_size.width)
         
         coords_rectangle = coords.get_rect()
         coords_rectangle.center = ((1 - self.__coords_width_offset_ratio) * self.constants.screen_size.width + coords.get_width() / 2, 
@@ -276,16 +289,16 @@ class Robot():
 
         screen.blit(coords, coords_rectangle)
 
-    def __drawVelocityVector(self, screen: pygame.Surface):
+    def __draw_velocity_vector(self, screen: pygame.Surface) -> None:
         x_vel, y_vel = self.chassis_state.VEL.tuple()
         
         x_point = self.pose.point() + Point(x = x_vel, y = 0)
         y_point = self.pose.point() + Point(x = 0, y = y_vel)
         vel = self.pose.point() + Point(x_vel, y_vel)
         
-        x_window = self.toWindowPoint(x_point)
-        y_window = self.toWindowPoint(y_point)
-        vel_window = self.toWindowPoint(vel)
+        x_window = self.to_window_point(x_point)
+        y_window = self.to_window_point(y_point)
+        vel_window = self.to_window_point(vel)
 
         pygame.draw.line(screen, "green", 
                         self.window_pose.point().tuple(), x_window.tuple(), width = 8)
@@ -295,7 +308,7 @@ class Robot():
                          self.window_pose.point().tuple(), vel_window.tuple(), width = 8)
 
 
-    def __findBorder(self, pose: Pose):
+    def __find_border(self, pose: Pose) -> List[Point]:
         border = self.image.get_rect(center = (pose.x, pose.y))
 
         pivot = pygame.math.Vector2(pose.x, pose.y)
@@ -309,7 +322,7 @@ class Robot():
 
 
     # debugging
-    def printPose(self):
+    def print_pose(self) -> None:
         print("\nx:{0} y:{1} head:{2}".format(round(self.pose.x, 2), 
                                             round(self.pose.y, 2), 
                                             round(self.pose.head, 2)))

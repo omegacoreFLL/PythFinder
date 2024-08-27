@@ -7,6 +7,9 @@ import pygame
 # file containing user-friendly control for both joystick and keyboard buttons,
 #       which each have an afferent edge detector
 
+# [RIGHT, LEFT, DOWN, UP]
+smallest_arrow_key = 1073741903
+
 class Dpad(Enum):
     UP = (0, 1)
     DOWN = (0, -1)
@@ -26,11 +29,14 @@ class Controls():
         self.keyboard_len = 0
         self.joystick_len = 0
 
-        self.joystick = None
-        self.joystick_type = None
+        self.joystick: pygame.joystick.Joystick = None
+        self.joystick_type: pygame.joystick.JoystickType = None
 
-        self.keyboard_detector = self.__initKeyboardDetector()
-        self.joystick_detector = self.__initJoystickDetector()
+        self.keyboard_detector = self.__init_keyboard_detector()
+        self.joystick_detector = self.__init_joystick_detector()
+
+        self.arrows_detector = [EdgeDetectorEx() for _ in range(4)]
+        self.arrows_len = 4
 
     # general use controls for different joysticks
     class Keybinds():
@@ -61,18 +67,18 @@ class Controls():
             self.dpad_detector = None
         
         # set type based on the pygame's controller names
-        def setType(self, joystick_type):
+        def set_type(self, joystick_type):
             match joystick_type: 
                 case "Xbox 360 Controller":
-                    self.setXbox()
+                    self.set_xbox()
                 case "PS4 Controller":
-                    self.setPS4()
+                    self.set_ps4()
                 case "Sony Interactive Entertainment Wireless Controller":
-                    self.setPS5()
+                    self.set_ps5()
                 case _:
                     raise Exception ("Not a supported controller")
 
-        def setXbox(self):
+        def set_xbox(self):
             self.state = JoyType.XBOX
             self.threshold = xbox_threshold
             self.left_x = xbox_left_x
@@ -103,7 +109,7 @@ class Controls():
                 Dpad.LEFT : EdgeDetectorEx()
             }
         
-        def setPS4(self):
+        def set_ps4(self):
             self.state = JoyType.PS4
             self.threshold = ps4_threshold
             self.left_x = ps4_left_x
@@ -129,7 +135,7 @@ class Controls():
 
             self.dpad_detector = None
         
-        def setPS5(self):
+        def set_ps5(self):
             self.state = JoyType.PS5
             self.threshold = ps5_threshold
             self.left_x = ps5_left_x
@@ -185,7 +191,7 @@ class Controls():
                     return None
 
         # from raw values to enum
-        def getKey(self, value: tuple):
+        def get_key(self, value: tuple):
             match value:
                 case self.turn_0:
                     return Dpad.UP
@@ -198,11 +204,11 @@ class Controls():
                 case _:
                     return None
 
-        def updateDpad(self, value):
+        def update_dpad(self, value):
             if self.state is JoyType.PS4:
                 return None
             
-            current_key = self.getKey(value)
+            current_key = self.get_key(value)
 
             for key in self.dpad_detector:
                 if key is not current_key:
@@ -230,9 +236,10 @@ class Controls():
                 case Dpad.LEFT:
                     return Dpad.RIGHT
 
-    
-    def __initKeyboardDetector(self):
-        keyboard_detector = []
+
+
+    def __init_keyboard_detector(self):
+        keyboard_detector: List[EdgeDetectorEx] = []
         key_states = pygame.key.get_pressed()
 
         for _ in key_states:
@@ -241,29 +248,33 @@ class Controls():
         self.keyboard_len = len(key_states)
         return keyboard_detector
     
-    def __initJoystickDetector(self):
-        joystick_detector = []
-        if exists(self.joystick):
+    def __init_joystick_detector(self):
+        joystick_detector: List[EdgeDetectorEx] = []
+        if self.joystick is not None:
             self.joystick_len = self.joystick.get_numbuttons()                                                                    
 
             for _ in range(self.joystick_len):
                 joystick_detector.append(EdgeDetectorEx())
         
         return joystick_detector
-    
+
+
+ 
     def update(self):
         if self.using_joystick.compare():
-            self.__updateJoystick()
-        else: self.__updateKeyboard()
+            self.__update_joystick()
+
+        self.__update_keyboard()
+        self.__update_arrow()
     
-    def __updateKeyboard(self):
+    def __update_keyboard(self):
         key_states = pygame.key.get_pressed() 
 
         for key in range(self.keyboard_len):
             self.keyboard_detector[key].update()
             self.keyboard_detector[key].set(key_states[key])
     
-    def __updateJoystick(self):
+    def __update_joystick(self):
         for button in range(self.joystick_len):
             self.joystick_detector[button].update()
 
@@ -273,14 +284,45 @@ class Controls():
 
             self.joystick_detector[button].set(boolean)
     
-    def addJoystick(self, joystick):
+    def __update_arrow(self):
+        for arrow in range(self.arrows_len):
+            self.arrows_detector[arrow].update()
+
+            try:
+                if arrow == self.event.key - smallest_arrow_key:
+                    boolean = True
+                else: boolean = False
+            except: boolean = False
+
+            self.arrows_detector[arrow].set(boolean)
+
+
+
+    def add_joystick(self, joystick):
         self.joystick = joystick
         
-        if exists(joystick):
+        if joystick is not None:
             self.using_joystick.set(True)
-            self.joystick_detector = self.__initJoystickDetector()
+            self.joystick_detector = self.__init_joystick_detector()
             self.joystick_type = self.joystick.get_name()
-            self.keybinds.setType(self.joystick_type)
+            self.keybinds.set_type(self.joystick_type)
         else: 
             self.using_joystick.set(False)
             self.joystick_type = None
+
+    def add_key(self, event):
+        self.event = event
+    
+
+
+    def get_arrow(self) -> Dpad:
+        if self.arrows_detector[0].rising:
+            return Dpad.RIGHT
+        if self.arrows_detector[1].rising:
+            return Dpad.LEFT
+        if self.arrows_detector[2].rising:
+            return Dpad.DOWN
+        if self.arrows_detector[3].rising:
+            return Dpad.UP
+        
+        return None

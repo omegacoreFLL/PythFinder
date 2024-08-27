@@ -12,6 +12,16 @@ class Preset():
                  preset_constants: Constants,
                  image: None | pygame.Surface = None,
                  image_size: None | Size = None):
+        """
+        Initialize a Preset object.
+
+        Args:
+            name (str): The name of the preset.
+            constants (Constants): The current constants.
+            preset_constants (Constants): The preset constants.
+            image (pygame.Surface | None): The image associated with the preset.
+            image_size (Size | None): The size of the image in centimeters.
+        """
         
         self.name = name
         
@@ -28,35 +38,53 @@ class Preset():
 
         self.recalculate()
     
-    def setImage(self,
+    def set_image(self,
                  image: None | pygame.Surface = None,
                  image_size: None | Size = None):
-        
+        """
+        Set the image and its size for the preset.
+
+        Args:
+            image (pygame.Surface | None): The new image.
+            image_size (Size | None): The new size of the image in centimeters.
+        """
         if image is not None:
             self.img = image
         if image_size is not None:
             self.img_size_cm = image_size
 
     def recalculate(self):
+        """
+        Recalculate the image size in pixels and update the image and its rectangle.
+        """
         try:
-            self.getImgSizeInPixels()
+            self.get_img_size_in_pixels()
 
             self.img = pygame.transform.scale(self.original, 
                                               self.img_size_px.get())
             
             self.rectangle = self.img.get_rect()
-            self.rectangle.center = (self.constants.screen_size.getHalf()) 
+            self.rectangle.center = (self.constants.screen_size.get_half()) 
         except:
             pass # no image found
     
-    def getImgSizeInPixels(self):
+    def get_img_size_in_pixels(self):
+        """
+        Convert the image size from centimeters to pixels.
+        """
         self.img_size_px = Size(
-                    self.constants.cmToPixels(self.img_size_cm.width),
-                    self.constants.cmToPixels(self.img_size_cm.height)
+                    self.constants.cm_to_pixels(self.img_size_cm.width),
+                    self.constants.cm_to_pixels(self.img_size_cm.height)
         )
 
 
-    def onScreen(self, screen: pygame.Surface):
+    def on_screen(self, screen: pygame.Surface):
+        """
+        Display the image on the screen if the edge detector is high.
+
+        Args:
+            screen (pygame.Surface): The screen to display the image on.
+        """
         self.ON.update()
 
         if self.ON.high:
@@ -69,11 +97,31 @@ class Preset():
             self.constants.check(self.preset_constants)
     
     def off(self):
+        """
+        Reset the constants to their original values.
+        """
         self.constants.check(self.original_constants)
         
 
 class PresetManager():
+    """
+    Class to manage multiple presets.
+
+    Attributes:
+        presets (List[Preset | None]): List of presets.
+        value (int | None): The current key value.
+        previous (int): The previous preset number.
+        WRITING (EdgeDetectorEx): Edge detector for writing.
+        constants (Constants): The current constants.
+    """
+        
     def __init__(self, constants: Constants):
+        """
+        Initialize a PresetManager object.
+
+        Args:
+            constants (Constants): The current constants.
+        """
         self.presets: List[Preset] = [None for _ in range(10)]
 
         self.value = None
@@ -83,6 +131,13 @@ class PresetManager():
         self.constants = constants
     
     def add(self, preset: Preset, key: None | int = None):
+        """
+        Add a preset to the manager.
+
+        Args:
+            preset (Preset): The preset to add.
+            key (int | None): The key to associate with the preset.
+        """
         if key is None:
             hasSpace = False
 
@@ -112,14 +167,29 @@ class PresetManager():
         return self
     
     def recalculate(self):
+        """
+        Recalculate all presets.
+        """
         for preset in self.presets:
             if preset is not None:
                 preset.recalculate()
     
-    def addKey(self, key):
+    def add_key(self, key):
+        """
+        Add a key to the manager.
+
+        Args:
+            key: The key to add.
+        """
         self.value = key
     
     def on(self, number: int):
+        """
+        Activate a preset by its number.
+
+        Args:
+            number (int): The number of the preset to activate.
+        """
         if self.presets[number - 1] is None and not number == 0:
             print("no preset for key {0}".format(number))
             return None
@@ -139,12 +209,18 @@ class PresetManager():
 
     
 
-    def onScreen(self, screen: pygame.Surface):
+    def on_screen(self, screen: pygame.Surface):
+        """
+        Display all active presets on the screen.
+
+        Args:
+            screen (pygame.Surface): The screen to display the presets on.
+        """
         self.WRITING.update()
 
         for preset in self.presets:
             if preset is not None:
-                preset.onScreen(screen)
+                preset.on_screen(screen)
 
         if self.value is None or not self.WRITING.high:
                 return None
@@ -179,6 +255,15 @@ class PresetManager():
         self.on(on)
             
     def get(self, number: int) -> Preset:
-        if not inOpenInterval(number, 0, 9):
+        """
+        Get a preset by its number.
+
+        Args:
+            number (int): The number of the preset to get.
+
+        Returns:
+            Preset: The preset with the specified number.
+        """
+        if not in_open_interval(number, 0, 9):
             return None
         return self.presets[number - 1]

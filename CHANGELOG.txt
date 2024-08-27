@@ -99,3 +99,18 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - you can't move the robot with the cursor when setting menu is enabled or in auto anymore
 - holonomic drivetrains don't move tiny amounts anymore when the joystick is resting
 - added documentation and merch files
+
+0.0.5.0 (xx.xx.2024)
+---------------------
+- added english documentation
+- fixed typos in README.md
+- new paint-like drawing features (sketch support)
+- added indicators for each of the tabs in the interface menu
+- updated interface main menu page
+- TRAIL button is now known as DRAW
+- minimum window size is introduced, making sure the interface menu is always visible
+- different cursor are displayed when moving the robot, drawing, and writing text
+- interface menu and on-the-go robot settings are now accessible through keyboard too
+- improved the appearance of the selection menu
+- updated the FLL robot image with our current design
+- complying with PEP 8 guidelines for better readability and consistency

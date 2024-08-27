@@ -26,9 +26,9 @@ class AngularSegment(MotionSegment):
         
         super().__init__(last_state)
         
-        self.diff = (toRadians(findShortestPath(angle_deg, last_state.pose.head))
+        self.diff = (math.radians(find_shortest_path(angle_deg, last_state.pose.head))
                                     if not reversed else
-                     toRadians(findLongestPath(angle_deg, last_state.pose.head))
+                     math.radians(find_longest_path(angle_deg, last_state.pose.head))
         )
         
         self.sign = signum(self.diff)
@@ -47,7 +47,7 @@ class AngularSegment(MotionSegment):
     
 
 
-    def addConstraintsSegmTime(self, time: int, constraints2d: Constraints2D, auto_build: bool = True):
+    def add_constraints_segm_time(self, time: int, constraints2d: Constraints2D, auto_build: bool = True):
         if not self.built:
             print("\n\ncan't add profile without generating")
             return None
@@ -87,12 +87,12 @@ class AngularSegment(MotionSegment):
             self.built = False
             if auto_build: self.generate()
 
-    def motionFromProfileState(self, t: int, profile_state: ProfileState) -> MotionState:
+    def motion_from_profile_state(self, t: int, profile_state: ProfileState) -> MotionState:
         ang, ang_vel, ang_acc = profile_state.tuple()
         ang, ang_vel = ang * self.sign, ang_vel * self.sign
 
         self.profile_states.append(profile_state)
-        self.current_pose = self.last_state.pose + Pose(0, 0, toDegrees(ang))
+        self.current_pose = self.last_state.pose + Pose(0, 0, math.degrees(ang))
                 
         # no linear velocity on pure angular motion
         VEL = Point()
@@ -110,7 +110,7 @@ class AngularSegment(MotionSegment):
 
 
 
-    def getAction(self) -> MotionAction:
+    def get_action(self) -> MotionAction:
         return MotionAction.TURN
     
     def copy(self, last_state: MotionState, constraints2d: Constraints2D = None):

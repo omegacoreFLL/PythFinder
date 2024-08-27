@@ -32,7 +32,7 @@ class X_DriveKinematics(Kinematics):
             angular_velocity = angular_velocity
         )
 
-    def getType(self) -> ChassisType:
+    def get_type(self) -> ChassisType:
         return ChassisType.HOLONOMIC
     
     def copy(self):

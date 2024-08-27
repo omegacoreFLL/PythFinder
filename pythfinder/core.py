@@ -1,31 +1,35 @@
 from pythfinder.Components.BetterClasses.booleanEx import *
 from pythfinder.Components.Constants.constants import *
-from pythfinder.Components.background import *
 from pythfinder.Components.Menu.mainMenu import *
+from pythfinder.Components.background import *
 from pythfinder.Components.controls import *
-from pythfinder.Components.robot import *
 from pythfinder.Components.presets import *
+from pythfinder.Components.robot import *
+from pythfinder.Components.paint import *
 from pythfinder.Components.fade import *
 
 from datetime import datetime
 import pygame
 
 
-# file connecting all features into one big ecosystem of classes
+# This file connects all the features into one big ecosystem of classes.
 #
-# from the Simulator object, all different aspects of the simulator can be accessed and be modified
+# The Simulator object allows access and modification of different aspects of the simulator.
 #
-# one big feature is the implementation of dynamic constants. Any of the lower-hierarchized objects,
-#   or the user, can modify the simulator constants, and the simulator makes sure that all the objects
-#   run the latest constants available with an update system based on change detection
+# One major feature is the implementation of dynamic constants. Any lower-hierarchical objects or the user can modify the simulator constants. 
+# The simulator ensures that all objects run with the latest available constants through an update system based on change detection.
 #
-# the joystick logic is also run in this class, as well as all the updates, screen drawings and simulator
-#   quiting events
+# The controller logic is also implemented in this class, along with updates, screen drawings, and simulator quitting events.
 
 
 class Simulator():
     def __init__(self, constants: Constants = Constants()):
-        
+        """
+        Initializes the Simulator class.
+
+        Args:
+            constants (Constants): The constants object containing simulation parameters.
+        """
         pygame.display.set_caption("PythFinder")
         
         self.running = BooleanEx(True)
@@ -37,42 +41,21 @@ class Simulator():
 
         self.dt = 0
         self.mouse_click = EdgeDetectorEx()
+        self.mouse_pose = None
 
         self.background = Background(self.constants)
         self.presets = PresetManager(self.constants)
         self.fade = Fade(self.constants)
-        self.menu = Menu(MenuType.UNDEFINED, self.constants, None)
-        self.robot = Robot(constants = self.constants)
         self.controls = Controls()
+        self.menu = Menu(MenuType.UNDEFINED, self.constants, self.controls, None)
+        self.robot = Robot(constants = self.constants)
+        self.paint = Paint(constants = self.constants)
 
-        self.__addDefaultPresets()
-
-
-
-    def chooseFieldCentric(self, fun: Fun, bool = None):
-        self.constants.FIELD_CENTRIC.choose(fun, bool)
-        self.constants.FORWARDS.set(True)
-    
-    def chooseDrawRobotBorder(self, fun: Fun, bool = None):
-        self.constants.ROBOT_BORDER.choose(fun, bool)
-    
-    def chooseUsingScreenBorder(self, fun: Fun, bool = None):
-        self.constants.SCREEN_BORDER.choose(fun, bool)
-    
-    def chooseMenuEntered(self, fun: Fun, bool = None):
-        self.constants.MENU_ENTERED.choose(fun, bool)
-    
-    def chooseHeadSelection(self, fun: Fun, bool = None):
-        self.constants.HEAD_SELECTION.choose(fun, bool)
-    
-    def chooseForward(self, fun: Fun, bool = None):
-        self.constants.FORWARDS.choose(fun, bool)
-
-    def chooseJoystickEnabled(self, fun: Fun, bool = None):
-        self.constants.JOYSTICK_ENABLED.choose(fun, bool)
+        self.__add_default_presets()
 
 
-    def addPreset(self, 
+
+    def add_preset(self, 
                   name: str, 
                   constants: Constants, 
                   image: pygame.Surface | None = None,
@@ -84,18 +67,18 @@ class Simulator():
 
 
     def recalculate(self):
-        resize_screen = self.constants.checkScreenSize(self.screen.get_size())
+        resize_screen = self.constants.check_screen_size(self.screen.get_size())
 
         if self.constants.recalculate.compare(False):
             return 0
         
         if resize_screen:
             self.screen = pygame.display.set_mode(self.constants.screen_size.get(), pygame.RESIZABLE)
-        else: 
-            self.constants.screen_size = ScreenSize(self.screen.get_size()[0], self.screen.get_size()[1])
+        else: self.constants.screen_size = ScreenSize(self.screen.get_size()[0], self.screen.get_size()[1])
 
         self.menu.recalculate()
         self.fade.recalculate()
+        self.paint.recalculate()
         self.robot.recalculate()
         self.presets.recalculate()
         self.background.recalculate()
@@ -108,85 +91,93 @@ class Simulator():
         return self.running.compare()
 
     def update(self):
+        self.mouse_pose = pygame.mouse.get_pos()
+
         self.recalculate()
-        self.__updateEventManager()
+        self.__update_event_manager()
 
         #reset frame
         self.screen.fill(default_background_color)
 
         if self.manual_control.compare():
-            self.__updateControls()
+            self.__update_controls()
         self.robot.update(self.dt)
 
-        self.presets.onScreen(self.screen)
-        self.background.onScreen(self.screen)
-        self.robot.onScreen(self.screen)
-        self.fade.onScreen(self.screen)
-        if self.constants.MENU_ENTERED.compare() and self.controls.using_joystick.compare():
-            self.menu.addControls(self.controls)
-            self.menu.onScreen(self.screen)
+        self.presets.on_screen(self.screen)
+        self.background.on_screen(self.screen)
+        self.paint.on_screen(self.screen, self.mouse_pose)
+        self.robot.on_screen(self.screen)
+        self.fade.on_screen(self.screen)
+        if self.constants.MENU_ENTERED.compare():
+            self.menu.on_screen(self.screen)
 
-        pygame.display.update()
+        pygame.display.flip()
         self.dt = self.clock.tick(self.constants.FPS) / 1000
 
-        self.__updateScreenshoot()
+        self.__update_screenshoots()
     
-
     
-    def __updateEventManager(self):
+    def __update_event_manager(self):
         if self.manual_control.compare():
             self.presets.WRITING.set(not self.constants.MENU_ENTERED.get())
-        self.presets.addKey(None)
-        self.menu.addKey(None)
 
-        try:
-            for event in pygame.event.get():
-                if event.type == pygame.JOYDEVICEADDED:
-                    self.controls.addJoystick(pygame.joystick.Joystick(event.device_index))
+        self.paint.add_key(None, self.mouse_click.get(), self.mouse_pose if self.mouse_click.rising else None)
+        self.controls.add_key(None)
+        self.presets.add_key(None)
+        self.menu.add_key(None)
+
+        for event in pygame.event.get():
+            if event.type == pygame.JOYDEVICEADDED:
+                self.controls.add_joystick(pygame.joystick.Joystick(event.device_index))
                     
-                elif event.type == pygame.JOYDEVICEREMOVED:
-                    self.controls.addJoystick(None)
+            elif event.type == pygame.JOYDEVICEREMOVED:
+                self.controls.add_joystick(None)
                     
-                if event.type == pygame.KEYDOWN:
-                    self.presets.addKey(event)
-                    self.menu.addKey(event)
+            if event.type == pygame.KEYDOWN:
+                if self.constants.MENU_ENTERED.compare(False) and self.constants.HAND_DRAWING.compare():
+                        self.paint.add_key(event, self.mouse_click.get())
+                self.controls.add_key(event)
+                self.presets.add_key(event)
+                self.menu.add_key(event)
 
-                if event.type == pygame.QUIT:
-                    self.running.set(False)
-                    print('\n\n')
-                    pygame.quit()
-        except: pass
+            if event.type == pygame.QUIT:
+                self.running.set(False)
+                print('\n\n')
+                pygame.quit()
 
 
-    def __updateControls(self):
+
+    def __update_controls(self):
         self.controls.update()
 
         if self.controls.using_joystick.compare() and self.constants.JOYSTICK_ENABLED.compare():
-            self.__updateJoystick()
-        self.__updateCursorRobotMove()
+            self.__update_controller()
+        self.__update_keyboard_buttons()
 
-    def __updateCursorRobotMove(self):
+        self.__update_cursor_robot_move()
+
+
+    def __update_cursor_robot_move(self):
         self.mouse_click.set(pygame.mouse.get_pressed()[0]) # left click
         self.mouse_click.update()
 
         if self.manual_control.compare() and self.constants.MENU_ENTERED.compare(False):   # move only manual control is enabled and not entered meny
-            self.robot.updateCursorMove(clicked = self.mouse_click.rising, released = self.mouse_click.falling,
-                                        cursor_point = Point(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]))
+            self.robot.update_cursor_move(clicked = self.mouse_click.rising, released = self.mouse_click.falling,
+                                        cursor_point = Point(self.mouse_pose[0], self.mouse_pose[1]))
 
 
-
-    def __updateJoystick(self):
+    def __update_controller(self):
         left_x = round(self.controls.joystick.get_axis(self.controls.keybinds.left_x), 4)
         left_y = round(self.controls.joystick.get_axis(self.controls.keybinds.left_y), 4)
         right_x = round(self.controls.joystick.get_axis(self.controls.keybinds.right_x), 4)
 
-        self.__updateJoystickButtons()
+        self.__update_controller_buttons()
 
-        match self.robot.kinematics.getType():
+        match self.robot.kinematics.get_type():
             case ChassisType.NON_HOLONOMIC:
                 if self.constants.FIELD_CENTRIC.compare():
-                    angular_multiplier, linear_x_multiplier = self.__updateJoystickFieldCentric((left_x, left_y))
-                else: angular_multiplier, linear_x_multiplier = self.__updateJoystickRobotCentric((right_x, left_y))
+                    angular_multiplier, linear_x_multiplier = self.__update_controller_field_centric((left_x, left_y))
+                else: angular_multiplier, linear_x_multiplier = self.__update_controller_robot_centric((right_x, left_y))
 
                 linear_y_multiplier = linear_x_multiplier * math.sin(math.radians(self.robot.pose.head))
                 linear_x_multiplier = linear_x_multiplier * math.cos(math.radians(self.robot.pose.head))
@@ -195,8 +186,8 @@ class Simulator():
                 if self.constants.FIELD_CENTRIC.compare():
                     linear_x_multiplier, linear_y_multiplier = -left_y, left_x
                 else:
-                    rotated_vel_x = Point(x = -left_y, y = 0).rotateMatrix(math.radians(self.robot.pose.head))
-                    rotated_vel_y = Point(x = 0, y = -left_x).rotateMatrix(-math.radians(self.robot.pose.head))
+                    rotated_vel_x = Point(x = -left_y, y = 0).rotate_by(math.radians(self.robot.pose.head))
+                    rotated_vel_y = Point(x = 0, y = -left_x).rotate_by(-math.radians(self.robot.pose.head))
 
                     linear_x_multiplier, linear_y_multiplier = (rotated_vel_x + rotated_vel_y).tuple()
 
@@ -212,12 +203,12 @@ class Simulator():
         joy_ang_vel = angular_multiplier * self.robot.constraints.angular.MAX_VEL
 
 
-        self.robot.setVelocities(ChassisState(
+        self.robot.set_velocities(ChassisState(
             velocity = Point(x = joy_vel_x, y = joy_vel_y),
             angular_velocity = joy_ang_vel
         ))
 
-    def __updateJoystickFieldCentric(self, values):    
+    def __update_controller_field_centric(self, values):    
         left_x, left_y = values
         joystick_threshold = self.controls.keybinds.threshold
 
@@ -227,18 +218,18 @@ class Simulator():
         if (abs(left_x) > joystick_threshold or abs(left_y) > joystick_threshold):
             a_tan = math.atan2(left_y, left_x)
 
-            self.robot.target_head = normalizeDegrees(math.degrees(a_tan + math.pi / 2))
+            self.robot.target_head = normalize_degres(math.degrees(a_tan + math.pi / 2))
             joy_y = min(1, math.hypot(left_x, left_y))
 
 
             if self.constants.FORWARDS.compare(False):
                 joy_y = -joy_y
-                self.robot.target_head = normalizeDegrees(self.robot.target_head + 180)
+                self.robot.target_head = normalize_degres(self.robot.target_head + 180)
 
         else: 
             joy_y = 0
 
-        error = findShortestPath(self.robot.target_head, self.robot.pose.head) / 180
+        error = find_shortest_path(self.robot.target_head, self.robot.pose.head) / 180
         joy_x = self.robot.head_controller.calculate(error)
 
         if abs(joy_x) < joystick_threshold:
@@ -246,7 +237,7 @@ class Simulator():
 
         return (joy_x, joy_y)
 
-    def __updateJoystickRobotCentric(self, values):
+    def __update_controller_robot_centric(self, values):
         right_x, left_y = values
         joystick_threshold = self.controls.keybinds.threshold
 
@@ -263,18 +254,10 @@ class Simulator():
 
         return (joy_x, joy_y)
 
-    def __updateJoystickButtons(self):
-        if self.controls.joystick_detector[self.controls.keybinds.disable_button].rising:
-            self.constants.MENU_ENTERED.negate()
+    def __update_controller_buttons(self):
+        if self.controls.joystick_detector[self.controls.keybinds.disable_button].rising:                       # enter with keyboard
+            self.__update_buttons_menu()
 
-            if self.constants.MENU_ENTERED.compare():
-                if self.manual_control.compare():
-                    self.robot.target_head = self.robot.pose.head
-                self.constants.FREEZE_TRAIL.set(True)
-                self.menu.reset()
-            else: 
-                self.constants.FREEZE_TRAIL.set(False)
-        
         if self.constants.MENU_ENTERED.compare():
             return 0
         
@@ -286,12 +269,12 @@ class Simulator():
                 self.constants.FORWARDS.negate()
 
                 if self.constants.FORWARDS.compare():  
-                    self.fade.reset(self.constants.matchScreenSize(img_forwards, self.constants.screen_size.width))
-                else: self.fade.reset(self.constants.matchScreenSize(img_backwards, self.constants.screen_size.width))
+                    self.fade.reset(self.constants.resize_image_to_fit_screen_width(img_forwards, self.constants.screen_size.width))
+                else: self.fade.reset(self.constants.resize_image_to_fit_screen_width(img_backwards, self.constants.screen_size.width))
 
 
         if self.controls.joystick_detector[self.controls.keybinds.zero_button].rising:
-            self.robot.setPoseEstimate(Pose(0,0,0))
+            self.robot.set_pose_estimate(Pose(0,0,0))
         
 
 
@@ -300,17 +283,17 @@ class Simulator():
         else: self.constants.HEAD_SELECTION.set(False)
 
         if self.controls.joystick_detector[self.controls.keybinds.head_selection_button].rising:
-                self.fade.reset(self.constants.matchScreenSize(img_selecting_on, self.constants.screen_size.width))
+                self.fade.reset(self.constants.resize_image_to_fit_screen_width(img_selecting_on, self.constants.screen_size.width))
         elif self.controls.joystick_detector[self.controls.keybinds.head_selection_button].falling:
-                self.fade.reset(self.constants.matchScreenSize(img_selecting_off, self.constants.screen_size.width))
+                self.fade.reset(self.constants.resize_image_to_fit_screen_width(img_selecting_off, self.constants.screen_size.width))
 
         
         if self.controls.joystick_detector[self.controls.keybinds.trail_button].rising:
             self.robot.trail.draw_trail.negate()
 
             if self.robot.trail.draw_trail.compare():
-                self.fade.reset(self.constants.matchScreenSize(img_show_trail, self.constants.screen_size.width))
-            else: self.fade.reset(self.constants.matchScreenSize(img_hide_trail, self.constants.screen_size.width))
+                self.fade.reset(self.constants.resize_image_to_fit_screen_width(img_show_trail, self.constants.screen_size.width))
+            else: self.fade.reset(self.constants.resize_image_to_fit_screen_width(img_hide_trail, self.constants.screen_size.width))
 
 
 
@@ -331,8 +314,51 @@ class Simulator():
             
             self.robot.pose.head = self.robot.target_head = target
 
-    def __updateScreenshoot(self):
-        if exists(self.controls.joystick):
+
+    def __update_keyboard_buttons(self):
+        if self.controls.keyboard_detector[pygame.K_ESCAPE].rising:
+            self.__update_buttons_menu()
+        
+        if self.constants.MENU_ENTERED.compare():
+            return 0
+        
+        if self.controls.keyboard_detector[pygame.K_DELETE].rising:
+            self.robot.trail.hide_trail.set(True)
+
+        if self.constants.FIELD_CENTRIC.compare():
+            if self.controls.keyboard_detector[pygame.K_SPACE].rising:
+                self.constants.FORWARDS.negate()
+
+                if self.constants.FORWARDS.compare():  
+                    self.fade.reset(self.constants.resize_image_to_fit_screen_width(img_forwards, self.constants.screen_size.width))
+                else: self.fade.reset(self.constants.resize_image_to_fit_screen_width(img_backwards, self.constants.screen_size.width))
+
+
+        if self.controls.keyboard_detector[pygame.K_TAB].rising:
+            self.robot.set_pose_estimate(Pose(0,0,0))
+
+    def __update_buttons_menu(self):
+        self.constants.MENU_ENTERED.negate()
+
+        if self.constants.MENU_ENTERED.compare():
+            if self.robot.mouse_locked.get():
+                self.robot.mouse_locked.set(False)
+                self.constants.cursor.apply_system(pygame.SYSTEM_CURSOR_ARROW, remember = False)
+            else: self.constants.cursor.apply_system(pygame.SYSTEM_CURSOR_ARROW)
+
+            if self.manual_control.compare():
+                self.robot.target_head = self.robot.pose.head
+            self.constants.FREEZE_TRAIL.set(True)
+            self.menu.reset()
+        else:
+            self.constants.cursor.throwback()
+            self.constants.FREEZE_TRAIL.set(False)
+
+
+
+
+    def __update_screenshoots(self):
+        if self.controls.joystick is not None:
             if self.manual_control.compare(False):
                 self.controls.update()
             
@@ -361,9 +387,9 @@ class Simulator():
 
 
 
-    def __addDefaultPresets(self):
+    def __add_default_presets(self):
         for preset in default_presets:
-            self.addPreset(*preset)     
+            self.add_preset(*preset)     
             
 
 

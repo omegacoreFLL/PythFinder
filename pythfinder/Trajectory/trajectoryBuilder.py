@@ -1,5 +1,4 @@
 from pythfinder.Trajectory.Control.feedforward import *
-from pythfinder.Trajectory.Control.feedback import *
 from pythfinder.Trajectory.Markers.generic import *
 from pythfinder.Trajectory.trajectory import *
 from pythfinder.Trajectory.Segments import *
@@ -61,9 +60,9 @@ class TrajectoryBuilder():
     
 
     def inLineCM(self, cm: float):
-        if self.__isEligibleToCombineLinear(cm): # combine consecutive line segments
+        if self.__is_eligible_to_combine_linear(cm): # combine consecutive line segments
             last_linear_sgm: LinearSegment = self.segments[-1]
-            self.segments[-1] = last_linear_sgm.addCM(cm)
+            self.segments[-1] = last_linear_sgm.add_cm(cm)
 
             return self
 
@@ -74,11 +73,26 @@ class TrajectoryBuilder():
 
         return self
     
+    # does nothing, yet
+    def inSpline(self, end: SplineTarget, tangent: bool = True, reversed: bool = False):
+        '''self.segments.append(SplineSegment(last_state = None,
+                                           kinematics = self.kinematics,
+                                           constraints2d = self.CONSTRAINTS,
+                                           end = end,
+                                           tangent = tangent,
+                                           reversed = reversed))
+        
+        self.relative_markers.append(None)'''
+
+        return self
+    
+
+    
     def wait(self, ms: int):
         ms = abs(ms)
-        if self.__isEligibleToCombineWait(ms):
+        if self.__is_eligible_to_combine_wait(ms):
             last_wait_sgm: WaitSegment = self.segments[-1]
-            self.segments[-1] = last_wait_sgm.addMS(ms)
+            self.segments[-1] = last_wait_sgm.add_ms(ms)
             
             return self
         
@@ -128,7 +142,7 @@ class TrajectoryBuilder():
         self.segments.append(PoseSegment(last_state = None,
                                          kinematics = self.kinematics,
                                          constraints2d = self.CONSTRAINTS,
-                                         pose = pose.norm(),
+                                         pose = pose.normalize_degreez(),
                                          tangent = False,
                                          linear_head = False,
                                          reversed = reversed))
@@ -140,7 +154,7 @@ class TrajectoryBuilder():
         self.segments.append(PoseSegment(last_state = None,
                                          kinematics = self.kinematics,
                                          constraints2d = self.CONSTRAINTS,
-                                         pose = pose.norm(),
+                                         pose = pose.normalize_degreez(),
                                          tangent = True,
                                          linear_head = False,
                                          reversed = reversed))
@@ -152,7 +166,7 @@ class TrajectoryBuilder():
         self.segments.append(PoseSegment(last_state = None,
                                          kinematics = self.kinematics,
                                          constraints2d = self.CONSTRAINTS,
-                                         pose = pose.norm(),
+                                         pose = pose.normalize_degreez(),
                                          tangent = False,
                                          linear_head = True,
                                          reversed = reversed))
@@ -168,7 +182,7 @@ class TrajectoryBuilder():
                                     constraints = constraints2d,
                                     relative = True))
     
-        self.__addRelativeMarker(marker)
+        self.__add_relative_marker(marker)
         return self
 
     def addRelativeTemporalConstraints(self, ms: int, constraints2d: Constraints2D):
@@ -177,7 +191,7 @@ class TrajectoryBuilder():
                                     constraints = constraints2d,
                                     relative = True))
         
-        self.__addRelativeMarker(marker)
+        self.__add_relative_marker(marker)
         return self
 
     def addRelativeDisplacementMarker(self, cm: float, fun = idle):
@@ -186,7 +200,7 @@ class TrajectoryBuilder():
                                 function = fun,
                                 relative = True))
         
-        self.__addRelativeMarker(marker)
+        self.__add_relative_marker(marker)
         return self
 
     def addRelativeTemporalMarker(self, ms: int, fun = idle):
@@ -195,7 +209,7 @@ class TrajectoryBuilder():
                                 function = fun,
                                 relative = True))
         
-        self.__addRelativeMarker(marker)
+        self.__add_relative_marker(marker)
         return self
 
     def interruptDisplacement(self, cm: float):
@@ -203,7 +217,7 @@ class TrajectoryBuilder():
                                   displacement = cm,
                                   relative = True))
         
-        self.__addRelativeMarker(marker)
+        self.__add_relative_marker(marker)
         return self
 
     def interruptTemporal(self, ms: float):
@@ -211,7 +225,7 @@ class TrajectoryBuilder():
                                   displacement = None,
                                   relative = True))
         
-        self.__addRelativeMarker(marker)
+        self.__add_relative_marker(marker)
         return self
 
 
@@ -254,7 +268,7 @@ class TrajectoryBuilder():
             sgm.generate()
 
             if markers is not None:
-                _, sgm = self.__processRelativeMarkers(markers, sgm)
+                _, sgm = self.__process_relative_markers(markers, sgm)
 
             # combine states from the primitive into one state
             self.states += sgm.get_all()
@@ -263,19 +277,19 @@ class TrajectoryBuilder():
             self.last_state = sgm.states[-1]
         
 
-        self.__processFinalFunctionMarkers()
+        self.__process_final_function_markers()
         return Trajectory(self.sim, self.states, self.final_markers)
 
 
         
-    def __addRelativeMarker(self, marker: Marker):
+    def __add_relative_marker(self, marker: Marker):
         if self.relative_markers[-1] is None:
             self.relative_markers[-1] = [marker]
         else: self.relative_markers[-1].append(marker)
 
 
 
-    def __markerPriority(self, marker: Marker):
+    def __marker_priority(self, marker: Marker):
         class_name = marker.__class__.__name__.lower()
 
         for key in type_priority.keys():    # loop through the priority dictionary
@@ -284,8 +298,8 @@ class TrajectoryBuilder():
             
         return float('inf')                 # Fallback if no type found
     
-    def __markerSortKey(self, marker: Marker):
-        priority = self.__markerPriority(marker)
+    def __marker_sort_key(self, marker: Marker):
+        priority = self.__marker_priority(marker)
         is_displacement = 0 if marker.displacement is not None else 1
         value = marker.time if marker.time is not None else marker.displacement
 
@@ -294,13 +308,13 @@ class TrajectoryBuilder():
                 value if value >= 0 else float('inf'),  # put negatives in the back 
                 value)                                  # normal sort, by value
     
-    def __sortMarkers(self, markers: List[Marker]) -> List[Marker]:
+    def __sort_markers(self, markers: List[Marker]) -> List[Marker]:
         return sorted(markers, 
-                      key = self.__markerSortKey) 
+                      key = self.__marker_sort_key) 
 
 
 
-    def __processNegativeIntoPositiveDisplacement(self, markers: List[Marker], segment: MotionSegment) -> List[Marker]:
+    def __process_negative_into_positive_displacement(self, markers: List[Marker], segment: MotionSegment) -> List[Marker]:
         remove = []
         removed = 0
 
@@ -325,7 +339,7 @@ class TrajectoryBuilder():
             
         return markers
 
-    def __processRelativesIntoAbsolutesDisplacement(self, markers: List[Marker], segment: MotionSegment) -> List[Marker]:
+    def __process_relatives_into_absolutes_displacement(self, markers: List[Marker], segment: MotionSegment) -> List[Marker]:
         for i in range(len(markers)):
 
             if markers[i].displacement is not None:
@@ -336,14 +350,14 @@ class TrajectoryBuilder():
 
 
 
-    def __findDisplacementFromSegmTime(self, time: int, segment: MotionSegment) -> float:
-        state = segment.getSegmTime(time)
+    def __find_displacement_from_segm_time(self, time: int, segment: MotionSegment) -> float:
+        state = segment.get_segm_time(time)
 
         if state is None: return None
         return state.displacement
 
-    def __findSegmTimeFromDisplacement(self, displacement: float, segment: MotionSegment) -> int:
-        if not inOpenInterval(displacement, 
+    def __find_segm_time_from_displacement(self, displacement: float, segment: MotionSegment) -> int:
+        if not in_open_interval(displacement, 
                               left = segment.states[0].displacement, 
                               right = segment.states[-1].displacement):
             return None
@@ -352,14 +366,14 @@ class TrajectoryBuilder():
     
 
 
-    def __separateMarkersByType(self, markers: List[Marker]) -> Tuple[list]:
+    def __separate_markers_by_type(self, markers: List[Marker]) -> Tuple[list]:
         constraints_markers = [m for m in markers if isinstance(m, ConstraintsMarker)]
         interrupt_markers = [m for m in markers if isinstance(m, InterruptMarker)]
         function_markers = [m for m in markers if isinstance(m, FunctionMarker)]
 
         return (markers, constraints_markers, interrupt_markers, function_markers)
 
-    def __separateMarkersByValue(self, markers: List[Marker]) -> Tuple[list]:
+    def __separate_markers_by_value(self, markers: List[Marker]) -> Tuple[list]:
         displacement = [m for m in markers if m.displacement is not None]
         temporal = [m for m in markers if m.time is not None]
 
@@ -367,7 +381,7 @@ class TrajectoryBuilder():
 
 
 
-    def __findTheFirstInDisplacementOrder(self, markers: List[Marker], segment: MotionSegment) -> int:
+    def __find_the_first_in_displacement_order(self, markers: List[Marker], segment: MotionSegment) -> int:
         min_disp = math.inf
         min_index = -1
 
@@ -375,7 +389,7 @@ class TrajectoryBuilder():
             marker = markers[i]
 
             if marker.displacement is None:
-                current_disp = self.__findDisplacementFromSegmTime(marker.time, segment)
+                current_disp = self.__find_displacement_from_segm_time(marker.time, segment)
             else: current_disp = marker.displacement
 
             if current_disp is None: # marker is not in the segment
@@ -389,55 +403,55 @@ class TrajectoryBuilder():
 
 
 
-    def __processRelativeConstraints(self, markers: List[ConstraintsMarker], segment: MotionSegment) -> MotionSegment:
+    def __process_relative_constraints(self, markers: List[ConstraintsMarker], segment: MotionSegment) -> MotionSegment:
         while markers:
-            index = self.__findTheFirstInDisplacementOrder(markers, segment)
+            index = self.__find_the_first_in_displacement_order(markers, segment)
 
             the_chosen_one = markers.pop(index)
             time = (the_chosen_one.time if the_chosen_one.time is not None else
-                    self.__findSegmTimeFromDisplacement(the_chosen_one.displacement, segment))
+                    self.__find_segm_time_from_displacement(the_chosen_one.displacement, segment))
             
-            if not segment.timeInSegmentSegmTime(time): # marker is not in the segment
-                self.__printMarkerNotInSegmentError(the_chosen_one, segment)
+            if not segment.time_in_segment_segm_time(time): # marker is not in the segment
+                self.__print_marker_not_in_segment_error(the_chosen_one, segment)
                 continue
 
             self.CONSTRAINTS = the_chosen_one.constraints
-            segment.addConstraintsSegmTime(time, the_chosen_one.constraints)
+            segment.add_constraints_segm_time(time, the_chosen_one.constraints)
             
         
         return segment
     
-    def __processRelativeInterrupt(self, markers: List[InterruptMarker], segment: MotionSegment) -> MotionSegment:
+    def __process_relative_interrupt(self, markers: List[InterruptMarker], segment: MotionSegment) -> MotionSegment:
         # use just the earliest interrupter, obviously
         # earliest in the segment, obviously
         marker_found = False
 
         while not marker_found and markers:
-            effective = self.__findTheFirstInDisplacementOrder(markers, segment)
+            effective = self.__find_the_first_in_displacement_order(markers, segment)
 
             the_chosen_one = markers.pop(effective)
             time = (the_chosen_one.time if the_chosen_one.time is not None else
-                    self.__findSegmTimeFromDisplacement(the_chosen_one.displacement, segment))
+                    self.__find_segm_time_from_displacement(the_chosen_one.displacement, segment))
             
-            if not segment.timeInSegmentSegmTime(time): # marker is not in the segment
-                self.__printMarkerNotInSegmentError(the_chosen_one, segment)
+            if not segment.time_in_segment_segm_time(time): # marker is not in the segment
+                self.__print_marker_not_in_segment_error(the_chosen_one, segment)
                 continue
 
-            segment.interruptSegmTime(time)
+            segment.interrupt_segm_time(time)
             marker_found = True
         
 
         markers = []
         return segment
 
-    def __processRelativeFunction(self, markers: List[FunctionMarker], segment: MotionSegment):
+    def __process_relative_function(self, markers: List[FunctionMarker], segment: MotionSegment):
         while markers:
             current = markers.pop()
             time = (current.time if current.time is not None else
-                    self.__findSegmTimeFromDisplacement(current.displacement, segment))
+                    self.__find_segm_time_from_displacement(current.displacement, segment))
             
-            if not segment.timeInSegmentSegmTime(time): # marker is not in the segment
-                self.__printMarkerNotInSegmentError(current, segment)
+            if not segment.time_in_segment_segm_time(time): # marker is not in the segment
+                self.__print_marker_not_in_segment_error(current, segment)
                 continue
 
             self.final_markers.append(FunctionMarker(time = segment.states[time].time,
@@ -447,28 +461,28 @@ class TrajectoryBuilder():
 
 
     # big boss function
-    def __processRelativeMarkers(self, markers: List[Marker], segment: MotionSegment):
-        markers = self.__processRelativesIntoAbsolutesDisplacement(markers, segment)
-        markers = self.__processNegativeIntoPositiveDisplacement(markers, segment)
-        markers = self.__sortMarkers(markers)
+    def __process_relative_markers(self, markers: List[Marker], segment: MotionSegment):
+        markers = self.__process_relatives_into_absolutes_displacement(markers, segment)
+        markers = self.__process_negative_into_positive_displacement(markers, segment)
+        markers = self.__sort_markers(markers)
 
         # now we are working with relative time and absolute displacement
 
-        markers, constraints, interrupt, function = self.__separateMarkersByType(markers)
-        segment = self.__processRelativeConstraints(constraints, segment)
-        segment = self.__processRelativeInterrupt(interrupt, segment)
-        self.__processRelativeFunction(function, segment)
+        markers, constraints, interrupt, function = self.__separate_markers_by_type(markers)
+        segment = self.__process_relative_constraints(constraints, segment)
+        segment = self.__process_relative_interrupt(interrupt, segment)
+        self.__process_relative_function(function, segment)
 
         return markers, segment
 
-    def __processFinalFunctionMarkers(self):
-        self.__processNegativeIntoPositiveAll()
-        self.__transformDisplacementIntoTemporal()
-        self.__sortFinalFunctionMarkers()
+    def __process_final_function_markers(self):
+        self.__process_negative_into_positive_all()
+        self.__transform_displacement_into_temporal()
+        self.__sort_final_function_markers()
 
     
 
-    def __processNegativeIntoPositiveAll(self):
+    def __process_negative_into_positive_all(self):
         remove = []
         removed = 0
 
@@ -483,7 +497,7 @@ class TrajectoryBuilder():
                         marker.displacement = positive   # if so, update marker
                     else: 
                         remove.append(i)                 # else remove marker, because it's impossible
-                        self.__printMarkerNotInTrajectoryError(marker)
+                        self.__print_marker_not_in_trajectory_error(marker)
             
             else:
                 if marker.time < 0:
@@ -493,13 +507,13 @@ class TrajectoryBuilder():
                         marker.time = positive
                     else:
                         remove.append(i)
-                        self.__printMarkerNotInTrajectoryError(marker)
+                        self.__print_marker_not_in_trajectory_error(marker)
                         
         for index in remove:
             self.final_markers.pop(index - removed)
             removed += 1
 
-    def __transformDisplacementIntoTemporal(self):
+    def __transform_displacement_into_temporal(self):
         for marker in self.final_markers:
             if marker.displacement is None: 
                 continue
@@ -509,12 +523,12 @@ class TrajectoryBuilder():
             marker.displacement = None
             marker.time = self.states[index].time
 
-    def __sortFinalFunctionMarkers(self):
-        self.final_markers = self.__sortMarkers(self.final_markers)
+    def __sort_final_function_markers(self):
+        self.final_markers = self.__sort_markers(self.final_markers)
 
 
 
-    def __isEligibleToCombineLinear(self, cm: float) -> bool:
+    def __is_eligible_to_combine_linear(self, cm: float) -> bool:
         if len(self.segments) == 0:
             return False
         
@@ -529,7 +543,7 @@ class TrajectoryBuilder():
         
         return True
 
-    def __isEligibleToCombineWait(self, ms: float) -> bool:
+    def __is_eligible_to_combine_wait(self, ms: float) -> bool:
         if len(self.segments) == 0:
             return False
         
@@ -540,18 +554,7 @@ class TrajectoryBuilder():
 
 
 
-    def __printMarkersDebugging(self, markers: List[Marker]):
-        print("\n\n")
-
-        for marker in markers:
-            class_type = marker.__class__.__name__
-
-            print("{0}: time ({1})   displacement ({2})"
-                  .format(class_type,
-                          marker.time,
-                          marker.displacement))
-    
-    def __printMarkerNotInSegmentError(self, marker: Marker, segment: MotionSegment):
+    def __print_marker_not_in_segment_error(self, marker: Marker, segment: MotionSegment):
         print("\n\nthere is no motion state at {0}{1} in this segment"
                   .format(marker.time if marker.time is not None else round(marker.displacement - segment.states[0].displacement, 2),
                           "ms" if marker.time is not None else "cm"))
@@ -564,7 +567,7 @@ class TrajectoryBuilder():
 
                           "ms" if marker.time is not None else "cm"))
 
-    def __printMarkerNotInTrajectoryError(self, marker: Marker):
+    def __print_marker_not_in_trajectory_error(self, marker: Marker):
         print("\n\nthere is no motion state at {0}{1} in this trajectory"
                   .format(marker.time if marker.time is not None else round(marker.displacement, 2),
                           "ms" if marker.time is not None else "cm"))
@@ -576,10 +579,23 @@ class TrajectoryBuilder():
 
                           "ms" if marker.time is not None else "cm"))
 
-    def __writeSegmentInFileDebugging(self, segment: MotionSegment, file_name: str = "test"):
+
+
+    def __print_markers_debugging(self, markers: List[Marker]):
+        print("\n\n")
+
+        for marker in markers:
+            class_type = marker.__class__.__name__
+
+            print("{0}: time ({1})   displacement ({2})"
+                  .format(class_type,
+                          marker.time,
+                          marker.displacement))
+    
+    def __write_segment_in_file_debugging(self, segment: MotionSegment, file_name: str = "test"):
         with open("{0}.txt".format(file_name), "w") as f:
             for state in segment.states:
-                f.write("{0} {1} {2} {3}\n".format(round(state.velocities.getVelocityMagnitude(), 1),
+                f.write("{0} {1} {2} {3}\n".format(round(state.velocities.get_velocity_magnitude(), 1),
                                              state.velocities.ANG_VEL,
                                              state.time,
                                              round(state.displacement, 3)))

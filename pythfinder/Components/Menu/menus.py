@@ -2,9 +2,9 @@ from pythfinder.Components.BetterClasses.edgeDetectorEx import *
 from pythfinder.Components.Constants.constants import *
 from pythfinder.Components.Menu.buttons import *
 from pythfinder.Components.Menu.enums import *
-from abc import ABC, abstractmethod
+
 from typing import List
-import pygame
+from abc import ABC
 
 # file containing:
 #       - abstract menu containing more between-button movement logic
@@ -17,7 +17,8 @@ class AbsMenu(ABC):
                  constants: Constants, 
                  background: pygame.Surface | None, 
                  always_display: bool = False, 
-                 overlap: bool = False):
+                 overlap: bool = False,
+                 indicator: pygame.Surface | None = None):
         
         self.name = name
         self.ENABLED = BooleanEx(False)
@@ -33,22 +34,35 @@ class AbsMenu(ABC):
         try: self.background_rect = background.get_rect()
         except: self.background_rect = None
         finally: self.background = background
-    
-    def setSelected(self, selected: Selected):
+
+        try: self.indicator_rect = indicator.get_rect()
+        except: self.indicator_rect = None
+        finally: self.indicator = indicator
+
+
+
+    def indicator_center(self, center: tuple):
+        if isinstance(self.indicator, pygame.Surface):
+            self.indicator_rect.center = center
+      
+    def background_center(self, center: tuple):
+        self.background_rect.center = center
+
+
+    def set_selected(self, selected: Selected):
         self.selected = selected
     
-    def setButtons(self, buttons: List[AbsButton]):
+    def set_buttons(self, buttons: List[AbsButton]):
         self.buttons = buttons
     
-    def setPressed(self, value: bool):
+    def set_pressed(self, value: bool):
         self.pressed = value
-    
-    def backgroundCenter(self, center: tuple):
-        self.background_rect.center = center
-    
-    def resetButtonsDefault(self):
+
+
+
+    def reset_buttons_default(self):
         for b in self.buttons:
-            b.resetDefault()
+            b.reset_default()
 
 
 
@@ -62,7 +76,7 @@ class AbsMenu(ABC):
         for button in self.buttons:
             button.check()
 
-    def updateSelections(self, direction: Dpad | None) -> Selected:
+    def update_selections(self, direction: Dpad | None) -> Selected:
         FINAL = None
 
         for button in self.buttons:
@@ -80,7 +94,7 @@ class AbsMenu(ABC):
         return FINAL
 
     # all the toggle buttons values in a list
-    def getToggles(self):
+    def get_toggles(self):
         list = []
         for button in self.buttons:
             try: list.append(button.on())
@@ -88,7 +102,7 @@ class AbsMenu(ABC):
         
         return list
 
-    def resetToggles(self):
+    def reset_toggles(self):
         for button in self.buttons:
             try: button.reset()
             except: pass
@@ -100,7 +114,7 @@ class AbsMenu(ABC):
                 return next
         return None
 
-    def getNext(self): 
+    def get_next(self): 
         for button in self.buttons:  # checks each button, and if it's a dynamic button and it's pressed,
             try:                     #      gets the next menu it links to
                 next = button.getNext()
@@ -111,11 +125,14 @@ class AbsMenu(ABC):
 
 
 
-    def onScreen(self, screen: pygame.Surface):
+    def on_screen(self, screen: pygame.Surface):
         if self.ENABLED.compare(False) and not self.always_display:
             return 0
         
         try: screen.blit(self.background, self.background_rect)
+        except: pass
+
+        try: screen.blit(self.indicator, self.indicator_rect)
         except: pass
 
         for button in self.buttons:
@@ -127,5 +144,6 @@ class Submenu(AbsMenu):
                  name: MenuType, constants: Constants, 
                  background: pygame.Surface | None, 
                  always_display: bool = False, 
-                 overlap: bool = False):
-        super().__init__(name, constants, background, always_display, overlap)
+                 overlap: bool = False,
+                 indicator: pygame.Surface | None = None):
+        super().__init__(name, constants, background, always_display, overlap, indicator)

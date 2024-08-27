@@ -43,7 +43,7 @@ class Constraints():
         if dec is not None:
             self.DEC = -abs(dec)
     
-    def isLike(self, other):
+    def is_like(self, other):
         return (self.MAX_VEL == other.MAX_VEL 
                             and
                 self.ACC == other.ACC
@@ -72,9 +72,9 @@ class Constraints2D():
                              self.angular.copy(),
                              self.TRACK_WIDTH)
     
-    def isLike(self, other):
-        return (self.linear.isLike(other.linear)
+    def is_like(self, other):
+        return (self.linear.is_like(other.linear)
                             and
-                self.angular.isLike(other.angular)
+                self.angular.is_like(other.angular)
                             and
                 self.TRACK_WIDTH == other.TRACK_WIDTH)

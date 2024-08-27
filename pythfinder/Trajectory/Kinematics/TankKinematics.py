@@ -19,6 +19,7 @@ class TankKinematics(Kinematics):
         if self.parallel_wheels % 2 == 1:
             raise Exception('\n\nyou kinda forgot one wheel somewhere')
 
+
     def inverse(self, chassis_state: ChassisState) -> Tuple[WheelState]:
         velocity = chassis_state.VEL
         angular_velocity = chassis_state.ANG_VEL
@@ -53,12 +54,13 @@ class TankKinematics(Kinematics):
             angular_velocity = angular_velocity
         )
     
-    def getType(self) -> ChassisType:
+
+    def get_type(self) -> ChassisType:
         if self.perpendicular_wheels == 0:
             return ChassisType.NON_HOLONOMIC
         return ChassisType.HOLONOMIC
 
-    def angular2LinearVel(self, angular_velocity):
+    def angular_to_linear(self, angular_velocity):
         return self.track_width * 0.5 * angular_velocity
     
     def copy(self):

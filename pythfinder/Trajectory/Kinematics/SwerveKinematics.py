@@ -54,16 +54,18 @@ class SwerveKinematics(Kinematics):
             self.last_state.append(WheelState())
         self.last_state = tuple(self.last_state)
     
+
     def lock(self):
         self.LOCKED = True
 
     def unlock(self):
         self.LOCKED = False
     
-    def setLockState(self, lock: SwerveLockStates):
+
+    def set_lock_state(self, lock: SwerveLockStates):
         self.lock_state = lock
 
-    def getLockState(self) -> Tuple[WheelState]:
+    def get_lock_state(self) -> Tuple[WheelState]:
         module_states: list = []
 
         match self.lock_state:
@@ -93,9 +95,10 @@ class SwerveKinematics(Kinematics):
         
         return tuple(module_states)
 
+
     def inverse(self, chassis_state: ChassisState) -> Tuple[WheelState]:
         if self.LOCKED:
-            return self.getLockState()
+            return self.get_lock_state()
 
         velocity = chassis_state.VEL
         angular_velocity = chassis_state.ANG_VEL
@@ -141,7 +144,8 @@ class SwerveKinematics(Kinematics):
             round(angular_velocity, 5)
         )
 
-    def getType(self) -> ChassisType:
+
+    def get_type(self) -> ChassisType:
         return ChassisType.HOLONOMIC
 
     def copy(self):

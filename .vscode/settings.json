@@ -4,5 +4,6 @@
         
     ],
     "plantuml.java": "C:\\Program Files\\Common Files\\Oracle\\Java\\javapath\\java.exe",
+    "python.analysis.typeCheckingMode": "off",
     
 }

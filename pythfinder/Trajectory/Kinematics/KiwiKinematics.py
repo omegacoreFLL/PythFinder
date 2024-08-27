@@ -33,7 +33,7 @@ class KiwiKinematics(Kinematics):
                                              y = (RW.VELOCITY - LW.VELOCITY) / math.sqrt(3)).round(5),
                             angular_velocity = round(-(FW.VELOCITY + LW.VELOCITY + RW.VELOCITY) / (3 * self.R), 5))
     
-    def getType(self) -> ChassisType:
+    def get_type(self) -> ChassisType:
         return ChassisType.HOLONOMIC
 
     def copy(self):

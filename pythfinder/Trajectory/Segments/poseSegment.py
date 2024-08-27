@@ -32,7 +32,7 @@ class PoseSegment(MotionSegment):
         self.primitives: List[MotionSegment] = []
 
         # non-holonomic chassis require a heading tangent to the path
-        if self.kinematics.getType() is ChassisType.NON_HOLONOMIC:
+        if self.kinematics.get_type() is ChassisType.NON_HOLONOMIC:
             self.tangent = True
             self.linear_head = False
         
@@ -40,11 +40,11 @@ class PoseSegment(MotionSegment):
 
         if self.tangent and not self.linear_head:
             # get the angle of the line
-            head = normalizeDegrees(toDegrees((self.pose.point() - self.last_state.pose.point()).atan2()))
+            head = normalize_degres(math.degrees((self.pose.point() - self.last_state.pose.point()).atan2()))
 
         # reverse the heading, holonomic or non-holonomic
         if reversed:
-            head = normalizeDegrees(180 + head)
+            head = normalize_degres(180 + head)
 
         # first primitive in this case would be going reverse / tangent (or no turn at all)
         self.primitives.append(AngularSegment(None, None, kinematics, head))
@@ -57,40 +57,40 @@ class PoseSegment(MotionSegment):
 
 
     
-    def addConstraintsTrajTime(self, time: int, constraints2D: Constraints2D, auto_build: bool = True):
-        self.addConstraintsSegmTime(self.trajTime_2_segmTime(time), constraints2D, auto_build)
+    def add_constraints_traj_time(self, time: int, constraints2D: Constraints2D, auto_build: bool = True):
+        self.add_constraints_segm_time(self.traj_time_to_segm_time(time), constraints2D, auto_build)
 
-    def addConstraintsSegmTime(self, time: int, constraints2D: Constraints2D, auto_build: bool = True):
+    def add_constraints_segm_time(self, time: int, constraints2D: Constraints2D, auto_build: bool = True):
         if not self.built:
             print("\n\ncan't add constraints without calling the 'generate' method")
             return None
         
-        time = self.normalizeSegmTime(time)
+        time = self.normalize_segm_time(time)
 
         linear_nr = len(self.linear_states)
         first_angular_nr = len(self.first_angular_states)
         last_angular_nr = len(self.last_angular_states)
 
         if time < first_angular_nr:       # all 3
-                self.primitives[0].addConstraintsSegmTime(time, constraints2D)
-                self.primitives[1].addConstraintsSegmTime(0, constraints2D)
-                self.primitives[2].addConstraintsSegmTime(0, constraints2D)
+                self.primitives[0].add_constraints_segm_time(time, constraints2D)
+                self.primitives[1].add_constraints_segm_time(0, constraints2D)
+                self.primitives[2].add_constraints_segm_time(0, constraints2D)
 
         elif not self.linear_head:                      # segments are separated
             if time < linear_nr:          # last 2
-                self.primitives[1].addConstraintsSegmTime(time - first_angular_nr, constraints2D)
-                self.primitives[2].addConstraintsSegmTime(0, constraints2D)
+                self.primitives[1].add_constraints_segm_time(time - first_angular_nr, constraints2D)
+                self.primitives[2].add_constraints_segm_time(0, constraints2D)
 
             if time < last_angular_nr:    # last 1
-                self.primitives[2].addConstraintsSegmTime((time - first_angular_nr - linear_nr), constraints2D)
+                self.primitives[2].add_constraints_segm_time((time - first_angular_nr - linear_nr), constraints2D)
         
         else:                                           # segments are combined
                 relative_time = time - first_angular_nr
 
                 if relative_time < linear_nr:
-                    self.primitives[1].addConstraintsSegmTime(relative_time, constraints2D)
+                    self.primitives[1].add_constraints_segm_time(relative_time, constraints2D)
                 if relative_time < last_angular_nr:
-                    self.primitives[2].addConstraintsSegmTime(relative_time, constraints2D)
+                    self.primitives[2].add_constraints_segm_time(relative_time, constraints2D)
 
 
         self.constraints2d = constraints2D
@@ -132,7 +132,7 @@ class PoseSegment(MotionSegment):
         
 
         if self.linear_head:
-            combined = self.__combineLinearAndAngular()
+            combined = self.__combine_linear_and_angular()
             self.states = self.first_angular_states + combined
         else: 
             self.states = self.first_angular_states + self.linear_states + self.last_angular_states
@@ -144,7 +144,7 @@ class PoseSegment(MotionSegment):
     
     
 
-    def __combineLinearAndAngular(self):
+    def __combine_linear_and_angular(self):
         combined: List[MotionState] = [] 
 
         ang_nr = len(self.last_angular_states)
@@ -176,12 +176,12 @@ class PoseSegment(MotionSegment):
         
         return combined
         
-    def motionFromProfileState(self, t: int, profile_state: ProfileState) -> MotionState:
+    def motion_from_profile_state(self, t: int, profile_state: ProfileState) -> MotionState:
         pass # the primitives do this for you
 
 
 
-    def getAction(self) -> MotionAction:
+    def get_action(self) -> MotionAction:
         return MotionAction.TO_POSE
     
     def copy(self, last_state: MotionState, constraints2d: Constraints2D):

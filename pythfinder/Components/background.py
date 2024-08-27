@@ -74,15 +74,15 @@ class Background():
             new_y = self.constants.screen_size.height - point.y
             return Point(point.x, new_y)
 
-    def onScreen(self, screen: pygame.Surface):
-        self.__drawGrid(screen)
-        self.__drawAxis(screen)
-        self.__drawArrows(screen)
-        self.__drawXY(screen)
+    def on_screen(self, screen: pygame.Surface):
+        self.__draw_grid(screen)
+        self.__draw_axis(screen)
+        self.__draw_arrows(screen)
+        self.__draw_xy(screen)
 
 
 
-    def __drawGrid(self, screen: pygame.Surface):
+    def __draw_grid(self, screen: pygame.Surface):
         #draw 'x'
         for line in range(self.units_on_screen_x + 1):
             #mirror one point to all quadrants
@@ -106,17 +106,17 @@ class Background():
             pygame.draw.line(screen, self.constants.GRID_COLOR, 
                 (negative_point.x, 0), (negative_point.x, self.constants.screen_size.height), width = 1)
 
-    def __drawAxis(self, screen: pygame.Surface):
+    def __draw_axis(self, screen: pygame.Surface):
         pygame.draw.line(screen, self.constants.AXIS_COLOR, self.negative_x, self.positive_x, width = 4)
         pygame.draw.line(screen, self.constants.AXIS_COLOR, self.negative_y, self.positive_y, width = 4)
 
-    def __drawArrows(self, screen: pygame.Surface):
+    def __draw_arrows(self, screen: pygame.Surface):
         #on 'x' field axis
         pygame.draw.line(screen, self.constants.AXIS_COLOR, 
                 self.positive_x, self.x_arrow_point_left, width = 4)
         pygame.draw.line(screen, self.constants.AXIS_COLOR, 
                 self.positive_x, 
-                point2Tuple(self.symmetrical(tuple2Point(self.x_arrow_point_left), Axis.X)), 
+                self.symmetrical(Point.from_tuple(self.x_arrow_point_left), Axis.X).tuple(), 
                 width = 4)
 
         #on 'y' field axis
@@ -124,10 +124,10 @@ class Background():
                 self.positive_y, self.y_arrow_point_up, width = 4)
         pygame.draw.line(screen, self.constants.AXIS_COLOR, 
                 self.positive_y, 
-                point2Tuple(self.symmetrical(tuple2Point(self.y_arrow_point_up), Axis.Y)),
-                 width = 4)
+                self.symmetrical(Point.from_tuple(self.y_arrow_point_up), Axis.Y).tuple(),
+                width = 4)
     
-    def __drawXY(self, screen: pygame.Surface):
+    def __draw_xy(self, screen: pygame.Surface):
         screen.blit(self.x_coord, self.x_rectangle)
         screen.blit(self.y_coord, self.y_rectangle)
 

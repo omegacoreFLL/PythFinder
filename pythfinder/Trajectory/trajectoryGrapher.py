@@ -16,13 +16,13 @@ class TrajectoryGrapher():
 
    
     
-    def graphWheelSpeeds(self, connect: bool = False, velocity: bool = True, acceleration: bool = True):
+    def graph_wheel_speeds(self, connect: bool = False, velocity: bool = True, acceleration: bool = True):
         VEL = []
         ACC = []
 
         # get wheel speeds
         for state in self.STATES:
-            robot_centric_vel = state.velocities.fieldToRobot(state.pose)
+            robot_centric_vel = state.velocities.field_to_robot(state.pose)
             wheel_speeds = self.sim.constants.kinematics.inverse(robot_centric_vel)
 
             for i in range(len(wheel_speeds)):
@@ -41,23 +41,23 @@ class TrajectoryGrapher():
 
         # get wheel accelerations
         for vel in VEL:
-            ACC.append(self.__getDerivative(vel))
+            ACC.append(self.__get_derivative(vel))
         
 
 
         mplt.style.use('dark_background')
 
         if acceleration:
-            self.__plotWheelAccelerationWindow(time, ACC, connect, "red")
+            self.__plot_wheel_acceleration_window(time, ACC, connect, "red")
             mplt.tight_layout()
 
         if velocity:
-            self.__plotWheelVelocityWindow(time, VEL, connect, "green")
+            self.__plot_wheel_velocity_window(time, VEL, connect, "green")
             mplt.tight_layout()
 
         mplt.show()
 
-    def __plotWheelVelocityWindow(self, t: List[int], vel: List[list],
+    def __plot_wheel_velocity_window(self, t: List[int], vel: List[list],
                                   connect: bool, color: str):
         
         figure = mplt.figure(figsize = (7, 7), facecolor = 'black')
@@ -79,7 +79,7 @@ class TrajectoryGrapher():
 
             ax.axhline(0, color = 'white', linewidth = 0.5)
 
-    def __plotWheelAccelerationWindow(self, t: List[int], acc: List[list],
+    def __plot_wheel_acceleration_window(self, t: List[int], acc: List[list],
                                       connect: bool, color: str):
         
         figure = mplt.figure(figsize = (7, 7), facecolor = 'black')
@@ -103,14 +103,14 @@ class TrajectoryGrapher():
 
 
 
-    def graphChassisSpeeds(self, connect: bool = False, velocity: bool = True, acceleration: bool = True):
+    def graph_chassis_speeds(self, connect: bool = False, velocity: bool = True, acceleration: bool = True):
         VEL_X = []
         VEL_Y = []
         ANG_VEL = []
 
         # get all velocities into separate lists
         for state in self.STATES:
-            robot_centric_vel = state.velocities.fieldToRobot(state.pose)
+            robot_centric_vel = state.velocities.field_to_robot(state.pose)
 
             VEL_X.append(robot_centric_vel.VEL.x)
             VEL_Y.append(robot_centric_vel.VEL.y)
@@ -124,22 +124,22 @@ class TrajectoryGrapher():
             each.append(0)
 
         time = linspace(0, len(VEL_X), len(VEL_X))
-        plots_deriv = [self.__getDerivative(vel) for vel in plots]
+        plots_deriv = [self.__get_derivative(vel) for vel in plots]
         
 
 
         mplt.style.use('dark_background')
 
         if acceleration:
-            self.__plotChassisAccelerationWindow(time, plots_deriv, connect, color = 'red')
+            self.__plot_chassis_acceleration_window(time, plots_deriv, connect, color = 'red')
             mplt.tight_layout()
         if velocity:
-            self.__plotChassisVelocityWindow(time, plots, connect, color = 'green')
+            self.__plot_chassis_velocity_window(time, plots, connect, color = 'green')
             mplt.tight_layout()
 
         mplt.show()
             
-    def __plotChassisVelocityWindow(self, t: List[int], vel: List[list], 
+    def __plot_chassis_velocity_window(self, t: List[int], vel: List[list], 
                                     connect: bool, color: str):
 
         figure = mplt.figure(figsize = (10, 4), facecolor = 'black')
@@ -161,7 +161,7 @@ class TrajectoryGrapher():
 
             ax.axhline(0, color = 'white', linewidth = 0.5)
 
-    def __plotChassisAccelerationWindow(self, t: List[int], acc: List[list], 
+    def __plot_chassis_acceleration_window(self, t: List[int], acc: List[list], 
                                         connect: bool, color: str):
         
         figure = mplt.figure(figsize = (10, 4), facecolor = 'black')
@@ -185,7 +185,7 @@ class TrajectoryGrapher():
 
 
 
-    def __getDerivative(self, vel: List[float]):
+    def __get_derivative(self, vel: List[float]):
         ACC = []
 
         for i in range(len(vel)):

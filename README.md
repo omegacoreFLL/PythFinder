@@ -9,9 +9,9 @@
 
 # Installation
 Before we dive into it, make sure you have:
-* a ``python`` version greater than 3.10 ([latest version][1] is recommended) ;
-* [``pip``][2] installed on your device (usually pip3 for 3.x versions, but pip works too) ;
-* our team's ``font`` '[graffitiyouthregular][5]' installed on your machine (used on the interface) ;
+* a ``Python`` version greater than 3.10 ([latest version][1] is recommended);
+* [``pip``][2] installed on your device (usually pip3 for 3.x versions, but pip works too);
+* our team's ``font`` '[graffitiyouthregular][5]' installed on your machine (used on the interface);
 <br />
 
 Now the installation it's as easy as writing a command in the command prompt or in Visual Studio's terminal:
@@ -43,9 +43,9 @@ So we developed a ``trajectory generator tool`` that runs locally on your machin
 On the robot side, there is a simplified version of just the following aspect of the library, along with methods to construct
 trajectories back from the ``.txt`` file decomposition. 
 
-Because of this operation, after starting the program, for an average max-points scoring code, there will be a time window of 2 - 5 minutes when the robot loads all the data (assuming 7-8 different launches). At this time, the code won't be accessible.
+Because of this operation, after starting the program, for an average max-points scoring code, there will be a time window of 1 - 3 minutes when the robot loads all the data (assuming 7-8 different launches). At this time, the code won't be accessible.
 Obviously, the time needed for reading data depends on the data amount, which can be manipulated by the user in multiple ways we'll describe later.
-**We recommend that you start the program at least 5 minutes before the match.**
+**We recommend that you start the program at least 4 minutes before the match.**
 
 But '*why would this method be better?*' you might ask. The answer is **consistency**. This library uses techniques found in industrial robotics control systems, enhancing precision through acceleration limitation profiles, multithreading actions for running multiple motor outputs at the same time, and more.
 
@@ -122,16 +122,16 @@ All of the Nintendo controllers are currently not supported and will raise an er
 The controls used to manipulate the simulator are the following:
 <br />
 <span style="font-size:0.8em;">*(the order of buttons is: **ps4 / xbox**)*</span>
-* ``△ / Y`` **--** go forwards / backwards (when field centric is on) ;
-* ``□ / X`` **--** enter / exit interface setting menu ;
-* ``○ / B`` **--** reset robot pose to origin / press buttons (when the menu is activated) ;
-* ``X / A`` **--** show / hide trail ;
-* ``left bumper`` **--** erase trail / set values to default (when the menu is activated) ;
-* ``right bumper`` **--** when held, enters selection mode ;
-* ``D-pad`` **--** move through the interface menu / select the robot's orientation (when selection mode is on) ;
-* ``left joystick`` **--** control robot's linear velocity + angular velocity (when field centric is on) ;
-* ``right joystick`` *--* control angular velocity (**ONLY** when field centric is off) ;
-* ``options / start`` **--** take a screenshot (found in the 'Screenshots' folder inside the locally installed library location) ;
+* ``△ / Y`` **--** go forwards / backwards (when field centric is on);
+* ``□ / X`` **--** enter / exit interface setting menu;
+* ``○ / B`` **--** reset robot pose to origin / press buttons (when the menu is activated);
+* ``X / A`` **--** show / hide trail;
+* ``left bumper`` **--** erase trail / set values to default (when the menu is activated);
+* ``right bumper`` **--** when held, enters selection mode;
+* ``D-pad`` **--** move through the interface menu / select the robot's orientation (when selection mode is on);
+* ``left joystick`` **--** control robot's linear velocity + angular velocity (when field centric is on);
+* ``right joystick`` *--* control angular velocity (**ONLY** when field centric is off);
+* ``options / start`` **--** take a screenshot (found in the 'Screenshots' folder inside the locally installed library location);
 
 <br/>
 
@@ -141,7 +141,7 @@ The controls used to manipulate the simulator are the following:
 
 ## Trajectory Usage
 
-### What are trajectories?
+### What are Trajectories?
 
 First, we define a specific set of data regarding the robot's position, speed, and distance traveled as a **state of motion**.
 
@@ -291,8 +291,10 @@ To actually make the robot move like in the simulator, you'll need to **transfer
 ```python
 STEPS = 6
 FILE_NAME = 'test'
+WHEEL_SPEEDS = True
+SEPARATE_LINES = False
 
-trajectory.generate(FILE_NAME, STEPS)
+trajectory.generate(FILE_NAME, STEPS, WHEEL_SPEEDS, SEPARATE_LINES)
 ```
 
 Now you can copy the '.txt' file and load it into the quick-start to see it running!

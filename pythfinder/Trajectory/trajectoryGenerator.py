@@ -13,7 +13,7 @@ class TrajectoryGenerator():
         self.STATES = motion_states
         self.MARKERS = markers
     
-    def generateWheelSpeeds(self, file_name: str, steps: int = 1, separate_lines: bool = False):
+    def generate_wheel_speeds(self, file_name: str, steps: int = 1, separate_lines: bool = False):
         with open('{0}.txt'.format(file_name), "w") as f:
 
             # first layer --> marker times
@@ -37,20 +37,20 @@ class TrajectoryGenerator():
 
                 consecutive = 0
                 try: # same stuff here
-                    while current_state.isLike(self.STATES[t * steps]):
+                    while current_state.is_like(self.STATES[t * steps]):
                         consecutive += 1
                         t += 1
                 except: pass
                 
                 # write velocities for each wheel, acording to the kinematics
-                robot_centric_vel = current_state.velocities.fieldToRobot(current_state.pose)
+                robot_centric_vel = current_state.velocities.field_to_robot(current_state.pose)
                 wheel_states = self.sim.constants.kinematics.inverse(robot_centric_vel)
 
                 if isinstance(self.sim.constants.kinematics, SwerveKinematics):
                     # add module angles too
-                    line = ''.join("{0} {1} ".format((self.sim.robot.toMotorPower(state.VELOCITY), 2), round(state.ANGLE, 2)) for state in wheel_states)
+                    line = ''.join("{0} {1} ".format((self.sim.robot.to_motor_power(state.VELOCITY), 2), round(state.ANGLE, 2)) for state in wheel_states)
                 else:
-                    line = ''.join(str(round(self.sim.robot.toMotorPower(state.VELOCITY), 2)) + " " for state in wheel_states)
+                    line = ''.join(str(round(self.sim.robot.to_motor_power(state.VELOCITY), 2)) + " " for state in wheel_states)
                 
                 line = line + "{0} {1} ".format(
                     round(current_state.pose.head, 2), 
@@ -61,7 +61,7 @@ class TrajectoryGenerator():
                         
                 f.write(line)
 
-    def generateChassisSpeeds(self, file_name: str, steps: int = 1, separate_lines: bool = False):
+    def generate_chassis_speeds(self, file_name: str, steps: int = 1, separate_lines: bool = False):
 
         with open('{0}.txt'.format(file_name), "w") as f:
 
@@ -86,12 +86,12 @@ class TrajectoryGenerator():
 
                 consecutive = 0
                 try: # same stuff here
-                    while current_state.isLike(self.STATES[t * steps]):
+                    while current_state.is_like(self.STATES[t * steps]):
                         consecutive += 1
                         t += 1
                 except: break
                 
-                robot_centric_vel = current_state.velocities.fieldToRobot(current_state.pose)
+                robot_centric_vel = current_state.velocities.field_to_robot(current_state.pose)
 
                 # write velocities for each wheel, acording to the kinematics
                 line = '{0} {1} {2} {3} {4}'.format(

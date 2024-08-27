@@ -31,18 +31,18 @@ class PointSegment(MotionSegment):
         self.primitives: List[MotionSegment] = []
 
         # non-holonomic chassis require a heading tangent to the path
-        if self.kinematics.getType() is ChassisType.NON_HOLONOMIC:
+        if self.kinematics.get_type() is ChassisType.NON_HOLONOMIC:
             self.tangent = True
         
         head = self.last_state.pose.head
 
         if self.tangent:
             # get the angle of the line
-            head = normalizeDegrees(toDegrees((target - current).atan2()))
+            head = normalize_degres(math.degrees((target - current).atan2()))
 
         # reverse the heading, holonomic or non-holonomic
         if reversed:
-            head = normalizeDegrees(180 + head)
+            head = normalize_degres(180 + head)
 
         # first primitive in this case would be going reverse / tangent (or no turn at all)
         self.primitives.append(AngularSegment(None, None, kinematics, head))
@@ -50,21 +50,21 @@ class PointSegment(MotionSegment):
         
 
 
-    def addConstraintsTrajTime(self, time: int, constraints2D: Constraints2D, auto_build: bool = True):
-        self.addConstraintsSegmTime(self.trajTime_2_segmTime(time), constraints2D, auto_build)
+    def add_constraints_traj_time(self, time: int, constraints2D: Constraints2D, auto_build: bool = True):
+        self.add_constraints_segm_time(self.traj_time_to_segm_time(time), constraints2D, auto_build)
 
-    def addConstraintsSegmTime(self, time: int, constraints2D: Constraints2D, auto_build: bool = True):
+    def add_constraints_segm_time(self, time: int, constraints2D: Constraints2D, auto_build: bool = True):
         if not self.built:
             print("\n\ncan't add constraints without calling the 'generate' method")
             return None
         
-        time = self.normalizeSegmTime(time)
+        time = self.normalize_segm_time(time)
 
-        if not self.stateFromPureLinearSegment(self.states[time]):
-            self.primitives[-2].addConstraintsSegmTime(self.pointSegmTime_2_angularSegmTime(time), constraints2D, auto_build = False)       # angular
-            self.primitives[-1].addConstraintsSegmTime(0, constraints2D, auto_build = False)                                                # linear
+        if not self.state_from_pure_linear_segment(self.states[time]):
+            self.primitives[-2].add_constraints_segm_time(self.point_segm_time_2_angular_segm_time(time), constraints2D, auto_build = False)       # angular
+            self.primitives[-1].add_constraints_segm_time(0, constraints2D, auto_build = False)                                                # linear
 
-        else: self.primitives[-1].addConstraintsSegmTime(self.pointSegmTime_2_linearSegmTime(time), constraints2D, auto_build = False)
+        else: self.primitives[-1].add_constraints_segm_time(self.point_segm_time_2_linear_segm_time(time), constraints2D, auto_build = False)
 
         self.constraints2d = constraints2D
 
@@ -73,10 +73,10 @@ class PointSegment(MotionSegment):
 
 
 
-    def pointSegmTime_2_linearSegmTime(self, time: int):
+    def point_segm_time_2_linear_segm_time(self, time: int):
         return time - len(self.primitives[-2].states) + 1
 
-    def pointSegmTime_2_angularSegmTime(self, time: int):
+    def point_segm_time_2_angular_segm_time(self, time: int):
         return time # i mean
 
 
@@ -113,12 +113,12 @@ class PointSegment(MotionSegment):
     
     
 
-    def motionFromProfileState(self, t: int, profile_state: ProfileState) -> MotionState:
+    def motion_from_profile_state(self, t: int, profile_state: ProfileState) -> MotionState:
         pass # the primitives do this for you
 
 
 
-    def getAction(self) -> MotionAction:
+    def get_action(self) -> MotionAction:
         return MotionAction.TO_POINT
     
     def copy(self, last_state: MotionState, constraints2d: Constraints2D):

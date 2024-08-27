@@ -1,5 +1,4 @@
 from pythfinder.Trajectory.Segments.Primitives.generic import *
-from pythfinder.Trajectory.Control.feedback import *
 from pythfinder.Trajectory.Markers import *
 
 from pythfinder.Trajectory.trajectoryGenerator import *
@@ -36,8 +35,8 @@ class Trajectory():
         print('\n\nwriting precious values into * {0}.txt * ...'.format(file_name))
 
         if wheel_speeds:
-            self.trajGenerator.generateWheelSpeeds(file_name, steps, separate_lines)
-        else: self.trajGenerator.generateChassisSpeeds(file_name, steps, separate_lines)
+            self.trajGenerator.generate_wheel_speeds(file_name, steps, separate_lines)
+        else: self.trajGenerator.generate_chassis_speeds(file_name, steps, separate_lines)
 
         print('\n\ndone writing in * {0}.txt * file :o'.format(file_name))
 
@@ -61,8 +60,8 @@ class Trajectory():
         print('\n\ncomputing graph...')
 
         if wheel_speeds:
-            self.trajGrapher.graphWheelSpeeds(connect, velocity, acceleration)
-        else: self.trajGrapher.graphChassisSpeeds(connect, velocity, acceleration)
+            self.trajGrapher.graph_wheel_speeds(connect, velocity, acceleration)
+        else: self.trajGrapher.graph_chassis_speeds(connect, velocity, acceleration)
     
     def follow(self,
                perfect: bool = True, 
