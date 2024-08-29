@@ -2,7 +2,7 @@
       <img src="https://i.ibb.co/YbtktKX/pyth-finder-logo.png" alt="pyth-finder-logo" border="0">
 </p>
 
-![version_badge](https://img.shields.io/badge/alpha-0.0.4-006400)
+![version_badge](https://img.shields.io/badge/alpha-0.0.5-006400)
 ![license](https://img.shields.io/badge/license-MIT-62e39e)
 
 <br />
