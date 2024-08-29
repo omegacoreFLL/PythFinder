@@ -29,7 +29,7 @@ class Menu(AbsMenu):
         self.create() # creates each button for each menu
         self.recalculate() # calculates the dimension of each button's afferent image
 
-        self.menus = [self.main_menu, self.robot_menu, self.other_menu, self.upper_bar, self.selection_menu] 
+        self.menus = [self.main_menu, self.robot_menu, self.draw_menu, self.other_menu, self.upper_bar, self.selection_menu] 
         self.main_menu.ENABLED.set(True)
 
 
@@ -123,7 +123,7 @@ class Menu(AbsMenu):
                         next = None)
         self.DRAW.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
                         value = (Selected.INTERFACE, None, Selected.PATHING, None),
-                        next = None)
+                        next = Selected.TRAIL_COLOR)
         self.PATHING.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
                         value = (Selected.DRAW, None, Selected.OTHER, None),
                         next = None)
@@ -211,6 +211,71 @@ class Menu(AbsMenu):
         self.robot_menu.set_buttons([self.ROBOT_IMG_SOURCE, self.ROBOT_WIDTH, self.ROBOT_HEIGHT, self.ROBOT_SCALE])
         self.robot_menu.background_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h))
         self.robot_menu.indicator_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 300))
+
+
+    def create_draw_menu(self):
+        self.TRAIL_COLOR = InputButton(name = Selected.TRAIL_COLOR,
+                                      quadrant_surface = img_draw_quadrant,
+                                      title_surface = img_draw_trail,
+                                      selected_title_surface = img_selected_draw_trail,
+                                      constants = self.constants,
+                                      size = 0,
+                                      value = self.constants.TRAIL_COLOR)
+
+        self.ROBOT_BORDER_COLOR = InputButton(name = Selected.ROBOT_BORDER_COLOR,
+                                      quadrant_surface = img_draw_quadrant,
+                                      title_surface = img_draw_robot_border,
+                                      selected_title_surface = img_selected_draw_robot_border,
+                                      constants = self.constants,
+                                      size = 0,
+                                      value = self.constants.ROBOT_BORDER_COLOR)
+        
+        self.PAINT_COLOR = InputButton(name = Selected.PAINT_COLOR,
+                                        quadrant_surface = img_draw_quadrant,
+                                        title_surface = img_drawing_tools,
+                                        selected_title_surface = img_selected_drawing_tool,
+                                        constants = self.constants,
+                                        size = 0,
+                                        value = self.constants.PAINT_COLOR)
+
+        self.DRAW_COLORS = EmptyButton(name = Selected.DRAW_COLORS,
+                                       quadrant_surface = None,
+                                       title_surface = img_draw_colors,
+                                       selected_title_surface = img_draw_colors)
+        
+        self.TRAIL_COLOR.set_input_type(InputType.COLOR, dimension = 0)
+        self.ROBOT_BORDER_COLOR.set_input_type(InputType.COLOR, dimension = 0)
+        self.PAINT_COLOR.set_input_type(InputType.COLOR, dimension = 0)
+
+
+        self.TRAIL_COLOR.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
+                            value = (Selected.MENU_BUTTON, None, Selected.ROBOT_BORDER_COLOR, None))
+        self.ROBOT_BORDER_COLOR.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
+                            value = (Selected.TRAIL_COLOR, None, Selected.PAINT_COLOR, None))
+        self.PAINT_COLOR.link(key = (Dpad.UP, Dpad.RIGHT, Dpad.DOWN, Dpad.LEFT),
+                            value = (Selected.ROBOT_BORDER_COLOR, None, None, None))
+
+
+
+        self.draw_menu = Submenu(MenuType.DRAW_MENU, self.constants, img_general_menu, indicator = img_draw_indicator, color_picker = True)
+
+    def recalculate_draw_menu(self):
+
+        self.DRAW_COLORS.set_title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 140))
+        self.TRAIL_COLOR.set_title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 15))
+        self.ROBOT_BORDER_COLOR.set_title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 113))
+        self.PAINT_COLOR.set_title_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 244))  
+
+        self.TRAIL_COLOR.set_quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h - 20))
+        self.ROBOT_BORDER_COLOR.set_quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 110))
+        self.PAINT_COLOR.set_quadrant_center((self.constants.screen_size.half_w - 173, self.constants.screen_size.half_h + 240))
+
+        self.draw_menu.set_buttons([self.DRAW_COLORS, self.TRAIL_COLOR, self.ROBOT_BORDER_COLOR, self.PAINT_COLOR])
+        self.draw_menu.background_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h))
+        self.draw_menu.indicator_center((self.constants.screen_size.half_w, self.constants.screen_size.half_h - 295))
+        
+        self.draw_menu.color_picker_h_center((self.constants.screen_size.half_w + 210, self.constants.screen_size.half_h + 155))
+        self.draw_menu.color_picker_sv_center((self.constants.screen_size.half_w + 210, self.constants.screen_size.half_h + 0))
 
 
     def create_other_menu(self):
@@ -321,9 +386,14 @@ class Menu(AbsMenu):
         self.selected = Selected.ON_MAIN_PAGE
         self.enable()
 
+        for menu in self.menus:
+            menu.reset()
+       
+
     def create(self):
         self.create_main_menu()
         self.create_robot_menu()
+        self.create_draw_menu()
         self.create_other_menu()
         self.create_upper_bar()
         self.create_selection_menu()
@@ -331,6 +401,7 @@ class Menu(AbsMenu):
     def recalculate(self):
         self.recalculate_main_menu()
         self.recalculate_robot_menu()
+        self.recalculate_draw_menu()
         self.recalculate_other_menu()
         self.recalculate_upper_bar()
         self.recalculate_selection_menu()

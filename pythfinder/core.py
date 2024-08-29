@@ -262,7 +262,7 @@ class Simulator():
             return 0
         
         if self.controls.joystick_detector[self.controls.keybinds.erase_trail_button].rising:
-            self.robot.trail.hide_trail.set(True)
+            self.robot.trail.HIDE_TRAIL.set(True)
 
         if self.constants.FIELD_CENTRIC.compare():
             if self.controls.joystick_detector[self.controls.keybinds.direction_button].rising:
@@ -289,9 +289,9 @@ class Simulator():
 
         
         if self.controls.joystick_detector[self.controls.keybinds.trail_button].rising:
-            self.robot.trail.draw_trail.negate()
+            self.robot.trail.DRAW_TRAIL.negate()
 
-            if self.robot.trail.draw_trail.compare():
+            if self.robot.trail.DRAW_TRAIL.compare():
                 self.fade.reset(self.constants.resize_image_to_fit_screen_width(img_show_trail, self.constants.screen_size.width))
             else: self.fade.reset(self.constants.resize_image_to_fit_screen_width(img_hide_trail, self.constants.screen_size.width))
 
@@ -323,7 +323,7 @@ class Simulator():
             return 0
         
         if self.controls.keyboard_detector[pygame.K_DELETE].rising:
-            self.robot.trail.hide_trail.set(True)
+            self.robot.trail.HIDE_TRAIL.set(True)
 
         if self.constants.FIELD_CENTRIC.compare():
             if self.controls.keyboard_detector[pygame.K_SPACE].rising:
@@ -336,6 +336,20 @@ class Simulator():
 
         if self.controls.keyboard_detector[pygame.K_TAB].rising:
             self.robot.set_pose_estimate(Pose(0,0,0))
+        
+
+        target = self.robot.pose.head
+
+        if self.controls.arrows_detector[3].rising:
+            target = 0
+        elif self.controls.arrows_detector[0].rising:
+            target = 90
+        elif self.controls.arrows_detector[2].rising:
+            target = 180
+        elif self.controls.arrows_detector[1].rising:
+            target = 270
+  
+        self.robot.pose.head = self.robot.target_head = target
 
     def __update_buttons_menu(self):
         self.constants.MENU_ENTERED.negate()
@@ -362,7 +376,9 @@ class Simulator():
             if self.manual_control.compare(False):
                 self.controls.update()
             
-            if self.controls.joystick_detector[self.controls.keybinds.screenshot_button].rising:
+            if (self.controls.joystick_detector[self.controls.keybinds.screenshot_button].rising
+                                            or 
+                self.controls.keyboard_detector[pygame.K_s].rising):
                 #take a screenshot
 
                 screenshot = pygame.Surface(self.constants.screen_size.get())

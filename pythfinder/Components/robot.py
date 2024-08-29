@@ -273,7 +273,7 @@ class Robot():
         screen.blit(coords, coords_rectangle)
     
     def __draw_border(self, screen: pygame.Surface) -> None:
-        pygame.draw.lines(screen, "yellow", True, self.__find_border(self.window_pose), 3)
+        pygame.draw.lines(screen, self.constants.ROBOT_BORDER_COLOR, True, self.__find_border(self.window_pose), 3)
     
     def __draw_cursor(self, screen: pygame.Surface) -> None:
         x, y = pygame.mouse.get_pos()

@@ -18,7 +18,8 @@ class AbsMenu(ABC):
                  background: pygame.Surface | None, 
                  always_display: bool = False, 
                  overlap: bool = False,
-                 indicator: pygame.Surface | None = None):
+                 indicator: pygame.Surface | None = None,
+                 color_picker: bool = False):
         
         self.name = name
         self.ENABLED = BooleanEx(False)
@@ -30,6 +31,10 @@ class AbsMenu(ABC):
         self.selected = None
         self.buttons = None
         self.pressed = False
+
+        if color_picker:
+            self.color_picker = ColorPicker(constants)
+        else: self.color_picker = None
 
         try: self.background_rect = background.get_rect()
         except: self.background_rect = None
@@ -47,6 +52,15 @@ class AbsMenu(ABC):
       
     def background_center(self, center: tuple):
         self.background_rect.center = center
+
+    def color_picker_h_center(self, center: tuple):
+        try: self.color_picker.set_h_center(center)
+        except: print("\n\nthere's no color picker in this menu")
+    
+    def color_picker_sv_center(self, center: tuple):
+        try: self.color_picker.set_sv_center(center)    
+        except: print("\n\nthere's no color picker in this menu")
+
 
 
     def set_selected(self, selected: Selected):
@@ -69,8 +83,10 @@ class AbsMenu(ABC):
 
     def update(self, selected: Selected, clicked: bool, default: bool = False, value = None):
         for button in self.buttons:
-            button.update(selected, clicked, value)
+            button.update(selected, clicked, value, self.color_picker)
             button.default(default)
+
+
     
     def check(self):
         for button in self.buttons:
@@ -125,6 +141,12 @@ class AbsMenu(ABC):
 
 
 
+    def reset(self):
+        try: self.color_picker.reset()
+        except: pass
+        ...
+
+
     def on_screen(self, screen: pygame.Surface):
         if self.ENABLED.compare(False) and not self.always_display:
             return 0
@@ -134,6 +156,9 @@ class AbsMenu(ABC):
 
         try: screen.blit(self.indicator, self.indicator_rect)
         except: pass
+
+        if self.color_picker is not None and self.ENABLED.compare():
+            self.color_picker.on_screen(screen)
 
         for button in self.buttons:
             button.display(screen)
@@ -145,5 +170,6 @@ class Submenu(AbsMenu):
                  background: pygame.Surface | None, 
                  always_display: bool = False, 
                  overlap: bool = False,
-                 indicator: pygame.Surface | None = None):
-        super().__init__(name, constants, background, always_display, overlap, indicator)
+                 indicator: pygame.Surface | None = None,
+                 color_picker: bool = False):
+        super().__init__(name, constants, background, always_display, overlap, indicator, color_picker)

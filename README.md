@@ -119,19 +119,21 @@ Connecting them is as easy as plugging in the **USB** or connecting it via **Blu
 
 All of the Nintendo controllers are currently not supported and will raise an error.
 
+As of version 0.0.5.0-alpha, the latest release introduces enhanced functionality for controlling settings, robot movement not included. In addition to the existing controller-based controls, users can now also utilize keyboard buttons to access and operate most of the functionalities previously limited to the controller interface.
+
 The controls used to manipulate the simulator are the following:
 <br />
-<span style="font-size:0.8em;">*(the order of buttons is: **ps4 / xbox**)*</span>
-* ``△ / Y`` **--** go forwards / backwards (when field centric is on);
-* ``□ / X`` **--** enter / exit interface setting menu;
-* ``○ / B`` **--** reset robot pose to origin / press buttons (when the menu is activated);
-* ``X / A`` **--** show / hide trail;
-* ``left bumper`` **--** erase trail / set values to default (when the menu is activated);
-* ``right bumper`` **--** when held, enters selection mode;
-* ``D-pad`` **--** move through the interface menu / select the robot's orientation (when selection mode is on);
-* ``left joystick`` **--** control robot's linear velocity + angular velocity (when field centric is on);
-* ``right joystick`` *--* control angular velocity (**ONLY** when field centric is off);
-* ``options / start`` **--** take a screenshot (found in the 'Screenshots' folder inside the locally installed library location);
+<span style="font-size:0.8em;">*(the order of buttons is: **ps4 / xbox / keyboard**)*</span>
+* ``△ / Y`` <span style="font-size:0.8em; color: darkgreen">*or*</span> ``SPACE`` **--** go forwards / backwards (when field centric is on);
+* ``□ / X`` <span style="font-size:0.8em; color: darkgreen">*or*</span> ``ESCAPE`` **--** enter / exit interface setting menu;
+* ``○ / B`` <span style="font-size:0.8em; color: darkgreen">*or*</span>  ``TAB`` **--** reset robot pose to origin / press buttons (when the menu is activated);
+* ``X / A`` <span style="font-size:0.8em; color: darkgreen">*not keyboard accessible*</span>  **--** show / hide trail;
+* ``left bumper`` <span style="font-size:0.8em; color: darkgreen">*or*</span> ``DELETE`` **--** erase trail / set values to default (when the menu is activated);
+* ``right bumper`` <span style="font-size:0.8em; color: darkgreen">*not keyboard accessible*</span> **--** when held, enters selection mode;
+* ``D-pad`` <span style="font-size:0.8em; color: darkgreen">*or*</span> ``ARROWS`` **--** move through the interface menu / select the robot's orientation (when selection mode is on);
+* ``left joystick`` <span style="font-size:0.8em; color: darkgreen">*not keyboard accessible*</span> **--** control robot's linear velocity + angular velocity (when field centric is on);
+* ``right joystick`` <span style="font-size:0.8em; color: darkgreen">*not keyboard accessible*</span> *--* control angular velocity (**ONLY** when field centric is off);
+* ``options / start`` <span style="font-size:0.8em; color: darkgreen">*or*</span> ``S`` **--** take a screenshot (found in the 'Screenshots' folder inside the locally installed library location);
 
 <br/>
 
@@ -369,6 +371,28 @@ By default, the button **1** is the latest `FLL` field and the button **2** is t
       <img src="https://github.com/omegacoreFLL/PythFinder/assets/159171107/0ea2aa63-31f7-41cb-b267-3ee00500d26b" width = 100% alt="pyth-finder-presets" border="0">
 </p>
 
+## Painting
+In response to a community request, we have implemented a new feature that allows users to draw shapes on the screen. This feature proves to be particularly useful when engaging in discussions or explaining strategies to team members or judges.
+
+To access the drawing functionality, simply toggle the `HAND DRAWING` option located in the **Other Menu**. Additionally, users can choose from a variety of colors by selecting the desired color from the color picker in the **Draw Menu**.
+
+Accessing the painting tools can be done using keyboard shortcuts. Simply press the designated keys to activate the desired painting tool:
+* `E` **--** *erase tool*;
+* `L` **--** *line tool*;
+* `R` **--** *rectangle tool*;
+* `C` **--** *circle tool*;
+* `T` **--** *triangle tool*;
+* `ENTER` **--** *exiting tools*;
+
+The functionality is similar to that of a painting program. Accessing different tools **will change the cursor icon**, providing visual feedback to the user regarding the selected tool.
+
+<p align="center">
+      <img src="https://i.ibb.co/f1nTKKT/simulator-paint.png" width = 100% alt="pyth-finder-paint" border="0">
+</p>
+
+
+
+
 ## Advanced Usage
 
 Check out the full [**documentation**][17].
@@ -385,7 +409,7 @@ Check out the full [**documentation**][17].
 <br />
 
 
-*v. 0.0.4.3-alpha*
+*v. 0.0.5.0-alpha*
 
 
 [1]: https://www.python.org/downloads/             "python download page"

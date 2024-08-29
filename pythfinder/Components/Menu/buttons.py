@@ -1,5 +1,6 @@
 from pythfinder.Components.BetterClasses.edgeDetectorEx import *
 from pythfinder.Components.Constants.constants import *
+from pythfinder.Components.colorPicker import *
 from pythfinder.Components.Menu.enums import *
 from pythfinder.Components.controls import *
 from abc import ABC, abstractmethod
@@ -131,7 +132,7 @@ class AbsButton(ABC):
         ...
     
     @abstractmethod
-    def update(self, selected: Selected, clicked: bool, value = None):
+    def update(self, selected: Selected, clicked: bool, value = None, color_picker: ColorPicker | None = None):
         self.selected = selected
         ...
     
@@ -265,7 +266,7 @@ class EmptyButton(AbsButton):
     def check(self):
         return None
     
-    def update(self, selected, clicked: bool, value = None):
+    def update(self, selected, clicked: bool, value = None, color_picker: ColorPicker | None = None):
         super().update(selected, clicked, value)
 
         if selected is self.name:
@@ -311,7 +312,7 @@ class DynamicButton(AbsButton):
     def check(self):
         return None
 
-    def update(self, selected: Selected, clicked: bool, value = None):
+    def update(self, selected: Selected, clicked: bool, value = None, color_picker: ColorPicker | None = None):
         super().update(selected, clicked, value)
 
         if selected is self.name:
@@ -377,7 +378,7 @@ class ToggleButton(AbsButton):
     def check(self):
         ...
 
-    def update(self, selected: Selected, clicked: bool, value=None):
+    def update(self, selected: Selected, clicked: bool, value = None, color_picker: ColorPicker | None = None):
         super().update(selected, clicked, value)
 
         if selected is self.name:
@@ -403,7 +404,8 @@ class InputButton(AbsButton):
                  value = None, 
                  size = None, 
                  font = default_system_font,
-                 limit: int = math.inf) -> None:
+                 limit: int = math.inf,
+                 change_cursor: bool = True) -> None:
         super().__init__(name, quadrant_surface, title_surface, selected_title_surface, value, size, font)
 
         self.WRITING = EdgeDetectorEx()
@@ -411,13 +413,15 @@ class InputButton(AbsButton):
         self.constants = constants
 
         self.type = None
-        self.dimension = None
         self.selected = None
+        self.dimension = None
+        self.color_picker = None
         self.original_value = None
+
         self.input = '_'
         self.limit = limit
+        self.change_cursor = change_cursor
 
-        self.cursor = pygame.mouse.get_cursor()
     
     def set_input_type(self, type: InputType, dimension: tuple | int):
         self.type = type
@@ -427,7 +431,7 @@ class InputButton(AbsButton):
             self.raw_value *= 100
             self.original *= 100
 
-        self.display(self.raw_value)
+        self.display_val(self.raw_value)
     
     def is_digit(self, value):
         return (value == pygame.K_0 or 
@@ -464,7 +468,8 @@ class InputButton(AbsButton):
         try: return in_open_interval(value, self.dimension[0], self.dimension[1])
         except: pass
 
-    def display(self, value):
+    def display_val(self, value):
+
         if isinstance(self.type.value, str):
             suffix = self.type.value
         else: suffix = ''
@@ -483,12 +488,17 @@ class InputButton(AbsButton):
 
         if self.write.get():
             self.input = '_'
-            self.display(self.input)
+            self.display_val(self.input)
+
+            try: self.color_picker.set(getattr(self.constants, self.name.name))
+            except: pass
+
             return None
 
         if self.input == '_':
-            self.display(self.raw_value)
+            self.display_val(self.raw_value)
             return None
+
     
         match self.type:
             case InputType.DIMENSION:
@@ -504,7 +514,8 @@ class InputButton(AbsButton):
             case InputType.FONT:
                 ...
             case InputType.COLOR:
-                ...
+                self.raw_value = self.input
+                setattr(self.constants, self.name.name, self.raw_value)
             case InputType.IMAGE_PATH:
                 try: 
                     pygame.image.load(self.input)
@@ -519,13 +530,15 @@ class InputButton(AbsButton):
             self.original_value = getattr(self.constants, self.name.name)
             self.constants.recalculate.set(True)
             
-        self.display(self.raw_value)
+        self.display_val(self.raw_value)
 
-    def update(self, selected: Selected, clicked: bool, value = None):
+    def update(self, selected: Selected, clicked: bool, value = None, color_picker: ColorPicker | None = None):
         if not isinstance(self.type, InputType):
             raise Exception("please initialize {0}'s input type".format(self.name))
         super().update(selected, clicked, value)
+
         self.selected = selected
+        self.color_picker = color_picker
         
         if selected is self.name:
             if clicked:
@@ -545,18 +558,22 @@ class InputButton(AbsButton):
 
         elif self.SELECTED.falling:
             self.write.set(False)
-            self.change()
             self.display_title = self.title
         
 
 
-        if self.WRITING.high and value is not None:
+        if self.WRITING.high and color_picker is not None:
+                self.input = color_picker.selected_color
+                return None
+
+        elif self.WRITING.high and value is not None:
+    
             match value.key:
                 case pygame.K_BACKSPACE:
                     if len(self.input) > 1:
                         self.input = self.input[:-1]
                     else: self.input = '_'
-                    self.display(self.input)
+                    self.display_val(self.input)
                 case _:
                     key_val = value.unicode
 
@@ -598,14 +615,13 @@ class InputButton(AbsButton):
                                 if len(self.input) + 1 <= self.dimension:
                                     self.input += key_val
 
-                    self.display(self.input)
+                    self.display_val(self.input)
 
-        elif self.WRITING.rising:
-            self.cursor = pygame.mouse.get_cursor()
-            pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_IBEAM)
+        elif self.WRITING.rising and self.change_cursor:
+            self.constants.cursor.apply_system(pygame.SYSTEM_CURSOR_IBEAM, remember = False)
         
-        elif self.WRITING.falling:
-            pygame.mouse.set_cursor(self.cursor)
+        elif self.WRITING.falling and self.change_cursor:
+            self.constants.cursor.apply_system(pygame.SYSTEM_CURSOR_ARROW, remember = False)
 
 
 class BoolButton(AbsButton):
@@ -675,7 +691,7 @@ class BoolButton(AbsButton):
                 self.display_title = self.selected_title[self.index]
             else: self.display_title = self.title[self.index]
 
-    def update(self, selected, clicked: bool, value = None):
+    def update(self, selected, clicked: bool, value = None, color_picker: ColorPicker | None = None):
         super().update(selected, clicked, value)
         self.selected = selected
 

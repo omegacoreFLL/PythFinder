@@ -25,6 +25,11 @@ class Selected(Enum):
     ROBOT_HEIGHT = auto()
     ROBOT_SCALE = auto()
 
+    DRAW_COLORS = auto()
+    TRAIL_COLOR = auto()
+    ROBOT_BORDER_COLOR = auto()
+    PAINT_COLOR = auto()
+
     FIELD_CENTRIC = auto()
     ROBOT_BORDER = auto()
     SCREEN_BORDER = auto()
@@ -42,6 +47,7 @@ class MenuType(Enum):
     SELECTION_MENU = [Selected.ROBOT, Selected.INTERFACE, 
                       Selected.DRAW, Selected.PATHING, Selected.OTHER]
     ROBOT_MENU = [Selected.ROBOT_IMG_SOURCE, Selected.ROBOT_WIDTH, Selected.ROBOT_HEIGHT, Selected.ROBOT_SCALE]
+    DRAW_MENU = [Selected.DRAW_COLORS, Selected.TRAIL_COLOR, Selected.ROBOT_BORDER_COLOR, Selected.PAINT_COLOR]
     OTHER_MENU = [Selected.FIELD_CENTRIC, Selected.ROBOT_BORDER, Selected.SCREEN_BORDER, Selected.HAND_DRAWING,
                   Selected.OTHER_NONE5, Selected.OTHER_NONE6, Selected.OTHER_NONE7, Selected.OTHER_NONE8]
 

@@ -33,7 +33,6 @@ class Paint():
 
         self.draw = BooleanEx(False)
 
-        self.COLOR = "blue"
         self.WIDTH = 6
 
     def add_key(self, event, clicked: bool, pose: tuple | None = None):
@@ -75,21 +74,21 @@ class Paint():
 
         match self.shape:
             case Shape.LINE:
-                pygame.draw.line(self.drawing_surface, self.COLOR, self.start_pose, mouse_pose, self.WIDTH)
+                pygame.draw.line(self.drawing_surface, self.constants.PAINT_COLOR, self.start_pose, mouse_pose, self.WIDTH)
 
             case Shape.CIRCLE:
                 radius = int(((mouse_pose[0] - self.start_pose[0]) ** 2 + (mouse_pose[1] - self.start_pose[1]) ** 2) ** 0.5)
-                pygame.draw.circle(self.drawing_surface, self.COLOR, self.start_pose, radius, self.WIDTH)
+                pygame.draw.circle(self.drawing_surface, self.constants.PAINT_COLOR, self.start_pose, radius, self.WIDTH)
 
             case Shape.TRIANGLE:
-                pygame.draw.polygon(self.drawing_surface, self.COLOR, [self.start_pose, mouse_pose, (self.start_pose[0], mouse_pose[1])], self.WIDTH)
+                pygame.draw.polygon(self.drawing_surface, self.constants.PAINT_COLOR, [self.start_pose, mouse_pose, (self.start_pose[0], mouse_pose[1])], self.WIDTH)
 
             case Shape.RECTANGLE:
                 top_left = (min(self.start_pose[0], mouse_pose[0]), min(self.start_pose[1], mouse_pose[1]))
                 width = abs(mouse_pose[0] - self.start_pose[0])
                 height = abs(mouse_pose[1] - self.start_pose[1])
 
-                pygame.draw.rect(self.drawing_surface, self.COLOR, pygame.Rect(top_left, (width, height)), self.WIDTH)
+                pygame.draw.rect(self.drawing_surface, self.constants.PAINT_COLOR, pygame.Rect(top_left, (width, height)), self.WIDTH)
 
             case Shape.ERASE:
                 pygame.draw.circle(self.last_surface, (0, 0, 0, 0), mouse_pose, radius = 30)

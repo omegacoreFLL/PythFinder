@@ -1,6 +1,7 @@
 from pythfinder.Components.BetterClasses.booleanEx import *
 from pythfinder.Components.Constants.constants import *
 
+from copy import deepcopy
 import pygame 
 
 
@@ -30,19 +31,20 @@ class TrailPoint():
         self.point = point_in_pixels
 
 class TrailSegment():
-    def __init__(self, constants: Constants, points: List[TrailPoint] | None = None):
+    def __init__(self, constants: Constants, color: pygame.Color, points: List[TrailPoint] | None = None):
         if points is not None:
             self.points = points
         else: self.points = []
 
         self.hide = BooleanEx(False)
+        self.color = color
 
         self.constants = constants
     
     def draw(self, screen):
         if self.hide.compare(False):
             for point in range(1, len(self.points)):     
-                pygame.draw.line(screen, self.constants.TRAIL_COLOR, 
+                pygame.draw.line(screen, self.color, 
                     self.points[point - 1].point, self.points[point].point, 
                 width = self.constants.TRAIL_WIDTH)
     
@@ -57,7 +59,7 @@ class TrailSegment():
 
 class Trail():
     def __init__(self, constants: Constants):
-        self.segments = [TrailSegment(constants)]
+        self.segments = [TrailSegment(constants, deepcopy(constants.TRAIL_COLOR))]
         self.DRAW_TRAIL = BooleanEx(False)
         self.HIDE_TRAIL = BooleanEx(False)
 
@@ -77,7 +79,7 @@ class Trail():
         self.current_segment -= 1
     
     def erase_trail(self):
-        self.segments = [TrailSegment(self.constants)]
+        self.segments = [TrailSegment(self.constants, deepcopy(self.constants.TRAIL_COLOR))]
         self.current_segment = 0
 
 
@@ -90,7 +92,7 @@ class Trail():
 
         if self.HIDE_TRAIL.compare():
             self.erase_trail()
-            self.hide_trail.set(False)
+            self.HIDE_TRAIL.set(False)
         else:
             for segment in self.segments:
                 segment.draw(screen)
@@ -123,7 +125,11 @@ class Trail():
             current_point = self.to_window_point(pose).tuple()
 
             if distance(last_point, current_point) > self.constants.DRAW_TRAIL_THRESHOLD:
-                self.segments.append(TrailSegment(self.constants))
+                self.segments.append(TrailSegment(self.constants, deepcopy(self.constants.TRAIL_COLOR)))
+                self.current_segment += 1
+            
+            if self.segments[self.current_segment].color != self.constants.TRAIL_COLOR:
+                self.segments.append(TrailSegment(self.constants, deepcopy(self.constants.TRAIL_COLOR)))
                 self.current_segment += 1
 
             self.segments[self.current_segment].points.append(

@@ -114,3 +114,4 @@ NOTE: This release is not part of the library, it's external code for EV3 robots
 - improved the appearance of the selection menu
 - updated the FLL robot image with our current design
 - complying with PEP 8 guidelines for better readability and consistency
+- added the DRAW menu with color picker functionality

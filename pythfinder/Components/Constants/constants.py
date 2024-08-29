@@ -32,15 +32,17 @@ default_robot_scaling_factor = 1
 default_robot_height_cm = 19
 default_robot_width_cm = 14
 default_robot_real_max_velocity = 27.7 # cm/s
+default_robot_border_color = pygame.Color("white")
 default_max_power = 100 # motor dc input
 
-default_coordinate_system_color = "white"
+default_coordinate_system_color = pygame.Color("white")
 default_grid_color = (63, 63, 63) #rgb
-default_background_color = "black"
+default_background_color = pygame.Color("black")
 
 default_frame_rate = 1000 #fps
 default_system_font = 'graffitiyouthregular'
-default_text_color = "white"
+default_text_color = pygame.Color("white")
+default_paint_color = pygame.Color("white")
 
 default_width_percent = 25
 
@@ -71,7 +73,7 @@ default_max_trail_length = math.inf
 default_max_segment_length = 100
 
 default_drawing_trail_threshold = 20
-default_trail_color = "darkmagenta"
+default_trail_color = pygame.Color("darkmagenta")
 default_trail_loops = 300
 default_trail_width = 2
 
@@ -103,17 +105,18 @@ class Constants():
                  robot_scale: int = default_robot_scaling_factor,
                  robot_width: int = default_robot_width_cm,
                  robot_height: int = default_robot_height_cm,
-                 text_color = default_text_color,
+                 robot_border_color: pygame.Color = default_robot_border_color,
+                 text_color: pygame.Color = default_text_color,
                  text_font: str = default_system_font,
                  max_trail_len: int = default_max_trail_length,
                  max_trail_segment_len: int = default_max_segment_length,
                  draw_trail_threshold: int = default_drawing_trail_threshold,
-                 trail_color = default_trail_color,
+                 trail_color: pygame.Color = default_trail_color,
                  trail_loops: int = default_trail_loops,
                  trail_width: int = default_trail_width,
-                 background_color = default_background_color,
-                 axis_color = default_coordinate_system_color,
-                 grid_color = default_grid_color,
+                 background_color: pygame.Color = default_background_color,
+                 axis_color: pygame.Color = default_coordinate_system_color,
+                 grid_color: pygame.Color = default_grid_color,
                  width_percent: int = default_width_percent,
                  backing_distance: int = default_backing_distance,
                  arrow_offset: int = default_positive_direction_arrow_offset,
@@ -121,6 +124,7 @@ class Constants():
                  fade_percent: int = default_fade_percent,
                  real_max_velocity: float = default_robot_real_max_velocity,
                  max_power: int | float = default_max_power,
+                 paint_color: pygame.Color = default_paint_color,
 
                  draw_robot_border: bool = default_draw_robot_border,
                  field_centric: bool = default_field_centric,
@@ -155,6 +159,7 @@ class Constants():
         self.ROBOT_SCALE = robot_scale
         self.ROBOT_WIDTH = robot_width
         self.ROBOT_HEIGHT = robot_height
+        self.ROBOT_BORDER_COLOR = robot_border_color
 
         self.TEXT_COLOR = text_color
         self.TEXT_FONT = text_font
@@ -174,6 +179,8 @@ class Constants():
         self.WIDTH_PERCENT = width_percent
 
         self.BACKING_DISTANCE = backing_distance
+
+        self.PAINT_COLOR = paint_color
 
         self.ARROW_OFFSET = arrow_offset
         self.UNIT_SIZE = default_unit_size # don't touch this
@@ -215,6 +222,7 @@ class Constants():
             self.ROBOT_SCALE,
             self.ROBOT_WIDTH,
             self.ROBOT_HEIGHT,
+            self.ROBOT_BORDER_COLOR,
             self.TEXT_COLOR,
             self.TEXT_FONT,
             self.MAX_TRAIL_LEN,
@@ -233,6 +241,7 @@ class Constants():
             self.FADE_PERCENT,
             self.REAL_MAX_VEL,
             self.MAX_POWER,
+            self.PAINT_COLOR,
 
             self.ROBOT_BORDER.get(),
             self.FIELD_CENTRIC.get(),
@@ -272,6 +281,9 @@ class Constants():
                 dif += 1
             if not self.ROBOT_WIDTH == other.ROBOT_WIDTH:
                 self.ROBOT_WIDTH = other.ROBOT_WIDTH
+                dif += 1
+            if not self.ROBOT_BORDER_COLOR == other.ROBOT_BORDER_COLOR:
+                self.ROBOT_BORDER_COLOR = other.ROBOT_BORDER_COLOR
                 dif += 1
             if not self.ROBOT_HEIGHT == other.ROBOT_HEIGHT:
                 self.ROBOT_HEIGHT = other.ROBOT_HEIGHT
@@ -329,6 +341,9 @@ class Constants():
                 dif += 1
             if not self.MAX_POWER == other.MAX_POWER:
                 self.MAX_POWER = other.MAX_POWER
+                dif += 1
+            if not self.PAINT_COLOR == other.PAINT_COLOR:
+                self.PAINT_COLOR = other.PAINT_COLOR
                 dif += 1
             if not self.screen_size.is_like(other.screen_size):
                 self.screen_size = other.screen_size.copy()
@@ -550,6 +565,17 @@ img_selected_left_arrow_source = "Menu/General/Arrows/Left/selected_left_arrow.p
 img_selected_right_arrow_source = "Menu/General/Arrows/Right/selected_right_arrow.png"
 
 
+img_selected_draw_robot_border_source = "Menu/Draw/selected_draw_robot_border.png"
+img_selected_drawing_tool_source = "Menu/Draw/selected_drawing_tool.png"
+img_selected_draw_trail_source = "Menu/Draw/selected_draw_trail.png"
+img_draw_robot_border_source = "Menu/Draw/draw_robot_border.png"
+img_draw_indicator_source = "Menu/Draw/draw_indicator.png"
+img_draw_quadrant_source = "Menu/Draw/draw_quadrant.png"
+img_drawing_tools_source = "Menu/Draw/drawing_tools.png"
+img_draw_colors_source = "Menu/Draw/draw_colors.png"
+img_draw_trail_source = "Menu/Draw/draw_trail.png"
+
+
 img_other_quadrant_source = "Menu/Other/other_quadrant.png"
 img_selected_none_source = "selected_none.png"
 img_none_source = "none.png"
@@ -632,6 +658,18 @@ img_right_arrow = pygame.image.load(os.path.join(device_relative_path, img_right
 img_selected_left_arrow = pygame.image.load(os.path.join(device_relative_path, img_selected_left_arrow_source))
 img_selected_right_arrow = pygame.image.load(os.path.join(device_relative_path, img_selected_right_arrow_source))
 
+
+img_selected_draw_robot_border = pygame.image.load(os.path.join(device_relative_path, img_selected_draw_robot_border_source))
+img_selected_drawing_tool = pygame.image.load(os.path.join(device_relative_path, img_selected_drawing_tool_source))
+img_selected_draw_trail = pygame.image.load(os.path.join(device_relative_path, img_selected_draw_trail_source))
+img_draw_robot_border = pygame.image.load(os.path.join(device_relative_path, img_draw_robot_border_source))
+img_draw_indicator = pygame.image.load(os.path.join(device_relative_path, img_draw_indicator_source))
+img_draw_quadrant = pygame.image.load(os.path.join(device_relative_path, img_draw_quadrant_source))
+img_drawing_tools = pygame.image.load(os.path.join(device_relative_path, img_drawing_tools_source))
+img_draw_colors = pygame.image.load(os.path.join(device_relative_path, img_draw_colors_source))
+img_draw_trail = pygame.image.load(os.path.join(device_relative_path, img_draw_trail_source))
+
+
 img_other_quadrant = pygame.image.load(os.path.join(device_relative_path, img_other_quadrant_source))
 img_selected_none = pygame.image.load(os.path.join(device_relative_path, img_selected_none_source))
 img_none = pygame.image.load(os.path.join(device_relative_path, img_none_source))
@@ -707,7 +745,9 @@ img_selected_other_button = pygame.transform.scale(img_selected_other_button, (1
 img_pathing_button = pygame.transform.scale(img_pathing_button, (244, 78))
 img_selected_pathing_button = pygame.transform.scale(img_selected_pathing_button, (244, 78))
 
+img_draw_quadrant = pygame.transform.scale(img_draw_quadrant, (310, 103))
 img_other_quadrant = pygame.transform.scale(img_other_quadrant, (310, 103))
+
 img_selected_none = pygame.transform.scale(img_selected_none, (230, 100))
 img_none = pygame.transform.scale(img_none, (230, 100))
 
@@ -733,6 +773,7 @@ img_selected_hand_drawing_off = pygame.transform.scale(img_selected_hand_drawing
 
 img_robot_indicator = pygame.transform.scale(img_robot_indicator, (170, 95))
 img_other_indicator = pygame.transform.scale(img_other_indicator, (170, 95))
+img_draw_indicator = pygame.transform.scale(img_draw_indicator, (170, 95))
 
 img_path_quadrant = pygame.transform.scale(img_path_quadrant, (700, 200))
 img_specs_quadrant = pygame.transform.scale(img_specs_quadrant, (193, 240))
@@ -786,7 +827,7 @@ default_presets = [["FLL Table",
                                                 pixels_to_dec = 60,
                                                 trail_width = 7,
                                                 field_centric = True,
-                                                trail_color = "black"),
+                                                trail_color = pygame.Color("black")),
                     fll_master_piece_table_image,
                     Size(fll_table_width_cm, fll_table_height_cm),
                     1],
@@ -798,7 +839,7 @@ default_presets = [["FLL Table",
                                                 robot_img_source = ftc_robot_image_relative_source,
                                                 robot_width = ftc_robot_image_width_cm,
                                                 robot_height = ftc_robot_image_height_cm,
-                                                trail_color = "white",
+                                                trail_color = pygame.Color("white"),
                                                 field_centric = False,
                                                 real_max_velocity = ftc_real_max_velocity,
                                                 max_power = ftc_max_power,
