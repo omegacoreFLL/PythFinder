@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
 
+# just a test
+
 setup(
     name = 'pythfinder',
-    version = '0.0.5.1',
+    version = '0.0.5.02',
     license = 'MIT',
     author = 'Contraș Adrian',
     author_email = 'omegacoresincai@gmail.com',
